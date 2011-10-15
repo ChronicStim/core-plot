@@ -1,0 +1,30 @@
+dependencies: \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTScatterPlot.m \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTMutableNumericData.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTNumericDataType.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTNumericData.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTScatterPlot.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTPlot.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTDefinitions.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTPlotRange.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTAnnotationHostLayer.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTLayer.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTResponder.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTMutableTextStyle.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTTextStyle.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTLegend.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTBorderedLayer.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTLineStyle.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTPathExtensions.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTPlotArea.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTGraph.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTPlotSpace.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTPlotSpaceAnnotation.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTAnnotation.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTExceptions.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTUtilities.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTXYPlotSpace.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTPlotSymbol.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTFill.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/NSCoderExtensions.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/NSNumberExtensions.h
