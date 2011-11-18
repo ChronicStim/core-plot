@@ -2,7 +2,9 @@
 
 #import "CPTPlot.h"
 #import "CPTTextStyle.h"
+#import "CPTUtilities.h"
 #import "NSCoderExtensions.h"
+#import <tgmath.h>
 
 /**	@cond */
 @interface CPTLegendEntry()
@@ -106,7 +108,7 @@
  *	@param rect The bounding rectangle where the title should be drawn.
  *	@param context The graphics context to draw into.
  **/
--(void)drawTitleInRect:(CGRect)rect inContext:(CGContextRef)context;
+-(void)drawTitleInRect:(CGRect)rect inContext:(CGContextRef)context scale:(CGFloat)scale;
 {
 #if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
 	CGContextSaveGState(context);
@@ -118,8 +120,16 @@
 	CGRect textRect = rect;
 	CGSize theTitleSize = self.titleSize;
 	if ( theTitleSize.height < textRect.size.height ) {
-		textRect = CGRectInset(textRect, 0.0, (textRect.size.height - theTitleSize.height) / (CGFloat)2.0);
+		CGFloat offset = (textRect.size.height - theTitleSize.height) / (CGFloat)2.0;
+		if ( scale == 1.0 ) {
+			offset = round(offset);
+		}
+		else {
+			offset = round(offset * scale) / scale;
+		}
+		textRect = CGRectInset(textRect, 0.0, offset);
 	}
+	CPTAlignRectToUserSpace(context, textRect);
 	[self.title drawInRect:textRect withTextStyle:self.textStyle inContext:context];
 #if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
 	CGContextRestoreGState(context);

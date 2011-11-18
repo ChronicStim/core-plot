@@ -3,6 +3,13 @@
 #import "CPTPlatformSpecificDefines.h"
 #import "CPTDefinitions.h"
 
+/**	@brief Node in a linked list of graphics contexts.
+ **/
+typedef struct _CPTContextNode {
+	NSGraphicsContext *context;			///< The graphics context.
+	struct _CPTContextNode *nextNode;	///< Pointer to the next node in the list.
+} CPTContextNode;
+
 #pragma mark -
 #pragma mark Graphics Context
 
@@ -56,7 +63,7 @@ CGContextRef CPTGetCurrentContext(void)
  *	@param nsColor The NSColor.
  *	@return The CGColorRef.
  **/
-CGColorRef CPTNewCGColorFromNSColor(NSColor *nsColor)
+CGColorRef CPTCreateCGColorFromNSColor(NSColor *nsColor)
 {
 	NSColor *rgbColor = [nsColor colorUsingColorSpace:[NSColorSpace genericRGBColorSpace]];
 	CGFloat r, g, b, a;

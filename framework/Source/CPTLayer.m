@@ -32,6 +32,7 @@
 @property (nonatomic, readwrite, assign) BOOL useFastRendering;
 
 -(void)applyTransform:(CATransform3D)transform toContext:(CGContextRef)context;
+-(NSString *)subLayersAtIndex:(NSUInteger)index;
 
 @end
 /**	@endcond */
@@ -510,13 +511,19 @@
 	CGSize subLayerSize = selfBounds.size;
 	subLayerSize.width -= leftPadding + rightPadding;
 	subLayerSize.width = MAX(subLayerSize.width, (CGFloat)0.0);
+	subLayerSize.width = round(subLayerSize.width);
 	subLayerSize.height -= topPadding + bottomPadding;
 	subLayerSize.height = MAX(subLayerSize.height, (CGFloat)0.0);
-		
+	subLayerSize.height = round(subLayerSize.height);
+	
+	CGRect subLayerFrame;
+	subLayerFrame.origin = CGPointMake(round(leftPadding), round(bottomPadding));
+	subLayerFrame.size = subLayerSize;
+	
     NSSet *excludedSublayers = [self sublayersExcludedFromAutomaticLayout];
 	for (CALayer *subLayer in self.sublayers) {
 		if (![excludedSublayers containsObject:subLayer] && [subLayer isKindOfClass:[CPTLayer class]]) {
-            subLayer.frame = CGRectMake(leftPadding, bottomPadding, subLayerSize.width, subLayerSize.height);
+            subLayer.frame = subLayerFrame;
 			[subLayer setNeedsLayout];
 			[subLayer setNeedsDisplay];
 		}
@@ -834,5 +841,29 @@
 {
 	return [NSString stringWithFormat:@"<%@ bounds: %@>", [super description], CPTStringFromRect(self.bounds)];
 };
+
+/**	@brief Logs this layer and all of its sublayers.
+ **/
+-(void)logLayers
+{
+	NSLog(@"Layer tree:\n%@", [self subLayersAtIndex:0]);
+}
+
+-(NSString *)subLayersAtIndex:(NSUInteger)index
+{
+	NSMutableString *result = [NSMutableString string];
+	
+	for ( NSUInteger i = 0; i < index; i++ ) {
+		[result appendString:@"    "];
+	}
+	[result appendString:[self description]];
+	
+	for ( CPTLayer *sublayer in self.sublayers ) {
+		[result appendString:@"\n"];
+		[result appendString:[sublayer subLayersAtIndex:index + 1]];
+	}
+	
+	return result;
+}
 
 @end

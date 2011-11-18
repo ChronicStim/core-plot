@@ -13,7 +13,7 @@
 #import "CPTLimitBand.h"
 #import "CPTLineCap.h"
 #import "CPTLineStyle.h"
-#import "CPTPlotRange.h"
+#import "CPTMutablePlotRange.h"
 #import "CPTPlotSpace.h"
 #import "CPTPlotArea.h"
 #import "CPTTextLayer.h"
@@ -36,8 +36,8 @@
 @interface CPTAxis ()
 
 @property (nonatomic, readwrite, assign) BOOL needsRelabel;
-@property (nonatomic, readwrite, assign) __weak CPTGridLines *minorGridLines;
-@property (nonatomic, readwrite, assign) __weak CPTGridLines *majorGridLines;
+@property (nonatomic, readwrite, assign) __cpt_weak CPTGridLines *minorGridLines;
+@property (nonatomic, readwrite, assign) __cpt_weak CPTGridLines *majorGridLines;
 @property (nonatomic, readwrite, assign) BOOL labelFormatterChanged;
 @property (nonatomic, readwrite, retain) NSMutableArray *mutableBackgroundLimitBands;
 
@@ -691,7 +691,7 @@ double niceNum(double x, BOOL round);
 	NSDecimal majorInterval = self.majorIntervalLength;
 	
 	if ( CPTDecimalGreaterThan(majorInterval, zero) ) {
-		CPTPlotRange *range = [[self.plotSpace plotRangeForCoordinate:self.coordinate] copy];
+		CPTMutablePlotRange *range = [[self.plotSpace plotRangeForCoordinate:self.coordinate] mutableCopy];
 		if ( range ) {
 			CPTPlotRange *theVisibleRange = self.visibleRange;
 			if ( theVisibleRange ) {
@@ -756,7 +756,7 @@ double niceNum(double x, BOOL round);
 -(void)autoGenerateMajorTickLocations:(NSSet **)newMajorLocations minorTickLocations:(NSSet **)newMinorLocations 
 {
 	// Get plot range
-	CPTPlotRange *range = [[self.plotSpace plotRangeForCoordinate:self.coordinate] copy];
+	CPTMutablePlotRange *range = [[self.plotSpace plotRangeForCoordinate:self.coordinate] mutableCopy];
     CPTPlotRange *theVisibleRange = self.visibleRange;
     if ( theVisibleRange ) {
         [range intersectionPlotRange:theVisibleRange];
@@ -908,7 +908,7 @@ double niceNum(double x, BOOL round);
 	NSMutableSet *majorLocations = [NSMutableSet set];
 	NSMutableSet *minorLocations = [NSMutableSet set];
 	
-	CPTPlotRange *range = [[self.plotSpace plotRangeForCoordinate:self.coordinate] copy];
+	CPTMutablePlotRange *range = [[self.plotSpace plotRangeForCoordinate:self.coordinate] mutableCopy];
 	if ( range ) {
 		CPTPlotRange *theVisibleRange = self.visibleRange;
 		if ( theVisibleRange ) {
@@ -1031,7 +1031,6 @@ double niceNum(double x, BOOL round)
 	else {
 		return allLocations;
 	}
-	
 }
 
 /**	@brief Removes any major ticks falling inside the label exclusion ranges from the set of tick locations.
@@ -1114,8 +1113,6 @@ double niceNum(double x, BOOL round)
 	CPTPlotArea *thePlotArea = self.plotArea;
 	
 	BOOL theLabelFormatterChanged = self.labelFormatterChanged;
-	CPTSign theTickDirection = self.tickDirection;
-	CPTCoordinate orthogonalCoordinate = CPTOrthogonalCoordinate(self.coordinate);
 	CPTShadow *theShadow = self.labelShadow;
 	
 	for ( NSDecimalNumber *tickLocation in locations ) {
@@ -1153,8 +1150,6 @@ double niceNum(double x, BOOL round)
 			}
 			
 			[newLabelLayer release];
-			CGPoint tickBasePoint = [self viewPointForCoordinateDecimalNumber:newAxisLabel.tickLocation];
-			[newAxisLabel positionRelativeToViewPoint:tickBasePoint forCoordinate:orthogonalCoordinate inDirection:theTickDirection];
 		}
 
 		lastLayer = newAxisLabel.contentLayer;
@@ -1198,7 +1193,7 @@ double niceNum(double x, BOOL round)
 {
     if ( !self.needsRelabel ) return;
 	if ( !self.plotSpace ) return;
-	if ( self.delegate && ![self.delegate axisShouldRelabel:self] ) {
+	if ( [self.delegate respondsToSelector:@selector(axisShouldRelabel:)] && ![self.delegate axisShouldRelabel:self] ) {
         self.needsRelabel = NO;
         return;
     }
@@ -1263,7 +1258,7 @@ double niceNum(double x, BOOL round)
 		[self.plotArea setNeedsDisplay];
 	}
 	
-	[self.delegate axisDidRelabel:self];
+	if ( [self.delegate respondsToSelector:@selector(axisDidRelabel:)] ) [self.delegate axisDidRelabel:self];
 }
 
 /**	@brief Update the major tick mark labels.
@@ -1305,8 +1300,13 @@ double niceNum(double x, BOOL round)
 
 -(void)layoutSublayers
 {
-	[self updateMajorTickLabels];
-	[self updateMinorTickLabels];
+	if ( self.needsRelabel ) {
+		[self relabel];
+	}
+	else {
+		[self updateMajorTickLabels];
+		[self updateMinorTickLabels];
+	}
 	
 	[self.axisTitle positionRelativeToViewPoint:[self viewPointForCoordinateDecimalNumber:self.titleLocation]
 								  forCoordinate:CPTOrthogonalCoordinate(self.coordinate)
@@ -1963,8 +1963,8 @@ double niceNum(double x, BOOL round)
 			}
 		}
 		else {
-			self.minorGridLines = nil;
-			self.majorGridLines = nil;
+			[self.minorGridLines removeFromSuperlayer];
+			[self.majorGridLines removeFromSuperlayer];
 			for ( CPTAxisLabel *label in self.axisLabels ) {
 				[label.contentLayer removeFromSuperlayer];
 			}

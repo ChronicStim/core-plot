@@ -33,6 +33,8 @@ typedef enum _CPTAxisLabelingPolicy {
  **/
 @protocol CPTAxisDelegate <NSObject>
 
+@optional
+
 /// @name Labels
 /// @{
 
@@ -47,8 +49,6 @@ typedef enum _CPTAxisLabelingPolicy {
  *	@param axis The axis.
  **/
 -(void)axisDidRelabel:(CPTAxis *)axis;
-
-@optional
 
 /**	@brief This method gives the delegate a chance to create custom labels for each tick.
  *  It can be used with any relabeling policy. Returning NO will cause the axis not
@@ -113,9 +113,9 @@ typedef enum _CPTAxisLabelingPolicy {
 	NSMutableArray *mutableBackgroundLimitBands;
 	BOOL separateLayers;
 	CPTShadow *labelShadow;
-	__weak CPTPlotArea *plotArea;
-	__weak CPTGridLines *minorGridLines;
-	__weak CPTGridLines *majorGridLines;
+	__cpt_weak CPTPlotArea *plotArea;
+	__cpt_weak CPTGridLines *minorGridLines;
+	__cpt_weak CPTGridLines *majorGridLines;
 }
 
 /// @name Axis
@@ -198,9 +198,9 @@ typedef enum _CPTAxisLabelingPolicy {
 /// @name Layers
 /// @{
 @property (nonatomic, readwrite, assign) BOOL separateLayers;
-@property (nonatomic, readwrite, assign) __weak CPTPlotArea *plotArea;
-@property (nonatomic, readonly, assign) __weak CPTGridLines *minorGridLines;
-@property (nonatomic, readonly, assign) __weak CPTGridLines *majorGridLines;
+@property (nonatomic, readwrite, cpt_weak_property) __cpt_weak CPTPlotArea *plotArea;
+@property (nonatomic, readonly, cpt_weak_property) __cpt_weak CPTGridLines *minorGridLines;
+@property (nonatomic, readonly, cpt_weak_property) __cpt_weak CPTGridLines *majorGridLines;
 @property (nonatomic, readonly, retain) CPTAxisSet *axisSet;
 ///	@}
 

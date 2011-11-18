@@ -46,7 +46,7 @@
     CGRect bounds = NSRectToCGRect(layerHostingView.bounds);
 #endif
     
-    CPTGraph* graph = [[[CPTXYGraph alloc] initWithFrame:[layerHostingView bounds]] autorelease];
+    CPTGraph* graph = [[[CPTXYGraph alloc] initWithFrame:bounds] autorelease];
     [self addGraph:graph toHostingView:layerHostingView];
     [self applyTheme:theme toGraph:graph withDefault:[CPTTheme themeNamed:kCPTSlateTheme]];
     
@@ -86,7 +86,7 @@
     CPTXYPlotSpace *plotSpace = (id)graph.defaultPlotSpace;
     [plotSpace scaleToFitPlots:[NSArray arrayWithObjects:dataSourceLinePlot, nil]];
     CPTPlotRange *xRange = plotSpace.xRange;
-    CPTPlotRange *yRange = plotSpace.yRange;
+    CPTMutablePlotRange *yRange = [[plotSpace.yRange mutableCopy] autorelease];
     [yRange expandRangeByFactor:CPTDecimalFromDouble(1.1)];
     plotSpace.yRange = yRange;
     

@@ -58,7 +58,7 @@ const NSUInteger numberOfPoints = 11;
     CGRect bounds = NSRectToCGRect(layerHostingView.bounds);
 #endif
     
-    CPTGraph *graph = [[[CPTXYGraph alloc] initWithFrame:[layerHostingView bounds]] autorelease];
+    CPTGraph *graph = [[[CPTXYGraph alloc] initWithFrame:bounds] autorelease];
     [self addGraph:graph toHostingView:layerHostingView];
     [self applyTheme:theme toGraph:graph withDefault:[CPTTheme themeNamed:kCPTPlainWhiteTheme]];
 
@@ -171,8 +171,8 @@ const NSUInteger numberOfPoints = 11;
     [plotSpace scaleToFitPlots:[NSArray arrayWithObject:linePlot]];
 	
 	// Adjust visible ranges so plot symbols along the edges are not clipped
-	CPTPlotRange *xRange = plotSpace.xRange;
-	CPTPlotRange *yRange = plotSpace.yRange;
+	CPTMutablePlotRange *xRange = [[plotSpace.xRange mutableCopy] autorelease];
+	CPTMutablePlotRange *yRange = [[plotSpace.yRange mutableCopy] autorelease];
 
 	x.orthogonalCoordinateDecimal = yRange.location;
 	y.orthogonalCoordinateDecimal = xRange.location;
@@ -185,7 +185,9 @@ const NSUInteger numberOfPoints = 11;
 	
 	[xRange expandRangeByFactor:CPTDecimalFromDouble(1.05)];
 	[yRange expandRangeByFactor:CPTDecimalFromDouble(1.05)];
-
+	plotSpace.xRange = xRange;
+	plotSpace.yRange = yRange;
+	
 	// Add legend
 	graph.legend = [CPTLegend legendWithPlots:[NSArray arrayWithObjects:linePlot, controlLinePlot, warningLinePlot, centerLinePlot, nil]];
 	graph.legend.textStyle = x.titleTextStyle;

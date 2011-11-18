@@ -8,6 +8,7 @@
 #import "CPTUtilities.h"
 #import "NSCoderExtensions.h"
 #import "NSNumberExtensions.h"
+#import <tgmath.h>
 
 /**	@defgroup legendAnimation Legends
  *	@brief Legend properties that can be animated using Core Animation.
@@ -444,7 +445,8 @@ NSString * const CPTLegendNeedsReloadEntriesForPlotNotification = @"CPTLegendNee
 			left += theSwatchSize.width + theOffset;
 			
 			[legendEntry drawTitleInRect:CPTAlignRectToUserSpace(context, CGRectMake(left, rowPosition, actualColumnWidths[col], actualRowHeights[row]))
-							   inContext:context];
+							   inContext:context
+								   scale:self.contentsScale];
 		}
 	}
 	
@@ -488,9 +490,8 @@ NSString * const CPTLegendNeedsReloadEntriesForPlotNotification = @"CPTLegendNee
 
 -(void)layoutSublayers
 {
-	[super layoutSublayers];
-
 	[self recalculateLayout];
+	[super layoutSublayers];
 }
 
 -(void)recalculateLayout
@@ -600,7 +601,9 @@ NSString * const CPTLegendNeedsReloadEntriesForPlotNotification = @"CPTLegendNee
 			legendSize.width += [width cgFloatValue];
 		}
 	}
-	legendSize.width += ((theSwatchSize.width + self.titleOffset) * columnCount) + (self.columnMargin * (columnCount - 1));
+	if ( columnCount > 0 ) {
+		legendSize.width += ((theSwatchSize.width + self.titleOffset) * columnCount) + (self.columnMargin * (columnCount - 1));
+	}
 
 	NSUInteger rows = row;
 	if ( col ) rows++;
@@ -615,6 +618,7 @@ NSString * const CPTLegendNeedsReloadEntriesForPlotNotification = @"CPTLegendNee
 	[maxColumnWidths release];
 	
 	self.bounds = CGRectMake(0.0, 0.0, legendSize.width, legendSize.height);
+	[self pixelAlign];
 	
 	self.layoutChanged = NO;
 }
@@ -796,7 +800,7 @@ NSString * const CPTLegendNeedsReloadEntriesForPlotNotification = @"CPTLegendNee
 
 -(void)legendNeedsReloadEntries:(NSNotification *)notif
 {
-	CPTPlot *thePlot = (CPTPlot *)notif;
+	CPTPlot *thePlot = (CPTPlot *)notif.object;
 	NSMutableArray *theLegendEntries = self.legendEntries;
 	
 	NSUInteger legendEntryIndex = 0;
@@ -862,6 +866,7 @@ NSString * const CPTLegendNeedsReloadEntriesForPlotNotification = @"CPTLegendNee
 		CGFloat fontSize = theTextStyle.fontSize;
 		if ( fontSize > 0.0 ) {
 			fontSize *= 1.5;
+			fontSize = round(fontSize);
 			theSwatchSize = CGSizeMake(fontSize, fontSize);
 		}
 		else {
