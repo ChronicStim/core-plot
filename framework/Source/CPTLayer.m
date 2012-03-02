@@ -369,12 +369,19 @@
 	CGContextRef pdfContext = CGPDFContextCreate(dataConsumer, &mediaBox, NULL);
 		
 	CPTPushCGContext(pdfContext);
+    
+    CGContextSaveGState(pdfContext);
 	
+    CGContextTranslateCTM(pdfContext, 0.0, mediaBox.size.height);
+    CGContextScaleCTM(pdfContext, 1.0, -1.0);
+    
 	CGContextBeginPage(pdfContext, &mediaBox);
 	[self layoutAndRenderInContext:pdfContext];
 	CGContextEndPage(pdfContext);
 	CGPDFContextClose(pdfContext);
 	
+    CGContextRestoreGState(pdfContext);
+    
 	CPTPopCGContext();
 	
 	CGContextRelease(pdfContext);
