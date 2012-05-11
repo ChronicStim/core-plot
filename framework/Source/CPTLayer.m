@@ -367,7 +367,9 @@
 	
 	const CGRect mediaBox = CGRectMake(0.0, 0.0, self.bounds.size.width, self.bounds.size.height);
 	CGContextRef pdfContext = CGPDFContextCreate(dataConsumer, &mediaBox, NULL);
-		
+    CGContextSetInterpolationQuality(pdfContext, kCGInterpolationHigh);
+    CGContextSetRenderingIntent(pdfContext, kCGRenderingIntentDefault);
+	
 	CPTPushCGContext(pdfContext);
     
     CGContextSaveGState(pdfContext);
