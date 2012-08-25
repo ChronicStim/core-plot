@@ -12,34 +12,38 @@
 
 static PlotGallery *sharedPlotGallery = nil;
 
-+ (PlotGallery *)sharedPlotGallery
++(PlotGallery *)sharedPlotGallery
 {
-    @synchronized(self) {
-        if (sharedPlotGallery == nil) {
+    @synchronized(self)
+    {
+        if ( sharedPlotGallery == nil ) {
             sharedPlotGallery = [[self alloc] init];
         }
     }
     return sharedPlotGallery;
 }
 
-+ (id)allocWithZone:(NSZone *)zone
++(id)allocWithZone:(NSZone *)zone
 {
-    @synchronized(self)	{
-        if (sharedPlotGallery == nil) {
-            return[super allocWithZone:zone];
+    @synchronized(self)
+    {
+        if ( sharedPlotGallery == nil ) {
+            return [super allocWithZone:zone];
         }
     }
     return sharedPlotGallery;
 }
 
-- (id)init
+-(id)init
 {
     Class thisClass = [self class];
-    @synchronized(thisClass) {
-        if (sharedPlotGallery == nil) {
-            if ((self = [super init])) {
+
+    @synchronized(thisClass)
+    {
+        if ( sharedPlotGallery == nil ) {
+            if ( (self = [super init]) ) {
                 sharedPlotGallery = self;
-                plotItems = [[NSMutableArray alloc] init];
+                plotItems         = [[NSMutableArray alloc] init];
             }
         }
     }
@@ -47,46 +51,46 @@ static PlotGallery *sharedPlotGallery = nil;
     return sharedPlotGallery;
 }
 
-- (id)copyWithZone:(NSZone *)zone
+-(id)copyWithZone:(NSZone *)zone
 {
     return self;
 }
 
-- (id)retain
+-(id)retain
 {
     return self;
 }
 
-- (NSUInteger)retainCount
+-(NSUInteger)retainCount
 {
     return UINT_MAX;
 }
 
-- (oneway void)release
+-(oneway void)release
 {
 }
 
-- (id)autorelease
+-(id)autorelease
 {
     return self;
 }
 
-- (void)addPlotItem:(PlotItem *)plotItem
+-(void)addPlotItem:(PlotItem *)plotItem
 {
     [plotItems addObject:plotItem];
 }
 
-- (NSUInteger)count
+-(NSUInteger)count
 {
     return [plotItems count];
 }
 
-- (PlotItem *)objectAtIndex:(NSUInteger)index
+-(PlotItem *)objectAtIndex:(NSUInteger)index
 {
     return [plotItems objectAtIndex:index];
 }
 
-- (void)sortByTitle
+-(void)sortByTitle
 {
     [plotItems sortUsingSelector:@selector(titleCompare:)];
 }

@@ -8,33 +8,28 @@
 
 #import "PlotHostView.h"
 
-
 @implementation PlotHostView
 
-
-- (id)initWithFrame:(CGRect)frame
+-(id)initWithFrame:(CGRect)frame
 {
-    if ((self = [super initWithFrame:frame]))
-	{
+    if ( (self = [super initWithFrame:frame]) ) {
     }
     return self;
 }
 
-
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+-(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
     return YES;
 }
 
-- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
+-(void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
 {
-	NSLog(@"PlotHostView:didRotateFromInterfaceOrientation:");
+    NSLog(@"PlotHostView:didRotateFromInterfaceOrientation:");
 }
 
-- (void)dealloc
+-(void)dealloc
 {
     [super dealloc];
 }
-
 
 @end

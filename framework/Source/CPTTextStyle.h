@@ -9,23 +9,24 @@
  *	@brief Enumeration of paragraph alignments.
  **/
 typedef enum  _CPTTextAlignment {
-    CPTTextAlignmentLeft,		///< Left alignment
-    CPTTextAlignmentCenter,		///< Center alignment
-    CPTTextAlignmentRight		///< Right alignment
-} CPTTextAlignment;
+    CPTTextAlignmentLeft,   ///< Left alignment
+    CPTTextAlignmentCenter, ///< Center alignment
+    CPTTextAlignmentRight   ///< Right alignment
+}
+CPTTextAlignment;
 
-@interface CPTTextStyle : NSObject <NSCoding, NSCopying, NSMutableCopying> {
-	@protected
+@interface CPTTextStyle : NSObject<NSCoding, NSCopying, NSMutableCopying> {
+    @protected
     NSString *fontName;
-	CGFloat fontSize;
+    CGFloat fontSize;
     CPTColor *color;
-	CPTTextAlignment textAlignment;
+    CPTTextAlignment textAlignment;
 }
 
-@property(readonly, copy, nonatomic) NSString *fontName;
-@property(readonly, assign, nonatomic) CGFloat fontSize;
-@property(readonly, copy, nonatomic) CPTColor *color;
-@property(readonly, assign, nonatomic) CPTTextAlignment textAlignment;
+@property (readonly, copy, nonatomic) NSString *fontName;
+@property (readonly, assign, nonatomic) CGFloat fontSize;
+@property (readonly, copy, nonatomic) CPTColor *color;
+@property (readonly, assign, nonatomic) CPTTextAlignment textAlignment;
 
 /// @name Factory Methods
 /// @{
@@ -33,7 +34,6 @@ typedef enum  _CPTTextAlignment {
 ///	@}
 
 @end
-
 
 /**	@category NSString(CPTTextStyleExtensions)
  *	@brief NSString extensions for drawing styled text.

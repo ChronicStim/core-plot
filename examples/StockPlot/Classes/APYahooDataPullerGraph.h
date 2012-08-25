@@ -6,15 +6,15 @@
 //  Copyright 2009 __MyCompanyName__. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
 #import "APYahooDataPuller.h"
 #import "CorePlot-CocoaTouch.h"
+#import <UIKit/UIKit.h>
 
-@interface APYahooDataPullerGraph : UIViewController <APYahooDataPullerDelegate, CPTPlotDataSource> {
+@interface APYahooDataPullerGraph : UIViewController<APYahooDataPullerDelegate, CPTPlotDataSource> {
     CPTGraphHostingView *graphHost;
     APYahooDataPuller *dataPuller;
 
-@private
+    @private
     CPTXYGraph *graph;
 }
 

@@ -1,12 +1,12 @@
-#import <Foundation/Foundation.h>
 #import "CPTAnnotationHostLayer.h"
+#import <Foundation/Foundation.h>
 
 @class CPTLineStyle;
 @class CPTFill;
 
 @interface CPTBorderedLayer : CPTAnnotationHostLayer {
-@private
-	CPTLineStyle *borderLineStyle;
+    @private
+    CPTLineStyle *borderLineStyle;
     CPTFill *fill;
 }
 

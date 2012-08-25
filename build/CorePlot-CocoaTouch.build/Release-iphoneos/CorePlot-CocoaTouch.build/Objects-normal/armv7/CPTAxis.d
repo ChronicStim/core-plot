@@ -1,9 +1,10 @@
 dependencies: \
   /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTAxis.m \
   /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTAxis.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTDefinitions.h \
   /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTLayer.h \
   /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTResponder.h \
-  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTDefinitions.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/iPhoneOnly/CPTPlatformSpecificDefines.h \
   /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTTextStyle.h \
   /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTAxisLabel.h \
   /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTAxisLabelGroup.h \
@@ -19,16 +20,16 @@ dependencies: \
   /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTLimitBand.h \
   /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTLineCap.h \
   /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTLineStyle.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTMutablePlotRange.h \
   /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTPlotRange.h \
-  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTPlotSpace.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/iPhoneOnly/CPTPlatformSpecificCategories.h \
   /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTPlotArea.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTAnnotationHostLayer.h \
   /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTGraph.h \
   /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTBorderedLayer.h \
-  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTAnnotationHostLayer.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTPlotSpace.h \
+  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTShadow.h \
   /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTTextLayer.h \
   /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTUtilities.h \
-  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/CPTShadow.h \
-  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/iPhoneOnly/CPTPlatformSpecificCategories.h \
-  /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/iPhoneOnly/CPTPlatformSpecificDefines.h \
   /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/NSCoderExtensions.h \
   /Users/development/Documents/Development/Repositories/ChronicPainTracker/core-plot/framework/Source/NSDecimalNumberExtensions.h

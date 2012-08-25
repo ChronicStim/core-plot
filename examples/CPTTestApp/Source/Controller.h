@@ -1,14 +1,14 @@
+#import "RotationView.h"
 #import <Cocoa/Cocoa.h>
 #import <CorePlot/CorePlot.h>
-#import "RotationView.h"
 
-@interface Controller : NSArrayController <CPTPlotDataSource, CPTRotationDelegate, CPTPlotSpaceDelegate, CPTBarPlotDelegate> {
+@interface Controller : NSArrayController<CPTPlotDataSource, CPTRotationDelegate, CPTPlotSpaceDelegate, CPTBarPlotDelegate> {
     IBOutlet CPTGraphHostingView *hostView;
     IBOutlet NSWindow *plotSymbolWindow;
     IBOutlet NSWindow *axisDemoWindow;
-	IBOutlet NSWindow *selectionDemoWindow;
+    IBOutlet NSWindow *selectionDemoWindow;
     CPTXYGraph *graph;
-	RotationView *overlayRotationView;
+    RotationView *overlayRotationView;
     CPTPlotSpaceAnnotation *symbolTextAnnotation;
     CGFloat xShift;
     CGFloat yShift;
@@ -28,6 +28,10 @@
 -(IBAction)exportToPDF:(id)sender;
 -(IBAction)exportToPNG:(id)sender;
 
+// Printing
+-(IBAction)printDocument:(id)sender;
+-(void)printOperationDidRun:(NSPrintOperation *)printOperation success:(BOOL)success contextInfo:(void *)contextInfo;
+
 // Layer exploding for illustration
 -(IBAction)explodeLayers:(id)sender;
 +(void)recursivelySplitSublayersInZForLayer:(CALayer *)layer depthLevel:(NSUInteger)depthLevel;
@@ -40,4 +44,3 @@
 -(IBAction)selectionDemo:(id)sender;
 
 @end
-

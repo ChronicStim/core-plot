@@ -13,20 +13,20 @@
 
 const float CPT_SPLIT_VIEW_MIN_LHS_WIDTH = 150.0f;
 
-#define kThemeTableViewControllerNoTheme        @"None"
-#define kThemeTableViewControllerDefaultTheme   @"Default"
+#define kThemeTableViewControllerNoTheme      @"None"
+#define kThemeTableViewControllerDefaultTheme @"Default"
 
 @implementation PlotGalleryController
 
 @dynamic plotItem;
 @synthesize currentThemeName;
 
-- (void)setupThemes
+-(void)setupThemes
 {
     [themePopUpButton addItemWithTitle:kThemeTableViewControllerDefaultTheme];
     [themePopUpButton addItemWithTitle:kThemeTableViewControllerNoTheme];
 
-    for (Class c in [CPTTheme themeClasses]) {
+    for ( Class c in [CPTTheme themeClasses] ) {
         [themePopUpButton addItemWithTitle:[c name]];
     }
 
@@ -34,7 +34,7 @@ const float CPT_SPLIT_VIEW_MIN_LHS_WIDTH = 150.0f;
     [themePopUpButton selectItemWithTitle:kThemeTableViewControllerDefaultTheme];
 }
 
-- (void)awakeFromNib
+-(void)awakeFromNib
 {
     [[PlotGallery sharedPlotGallery] sortByTitle];
 
@@ -42,7 +42,7 @@ const float CPT_SPLIT_VIEW_MIN_LHS_WIDTH = 150.0f;
 
     [imageBrowser setDelegate:self];
     [imageBrowser setDataSource:self];
-    [imageBrowser setCellsStyleMask:IKCellsStyleShadowed | IKCellsStyleTitled ]; //| IKCellsStyleSubtitled];
+    [imageBrowser setCellsStyleMask:IKCellsStyleShadowed | IKCellsStyleTitled]; //| IKCellsStyleSubtitled];
 
     [imageBrowser reloadData];
 
@@ -55,22 +55,21 @@ const float CPT_SPLIT_VIEW_MIN_LHS_WIDTH = 150.0f;
     // an explicit link of the Nu framework, which may not be installed
     nuHandle = dlopen("/Library/Frameworks/Nu.framework/Nu", RTLD_LAZY);
 
-    if (nuHandle)
-    {		
+    if ( nuHandle ) {
         NSString *consoleStartup =
-        @"(progn \
+            @"(progn \
            (load \"console\") \
            (set $console ((NuConsoleWindowController alloc) init)))";
 
         Class nuClass = NSClassFromString(@"Nu");
-        id parser = [nuClass performSelector:@selector(parser)];
-        id code = [parser performSelector:@selector(parse:) withObject:consoleStartup];
+        id parser     = [nuClass performSelector:@selector(parser)];
+        id code       = [parser performSelector:@selector(parse:) withObject:consoleStartup];
         [parser performSelector:@selector(eval:) withObject:code];
     }
 #endif
 }
 
-- (void)dealloc
+-(void)dealloc
 {
     [self setPlotItem:nil];
 
@@ -80,15 +79,17 @@ const float CPT_SPLIT_VIEW_MIN_LHS_WIDTH = 150.0f;
     [hostingView setDelegate:nil];
 
 #ifdef EMBED_NU
-    if (nuHandle) dlclose(nuHandle);
+    if ( nuHandle ) {
+        dlclose(nuHandle);
+    }
 #endif
 
     [super dealloc];
 }
 
-- (void)setFrameSize:(NSSize)newSize
+-(void)setFrameSize:(NSSize)newSize
 {
-    if ([plotItem respondsToSelector:@selector(setFrameSize:)]) {
+    if ( [plotItem respondsToSelector:@selector(setFrameSize:)] ) {
         [plotItem setFrameSize:newSize];
     }
 }
@@ -96,14 +97,14 @@ const float CPT_SPLIT_VIEW_MIN_LHS_WIDTH = 150.0f;
 #pragma mark -
 #pragma mark Theme Selection
 
-- (CPTTheme *)currentTheme
+-(CPTTheme *)currentTheme
 {
     CPTTheme *theme;
 
-    if (currentThemeName == kThemeTableViewControllerNoTheme) {
+    if ( currentThemeName == kThemeTableViewControllerNoTheme ) {
         theme = (id)[NSNull null];
     }
-    else if (currentThemeName == kThemeTableViewControllerDefaultTheme) {
+    else if ( currentThemeName == kThemeTableViewControllerDefaultTheme ) {
         theme = nil;
     }
     else {
@@ -113,23 +114,23 @@ const float CPT_SPLIT_VIEW_MIN_LHS_WIDTH = 150.0f;
     return theme;
 }
 
-- (IBAction)themeSelectionDidChange:(id)sender
+-(IBAction)themeSelectionDidChange:(id)sender
 {
     self.currentThemeName = [sender titleOfSelectedItem];
-	[plotItem renderInView:hostingView withTheme:[self currentTheme]];
+    [plotItem renderInView:hostingView withTheme:[self currentTheme]];
 }
 
 #pragma mark -
 #pragma mark PlotItem Property
 
-- (PlotItem *)plotItem
+-(PlotItem *)plotItem
 {
     return plotItem;
 }
 
-- (void)setPlotItem:(PlotItem *)item
+-(void)setPlotItem:(PlotItem *)item
 {
-    if (plotItem != item) {
+    if ( plotItem != item ) {
         [plotItem killGraph];
         [plotItem release];
 
@@ -141,23 +142,23 @@ const float CPT_SPLIT_VIEW_MIN_LHS_WIDTH = 150.0f;
 
 #pragma mark IKImageBrowserViewDataSource methods
 
-- (NSUInteger)numberOfItemsInImageBrowser:(IKImageBrowserView *)browser
-{	
+-(NSUInteger)numberOfItemsInImageBrowser:(IKImageBrowserView *)browser
+{
     return [[PlotGallery sharedPlotGallery] count];
 }
 
-- (id)imageBrowser:(IKImageBrowserView *)browser itemAtIndex:(NSUInteger)index
+-(id)imageBrowser:(IKImageBrowserView *)browser itemAtIndex:(NSUInteger)index
 {
     return [[PlotGallery sharedPlotGallery] objectAtIndex:index];
 }
 
 #pragma mark IKImageBrowserViewDelegate methods
 
-- (void)imageBrowserSelectionDidChange:(IKImageBrowserView *)browser
+-(void)imageBrowserSelectionDidChange:(IKImageBrowserView *)browser
 {
     NSUInteger index = [[browser selectionIndexes] firstIndex];
 
-    if (index != NSNotFound) {
+    if ( index != NSNotFound ) {
         PlotItem *item = [[PlotGallery sharedPlotGallery] objectAtIndex:index];
         self.plotItem = item;
     }
@@ -165,33 +166,33 @@ const float CPT_SPLIT_VIEW_MIN_LHS_WIDTH = 150.0f;
 
 #pragma mark NSSplitViewDelegate methods
 
-- (CGFloat)splitView:(NSSplitView *)sv constrainMinCoordinate:(CGFloat)coord ofSubviewAt:(NSInteger)index
+-(CGFloat)splitView:(NSSplitView *)sv constrainMinCoordinate:(CGFloat)coord ofSubviewAt:(NSInteger)index
 {
     return coord + CPT_SPLIT_VIEW_MIN_LHS_WIDTH;
 }
 
-- (CGFloat)splitView:(NSSplitView *)sv constrainMaxCoordinate:(CGFloat)coord ofSubviewAt:(NSInteger)index
+-(CGFloat)splitView:(NSSplitView *)sv constrainMaxCoordinate:(CGFloat)coord ofSubviewAt:(NSInteger)index
 {
     return coord - CPT_SPLIT_VIEW_MIN_LHS_WIDTH;
 }
 
-- (void)splitView:(NSSplitView*)sender resizeSubviewsWithOldSize:(NSSize)oldSize
+-(void)splitView:(NSSplitView *)sender resizeSubviewsWithOldSize:(NSSize)oldSize
 {
     // Lock the LHS width
-    NSRect frame = [sender frame];
-    NSView *lhs = [[sender subviews] objectAtIndex:0];
+    NSRect frame   = [sender frame];
+    NSView *lhs    = [[sender subviews] objectAtIndex:0];
     NSRect lhsRect = [lhs frame];
-    NSView *rhs = [[sender subviews] objectAtIndex:1];
+    NSView *rhs    = [[sender subviews] objectAtIndex:1];
     NSRect rhsRect = [rhs frame];
 
     CGFloat dividerThickness = [sender dividerThickness];
 
     lhsRect.size.height = frame.size.height;
 
-    rhsRect.size.width = frame.size.width - lhsRect.size.width - dividerThickness;
+    rhsRect.size.width  = frame.size.width - lhsRect.size.width - dividerThickness;
     rhsRect.size.height = frame.size.height;
-    rhsRect.origin.x = lhsRect.size.width + dividerThickness;
-	
+    rhsRect.origin.x    = lhsRect.size.width + dividerThickness;
+
     [lhs setFrame:lhsRect];
     [rhs setFrame:rhsRect];
 }

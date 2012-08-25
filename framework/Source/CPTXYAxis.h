@@ -1,12 +1,12 @@
-#import <Foundation/Foundation.h>
 #import "CPTAxis.h"
+#import <Foundation/Foundation.h>
 
 @class CPTConstraints;
 
 @interface CPTXYAxis : CPTAxis {
-@private
+    @private
     NSDecimal orthogonalCoordinateDecimal;
-	CPTConstraints *axisConstraints;
+    CPTConstraints *axisConstraints;
 }
 
 /// @name Positioning

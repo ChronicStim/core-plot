@@ -3,12 +3,12 @@
 //  CPTTestApp-iPhone
 //
 
-#import <UIKit/UIKit.h>
 #import "CorePlot-CocoaTouch.h"
+#import <UIKit/UIKit.h>
 
-@interface CPTTestAppBarChartController : UIViewController <CPTPlotDataSource> 
+@interface CPTTestAppBarChartController : UIViewController<CPTPlotDataSource>
 {
-	CPTXYGraph *barChart;
+    CPTXYGraph *barChart;
 }
 
 @end

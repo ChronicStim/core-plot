@@ -1,17 +1,17 @@
+#import "CPTDefinitions.h"
 #import <Foundation/Foundation.h>
 #import <QuartzCore/QuartzCore.h>
-#import "CPTDefinitions.h"
 
 @class CPTAnnotationHostLayer;
 @class CPTLayer;
 
-@interface CPTAnnotation : NSObject <NSCoding> {
-@private
-	__cpt_weak CPTAnnotationHostLayer *annotationHostLayer;
-	CPTLayer *contentLayer;
-	CGPoint contentAnchorPoint;
-	CGPoint displacement;
-	CGFloat rotation;
+@interface CPTAnnotation : NSObject<NSCoding> {
+    @private
+    __cpt_weak CPTAnnotationHostLayer *annotationHostLayer;
+    CPTLayer *contentLayer;
+    CGPoint contentAnchorPoint;
+    CGPoint displacement;
+    CGFloat rotation;
 }
 
 @property (nonatomic, readwrite, retain) CPTLayer *contentLayer;

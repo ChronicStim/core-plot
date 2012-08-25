@@ -1,15 +1,57 @@
 *For best results, view this document using a Markdown reader.*
 
-
-Release 1.0 (Not yet released)
+# Next Release
 
 ## Release Notes
 
-This release contains changes that will break apps built against earlier Core Plot versions. `CPTPlotRange` has been split into mutable and immutable variants similar to `CPTLineStyle` and `CPTTextStyle`. This change will break existing code that changes plot ranges; that code should be updated to use the mutable versions.
+## Details
+- **New**: Added Bezier curve interpolation option to `CPTScatterPlot`.
+- **New**: Added printing support to the OS X hosting view.
+- **New**: Added a plot data label selection delegate method.
+- **New**: Added a line fill property to `CPTLineStyle`.
+- **New**: Added point selection delegate methods to `CPTRangePlot` and `CPTTradingRangePlot`.
+- **New**: Added an end angle property and the ability to rotate data labels relative to the pie radius to `CPTPieChart`.
+- **New**: Added the `-didFinishDrawing:` delegate method to `CPTPlot`.
+- **New**: Added selection delegate methods that include the event that triggered the selection to all plots.
+- **New**: Added plot space convenience methods that convert global interaction coordinates obtained from an OS event to plot area drawing coordinates.
+- **New**: Added the plot symbol anchor point.
+- **New**: Added a corner radius property to `CPTBarPlot` that applies to the base value end of the bars.
+- **New**: Added a method to `CPTBarPlot` that computes a plot range that encloses all of the bars, including the bar width and bar offset.
+- **New**: Added bindings for plot data labels, bar plot fills and borders, and pie chart fills and radial offsets.
+- **New**: Added bindings and data source methods for all line styles and fills in range and trading range plots.
+- **New**: Added additional data source methods to all plots so each data source item can be supplied one at a time or in an array.
+- **New**: Added multi-dimensional data array support to `CPTNumericData`.
+- **New**: Added a new plot datasource method that returns a multi-dimensional `CPTNumericData` containing data for all plot fields.
+- **Changed**: Changed the superclass of `CPTTextLayer` from `CPTLayer` to `CPTBorderedLayer`.
+- **Changed**: Changed all iOS header files to "Project" visibility to prevent problems with archiving an app that uses the Core Plot static library.
+
+
+
+# Release 1.0 (February 20, 2012)
+
+## Release Notes
+
+This release contains changes that will break apps built against earlier Core Plot versions. `CPTPlotRange` has been split into mutable and immutable variants similar to `CPTLineStyle` and `CPTTextStyle`. This change will break existing code that changes plot ranges; that code should be updated to use the mutable versions. The `CPTBarPlotField` enum was changed so that the field values start at zero like all other plots. This will affect any existing code that used hard-coded values for the fields instead of the enum field names (`CPTBarPlotFieldBarLocation`, etc.). The `CPTNewCGColorFromNSColor()` function was renamed to `CPTCreateCGColorFromNSColor()` to conform to Apple's memory management naming conventions.
+
+Core Plot now supports projects that use automatic reference counting (ARC). For compatibility with older systems, Core Plot itself does not use ARC but its header files and binaries can be used in applications that do.
 
 ## Details
+- **New**: Added a script to automatically format the code following the coding standards using uncrustify.
+- **New**: Added support for automatic reference counting (ARC).
+- **New**: Added the HTML docs built with Doxygen to the source code repository so that they can be viewed online with a web browser.
+- **New**: Added an `identifier` property to `CPTLayer`, replacing the one from `CPTPlot` and `CPTPlotGroup`.
+- **New**: Added control chart and multi-colored bar plot examples to the Plot Gallery app.
+- **New**: Added a mouse zoom user interface to the DropPlot app.
 - **Changed**: Split `CPTPlotRange` into mutable and immutable variants.
+- **Changed**: Changed the `CPTBarPlotField` enum values.
+- **Changed**: Renamed the `CPTNewCGColorFromNSColor()` function to `CPTCreateCGColorFromNSColor()`.
 - **Changed**: Updated all projects to support Xcode 4.2.
+- **Changed**: Made all `CPTAxis` delegate methods optional.
+- **Changed**: Added the `-[CPTAxis axis:shouldUpdateMinorAxisLabelsAtLocations:]` delegate method.
+- **Changed**: Added a graph fill to the Slate theme so that all themes have explicit fills.
+- **Changed**: Miscellaneous bug fixes and cleanup.
+- **Removed**: Removed unused `NSException` extensions.
+- **Removed**: Removed unused methods from `CPTLayer` and `CPTTextLayer`.
 
 
 

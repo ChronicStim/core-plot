@@ -5,11 +5,11 @@
 
 #import "PlotItem.h"
 
-@interface RealTimePlot : PlotItem < CPTPlotDataSource >
+@interface RealTimePlot : PlotItem<CPTPlotDataSource>
 {
-    NSMutableArray* plotData;
-	NSUInteger currentIndex;
-	NSTimer *dataTimer;
+    NSMutableArray *plotData;
+    NSUInteger currentIndex;
+    NSTimer *dataTimer;
 }
 
 -(void)newData:(NSTimer *)theTimer;

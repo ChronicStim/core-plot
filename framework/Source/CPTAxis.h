@@ -1,7 +1,7 @@
-#import <Foundation/Foundation.h>
-#import "CPTLayer.h"
 #import "CPTDefinitions.h"
+#import "CPTLayer.h"
 #import "CPTTextStyle.h"
+#import <Foundation/Foundation.h>
 
 ///	@file
 
@@ -17,47 +17,59 @@
 @class CPTPlotArea;
 @class CPTShadow;
 
-/**	@brief Enumeration of labeling policies
+/**
+ *	@brief Enumeration of labeling policies
  **/
 typedef enum _CPTAxisLabelingPolicy {
-    CPTAxisLabelingPolicyNone,					///< No labels provided; user sets labels and tick locations.
-    CPTAxisLabelingPolicyLocationsProvided,		///< User sets tick locations; axis makes labels.
-    CPTAxisLabelingPolicyFixedInterval,			///< Fixed interval labeling policy.
-	CPTAxisLabelingPolicyAutomatic,				///< Automatic labeling policy.
-	CPTAxisLabelingPolicyEqualDivisions			///< Divide the plot range into equal parts.
-} CPTAxisLabelingPolicy;
+    CPTAxisLabelingPolicyNone,              ///< No labels provided; user sets labels and tick locations.
+    CPTAxisLabelingPolicyLocationsProvided, ///< User sets tick locations; axis makes labels.
+    CPTAxisLabelingPolicyFixedInterval,     ///< Fixed interval labeling policy.
+    CPTAxisLabelingPolicyAutomatic,         ///< Automatic labeling policy.
+    CPTAxisLabelingPolicyEqualDivisions     ///< Divide the plot range into equal parts.
+}
+CPTAxisLabelingPolicy;
 
 #pragma mark -
 
-/**	@brief Axis labeling delegate.
+/**
+ *	@brief Axis labeling delegate.
  **/
-@protocol CPTAxisDelegate <NSObject>
+@protocol CPTAxisDelegate<NSObject>
 
 @optional
 
 /// @name Labels
 /// @{
 
-/**	@brief Determines if the axis should relabel itself now.
+/**	@brief (Optional) Determines if the axis should relabel itself now.
  *	@param axis The axis.
  *	@return YES if the axis should relabel now.
  **/
 -(BOOL)axisShouldRelabel:(CPTAxis *)axis;
 
-/**	@brief The method is called after the axis is relabeled to allow the delegate to perform any
+/**	@brief (Optional) The method is called after the axis is relabeled to allow the delegate to perform any
  *	necessary cleanup or further labeling actions.
  *	@param axis The axis.
  **/
 -(void)axisDidRelabel:(CPTAxis *)axis;
 
-/**	@brief This method gives the delegate a chance to create custom labels for each tick.
- *  It can be used with any relabeling policy. Returning NO will cause the axis not
+/**	@brief (Optional) This method gives the delegate a chance to create custom labels for each tick.
+ *  It can be used with any labeling policy. Returning NO will cause the axis not
  *  to update the labels. It is then the delegates responsiblity to do this.
  *	@param axis The axis.
  *  @param locations The locations of the major ticks.
- *  @return YES if the axis class should proceed with automatic relabeling.
+ *  @return YES if the axis class should proceed with automatic labeling.
  **/
 -(BOOL)axis:(CPTAxis *)axis shouldUpdateAxisLabelsAtLocations:(NSSet *)locations;
+
+/**	@brief (Optional) This method gives the delegate a chance to create custom labels for each minor tick.
+ *  It can be used with any labeling policy. Returning NO will cause the axis not
+ *  to update the labels. It is then the delegates responsiblity to do this.
+ *	@param axis The axis.
+ *  @param locations The locations of the minor ticks.
+ *  @return YES if the axis class should proceed with automatic labeling.
+ **/
+-(BOOL)axis:(CPTAxis *)axis shouldUpdateMinorAxisLabelsAtLocations:(NSSet *)locations;
 
 ///	@}
 
@@ -65,57 +77,59 @@ typedef enum _CPTAxisLabelingPolicy {
 
 #pragma mark -
 
-@interface CPTAxis : CPTLayer {   
-	@private
+@interface CPTAxis : CPTLayer {
+    @private
     CPTCoordinate coordinate;
-	CPTPlotSpace *plotSpace;
+    CPTPlotSpace *plotSpace;
     NSSet *majorTickLocations;
     NSSet *minorTickLocations;
     CGFloat majorTickLength;
     CGFloat minorTickLength;
-	CGFloat labelOffset;
-	CGFloat minorTickLabelOffset;
+    CGFloat labelOffset;
+    CGFloat minorTickLabelOffset;
     CGFloat labelRotation;
     CGFloat minorTickLabelRotation;
-	CPTAlignment labelAlignment;
-	CPTAlignment minorTickLabelAlignment;
+    CPTAlignment labelAlignment;
+    CPTAlignment minorTickLabelAlignment;
     CPTLineStyle *axisLineStyle;
     CPTLineStyle *majorTickLineStyle;
     CPTLineStyle *minorTickLineStyle;
     CPTLineStyle *majorGridLineStyle;
     CPTLineStyle *minorGridLineStyle;
-	CPTLineCap *axisLineCapMin;
-	CPTLineCap *axisLineCapMax;
-    NSDecimal labelingOrigin;			
-    NSDecimal majorIntervalLength;	
+    CPTLineCap *axisLineCapMin;
+    CPTLineCap *axisLineCapMax;
+    NSDecimal labelingOrigin;
+    NSDecimal majorIntervalLength;
     NSUInteger minorTicksPerInterval;
     NSUInteger preferredNumberOfMajorTicks;
     CPTAxisLabelingPolicy labelingPolicy;
-	CPTTextStyle *labelTextStyle;
-	CPTTextStyle *minorTickLabelTextStyle;
-	CPTTextStyle *titleTextStyle;
-	NSNumberFormatter *labelFormatter;
-	NSNumberFormatter *minorTickLabelFormatter;
-	BOOL labelFormatterChanged;
-	NSSet *axisLabels;
-	NSSet *minorTickAxisLabels;
-	CPTAxisTitle *axisTitle;
-	NSString *title;
-	CGFloat titleOffset;
-	CGFloat titleRotation;
-	NSDecimal titleLocation;	
+    CPTTextStyle *labelTextStyle;
+    CPTTextStyle *minorTickLabelTextStyle;
+    CPTTextStyle *titleTextStyle;
+    NSNumberFormatter *labelFormatter;
+    NSNumberFormatter *minorTickLabelFormatter;
+    BOOL labelFormatterChanged;
+    BOOL minorLabelFormatterChanged;
+    NSSet *axisLabels;
+    NSSet *minorTickAxisLabels;
+    CPTAxisTitle *axisTitle;
+    NSString *title;
+    CGFloat titleOffset;
+    CGFloat titleRotation;
+    NSDecimal titleLocation;
     CPTSign tickDirection;
     BOOL needsRelabel;
-	NSArray *labelExclusionRanges;
+    NSArray *labelExclusionRanges;
     CPTPlotRange *visibleRange;
+    CPTPlotRange *visibleAxisRange;
     CPTPlotRange *gridLinesRange;
-	NSArray *alternatingBandFills;
-	NSMutableArray *mutableBackgroundLimitBands;
-	BOOL separateLayers;
-	CPTShadow *labelShadow;
-	__cpt_weak CPTPlotArea *plotArea;
-	__cpt_weak CPTGridLines *minorGridLines;
-	__cpt_weak CPTGridLines *majorGridLines;
+    NSArray *alternatingBandFills;
+    NSMutableArray *mutableBackgroundLimitBands;
+    BOOL separateLayers;
+    CPTShadow *labelShadow;
+    __cpt_weak CPTPlotArea *plotArea;
+    __cpt_weak CPTGridLines *minorGridLines;
+    __cpt_weak CPTGridLines *majorGridLines;
 }
 
 /// @name Axis
@@ -125,6 +139,7 @@ typedef enum _CPTAxisLabelingPolicy {
 @property (nonatomic, readwrite, assign) NSDecimal labelingOrigin;
 @property (nonatomic, readwrite, assign) CPTSign tickDirection;
 @property (nonatomic, readwrite, copy) CPTPlotRange *visibleRange;
+@property (nonatomic, readwrite, copy) CPTPlotRange *visibleAxisRange;
 @property (nonatomic, readwrite, copy) CPTLineCap *axisLineCapMin;
 @property (nonatomic, readwrite, copy) CPTLineCap *axisLineCapMax;
 ///	@}
@@ -250,4 +265,3 @@ typedef enum _CPTAxisLabelingPolicy {
 ///	@}
 
 @end
-

@@ -1,12 +1,12 @@
-
 #import "NSDateFormatterExtensions.h"
 
-@implementation NSDateFormatter (APExtensions)
+@implementation NSDateFormatter(APExtensions)
 
 +(NSDateFormatter *)csvDateFormatter
 {
     static NSDateFormatter *df = nil;
-    if (!df) {
+
+    if ( !df ) {
         df = [[NSDateFormatter alloc] init];
         [df setDateFormat:@"yyyy-MM-dd"];
     }
@@ -14,4 +14,3 @@
 }
 
 @end
-

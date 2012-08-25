@@ -1,15 +1,15 @@
-#import <Foundation/Foundation.h>
 #import "CPTDefinitions.h"
+#import <Foundation/Foundation.h>
 
 @class CPTLayer;
 @class CPTTextStyle;
 
-@interface CPTAxisLabel : NSObject <NSCoding> {
-	@private
+@interface CPTAxisLabel : NSObject<NSCoding> {
+    @private
     CPTLayer *contentLayer;
     CGFloat offset;
     CGFloat rotation;
-	CPTAlignment alignment;
+    CPTAlignment alignment;
     NSDecimal tickLocation;
 }
 

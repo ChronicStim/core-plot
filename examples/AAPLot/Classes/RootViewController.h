@@ -12,7 +12,6 @@
 @class FlipsideViewController;
 
 @interface RootViewController : UIViewController {
-
     UIButton *infoButton;
     MainViewController *mainViewController;
     FlipsideViewController *flipsideViewController;
@@ -24,6 +23,6 @@
 @property (nonatomic, retain) UINavigationBar *flipsideNavigationBar;
 @property (nonatomic, retain) FlipsideViewController *flipsideViewController;
 
-- (IBAction)toggleView;
+-(IBAction)toggleView;
 
 @end

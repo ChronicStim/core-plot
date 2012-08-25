@@ -1,57 +1,23 @@
 #import "CPTPlotGroup.h"
+
 #import "CPTPlot.h"
 
-/**	@brief Defines the coordinate system of a plot.
+/**
+ *	@brief Defines the coordinate system of a plot.
  **/
 @implementation CPTPlotGroup
-
-/**	@property identifier
- *	@brief An object used to identify the plot group in collections.
- **/
-@synthesize identifier;
-
-#pragma mark -
-#pragma mark Initialize/Deallocate
-
--(id)initWithFrame:(CGRect)newFrame
-{
-	if ( (self = [super initWithFrame:newFrame]) ) {
-		identifier = nil;
-	}
-	return self;
-}
-
--(id)initWithLayer:(id)layer
-{
-	if ( (self = [super initWithLayer:layer]) ) {
-		CPTPlotGroup *theLayer = (CPTPlotGroup *)layer;
-		
-		identifier = [theLayer->identifier retain];
-	}
-	return self;
-}
-
--(void)dealloc
-{
-	[identifier release];
-	[super dealloc];
-}
 
 #pragma mark -
 #pragma mark NSCoding methods
 
--(void)encodeWithCoder:(NSCoder *)coder
-{
-	[super encodeWithCoder:coder];
-	
-	[coder encodeObject:self.identifier forKey:@"CPTPlotGroup.identifier"];
-}
-
 -(id)initWithCoder:(NSCoder *)coder
 {
     if ( (self = [super initWithCoder:coder]) ) {
-		identifier = [[coder decodeObjectForKey:@"CPTPlotGroup.identifier"] copy];
-	}
+        // support old archives
+        if ( [coder containsValueForKey:@"CPTPlotGroup.identifier"] ) {
+            self.identifier = [coder decodeObjectForKey:@"CPTPlotGroup.identifier"];
+        }
+    }
     return self;
 }
 
@@ -63,7 +29,21 @@
  **/
 -(void)addPlot:(CPTPlot *)plot
 {
-	[self addSublayer:plot];
+    NSParameterAssert(plot);
+
+    [self addSublayer:plot];
+}
+
+/**	@brief Add a plot to this plot group at the given index.
+ *	@param plot The plot.
+ *	@param index The index at which to insert the plot. This value must not be greater than the count of elements in the sublayer array.
+ **/
+-(void)insertPlot:(CPTPlot *)plot atIndex:(NSUInteger)index
+{
+    NSParameterAssert(plot);
+    NSParameterAssert(index <= [[self sublayers] count]);
+
+    [self insertSublayer:plot atIndex:index];
 }
 
 /**	@brief Remove a plot from this plot group.
@@ -71,17 +51,21 @@
  **/
 -(void)removePlot:(CPTPlot *)plot
 {
-	if ( self == [plot superlayer] ) {
-		[plot removeFromSuperlayer];
-	}
+    if ( self == [plot superlayer] ) {
+        [plot removeFromSuperlayer];
+    }
 }
 
 #pragma mark -
 #pragma mark Drawing
 
+///	@cond
+
 -(void)renderAsVectorInContext:(CGContextRef)theContext
 {
-	// nothing to draw
+    // nothing to draw
 }
+
+///	@endcond
 
 @end

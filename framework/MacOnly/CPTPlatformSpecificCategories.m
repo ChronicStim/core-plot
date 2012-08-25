@@ -1,6 +1,7 @@
-#import <AppKit/AppKit.h>
 #import "CPTPlatformSpecificCategories.h"
+
 #import "CPTUtilities.h"
+#import <AppKit/AppKit.h>
 
 @implementation CPTLayer(CPTPlatformSpecificLayerExtensions)
 
@@ -9,23 +10,23 @@
  **/
 -(CPTNativeImage *)imageOfLayer
 {
-	CGSize boundsSize = self.bounds.size;
-	
-	NSBitmapImageRep *layerImage = [[NSBitmapImageRep alloc] initWithBitmapDataPlanes:NULL pixelsWide:boundsSize.width pixelsHigh:boundsSize.height bitsPerSample:8 samplesPerPixel:4 hasAlpha:YES isPlanar:NO colorSpaceName:NSCalibratedRGBColorSpace bytesPerRow:(NSInteger)boundsSize.width * 4 bitsPerPixel:32];
-	NSGraphicsContext *bitmapContext = [NSGraphicsContext graphicsContextWithBitmapImageRep:layerImage];
-	CGContextRef context = (CGContextRef)[bitmapContext graphicsPort];
-	
-	CGContextClearRect(context, CGRectMake(0.0, 0.0, boundsSize.width, boundsSize.height));
-	CGContextSetAllowsAntialiasing(context, true);
-	CGContextSetShouldSmoothFonts(context, false);
-	[self layoutAndRenderInContext:context];	
-	CGContextFlush(context);
-	
+    CGSize boundsSize = self.bounds.size;
+
+    NSBitmapImageRep *layerImage     = [[NSBitmapImageRep alloc] initWithBitmapDataPlanes:NULL pixelsWide:boundsSize.width pixelsHigh:boundsSize.height bitsPerSample:8 samplesPerPixel:4 hasAlpha:YES isPlanar:NO colorSpaceName:NSCalibratedRGBColorSpace bytesPerRow:(NSInteger)boundsSize.width * 4 bitsPerPixel:32];
+    NSGraphicsContext *bitmapContext = [NSGraphicsContext graphicsContextWithBitmapImageRep:layerImage];
+    CGContextRef context             = (CGContextRef)[bitmapContext graphicsPort];
+
+    CGContextClearRect( context, CGRectMake(0.0, 0.0, boundsSize.width, boundsSize.height) );
+    CGContextSetAllowsAntialiasing(context, true);
+    CGContextSetShouldSmoothFonts(context, false);
+    [self layoutAndRenderInContext:context];
+    CGContextFlush(context);
+
     NSImage *image = [[NSImage alloc] initWithSize:NSSizeFromCGSize(boundsSize)];
     [image addRepresentation:layerImage];
-	[layerImage release];
-    
-	return [image autorelease];
+    [layerImage release];
+
+    return [image autorelease];
 }
 
 @end
@@ -41,7 +42,7 @@
 
 -(NSColor *)nsColor
 {
-	return [NSColor colorWithCIColor:[CIColor colorWithCGColor:self.cgColor]];
+    return [NSColor colorWithCIColor:[CIColor colorWithCGColor:self.cgColor]];
 }
 
 @end

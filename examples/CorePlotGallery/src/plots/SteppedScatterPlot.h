@@ -8,16 +8,11 @@
 
 #import "PlotItem.h"
 
-@interface SteppedScatterPlot : PlotItem <CPTPlotSpaceDelegate,
-                                          CPTPlotDataSource,
-                                          CPTScatterPlotDelegate>
+@interface SteppedScatterPlot : PlotItem<CPTPlotSpaceDelegate,
+                                         CPTPlotDataSource,
+                                         CPTScatterPlotDelegate>
 {
-    CGFloat     xShift;
-    CGFloat     yShift;
-    
-    CGFloat     labelRotation;
-    
-    NSArray     *plotData;
+    NSArray *plotData;
 }
 
 @end

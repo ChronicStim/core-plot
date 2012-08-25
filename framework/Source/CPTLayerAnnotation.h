@@ -1,13 +1,13 @@
-#import <Foundation/Foundation.h>
 #import "CPTAnnotation.h"
 #import "CPTDefinitions.h"
+#import <Foundation/Foundation.h>
 
 @class CPTConstraints;
 
 @interface CPTLayerAnnotation : CPTAnnotation {
-@private
-	__cpt_weak CPTLayer *anchorLayer;
-	CPTConstraints *xConstraints;
+    @private
+    __cpt_weak CPTLayer *anchorLayer;
+    CPTConstraints *xConstraints;
     CPTConstraints *yConstraints;
     CPTRectAnchor rectAnchor;
 }

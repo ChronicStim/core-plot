@@ -1,4 +1,3 @@
-
 #import "CPTTestCase.h"
 
 @class CPTXYGraph;
@@ -7,6 +6,6 @@
     CPTXYGraph *graph;
 }
 
-@property (retain,readwrite) CPTXYGraph *graph;
+@property (retain, readwrite) CPTXYGraph *graph;
 
 @end

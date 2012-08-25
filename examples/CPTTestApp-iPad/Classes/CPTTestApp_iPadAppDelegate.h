@@ -9,7 +9,7 @@
 
 @class CPTTestApp_iPadViewController;
 
-@interface CPTTestApp_iPadAppDelegate : NSObject <UIApplicationDelegate> {
+@interface CPTTestApp_iPadAppDelegate : NSObject<UIApplicationDelegate> {
     UIWindow *window;
     CPTTestApp_iPadViewController *viewController;
 }
@@ -18,4 +18,3 @@
 @property (nonatomic, retain) IBOutlet CPTTestApp_iPadViewController *viewController;
 
 @end
-

@@ -1,4 +1,3 @@
-
 #import <Foundation/Foundation.h>
 
 @class APYahooDataPuller;
@@ -15,19 +14,18 @@
     NSString *symbol;
     NSDate *startDate;
     NSDate *endDate;
-    
+
     NSDate *targetStartDate;
     NSDate *targetEndDate;
     NSString *targetSymbol;
-    
+
     id delegate;
     NSDecimalNumber *overallHigh;
     NSDecimalNumber *overallLow;
-	NSDecimalNumber *overallVolumeHigh;
+    NSDecimalNumber *overallVolumeHigh;
     NSDecimalNumber *overallVolumeLow;
-	
 
-	@private
+    @private
     NSString *csvString;
     NSArray *financialData; // consists of dictionaries
 
@@ -48,7 +46,6 @@
 @property (nonatomic, readonly, retain) NSDecimalNumber *overallLow;
 @property (nonatomic, readonly, retain) NSDecimalNumber *overallVolumeHigh;
 @property (nonatomic, readonly, retain) NSDecimalNumber *overallVolumeLow;
-
 
 -(id)initWithTargetSymbol:(NSString *)aSymbol targetStartDate:(NSDate *)aStartDate targetEndDate:(NSDate *)anEndDate;
 

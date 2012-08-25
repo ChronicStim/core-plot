@@ -1,17 +1,18 @@
-#import "CPTAxisSet.h"
-#import "CPTGraph.h"
 #import "CPTLayer.h"
+
+#import "CPTAxisSet.h"
+#import "CPTExceptions.h"
+#import "CPTGraph.h"
+#import "CPTLineStyle.h"
 #import "CPTPathExtensions.h"
 #import "CPTPlatformSpecificDefines.h"
 #import "CPTPlatformSpecificFunctions.h"
-#import "CPTExceptions.h"
-#import "CPTLineStyle.h"
 #import "CPTShadow.h"
 #import "CPTUtilities.h"
 #import "CorePlotProbes.h"
-#import <objc/runtime.h>
 #import "NSCoderExtensions.h"
 #import "NSNumberExtensions.h"
+#import <objc/runtime.h>
 #import <tgmath.h>
 
 /**	@defgroup animation Animatable Properties
@@ -25,26 +26,29 @@
  *	@brief Notifications used by Core Plot.
  **/
 
-/**	@cond */
+///	@cond
 @interface CPTLayer()
 
-@property (nonatomic, readwrite, getter=isRenderingRecursively) BOOL renderingRecursively;
+@property (nonatomic, readwrite, getter = isRenderingRecursively) BOOL renderingRecursively;
 @property (nonatomic, readwrite, assign) BOOL useFastRendering;
 
 -(void)applyTransform:(CATransform3D)transform toContext:(CGContextRef)context;
 -(NSString *)subLayersAtIndex:(NSUInteger)index;
 
 @end
-/**	@endcond */
+
+///	@endcond
 
 #pragma mark -
 
 /** @brief Base class for all Core Animation layers in Core Plot.
  *
- *	Default animations for changes in position, bounds, and sublayers are turned off.
- *	The default layer is not opaque and does not mask to bounds.
- *
- *	@todo More documentation needed 
+ *	Unless <code>@link CPTLayer::useFastRendering useFastRendering @endlink == YES</code>,
+ *	all drawing is done in a way that preserves the
+ *	drawing vectors. Sublayers are arranged automatically to fill the layer's
+ *	bounds, minus any padding. Default animations for changes in position, bounds,
+ *	and sublayers are turned off. The default layer is not opaque and does not mask
+ *	to bounds.
  **/
 @implementation CPTLayer
 
@@ -73,18 +77,18 @@
  **/
 @synthesize paddingBottom;
 
-/** @property masksToBorder 
+/** @property masksToBorder
  *  @brief If YES, a sublayer mask is applied to clip sublayer content to the inside of the border.
  **/
 @synthesize masksToBorder;
 
-/** @property contentsScale 
+/** @property contentsScale
  *  @brief The scale factor applied to the layer.
  **/
 @dynamic contentsScale;
 
-/** @property shadow 
- *  @brief The shadow drawn under the layer content. If nil (the default), no shadow is drawn.
+/** @property shadow
+ *  @brief The shadow drawn under the layer content. If <code>nil</code> (the default), no shadow is drawn.
  **/
 @synthesize shadow;
 
@@ -120,10 +124,15 @@
  **/
 @dynamic sublayersExcludedFromAutomaticLayout;
 
-/** @property useFastRendering 
+/** @property useFastRendering
  *  @brief If YES, subclasses should optimize their drawing for speed over precision.
  **/
 @synthesize useFastRendering;
+
+/**	@property identifier
+ *	@brief An object used to identify the layer in collections.
+ **/
+@synthesize identifier;
 
 // Private properties
 @synthesize renderingRecursively;
@@ -133,79 +142,90 @@
 
 /** @brief Initializes a newly allocated CPTLayer object with the provided frame rectangle.
  *
- *	This is the designated initializer. The initialized layer will have the following properties that
- *	are different than a CALayer:
- *	- needsDisplayOnBoundsChange = NO
- *	- opaque = NO
- *	- masksToBounds = NO
- *	- padding = 0 on all four sides
- *	- Default animations for changes in position, bounds, and sublayers are turned off.
+ *	This is the designated initializer. The initialized layer will have the following properties:
+ *	- @link CPTLayer::paddingLeft paddingLeft @endlink = 0.0
+ *	- @link CPTLayer::paddingTop paddingTop @endlink = 0.0
+ *	- @link CPTLayer::paddingRight paddingRight @endlink = 0.0
+ *	- @link CPTLayer::paddingBottom paddingBottom @endlink = 0.0
+ *	- @link CPTLayer::masksToBorder masksToBorder @endlink = <code>NO</code>
+ *	- @link CPTLayer::shadow shadow @endlink = <code>nil</code>
+ *	- @link CPTLayer::useFastRendering useFastRendering @endlink = <code>NO</code>
+ *	- @link CPTLayer::graph graph @endlink = <code>nil</code>
+ *	- @link CPTLayer::outerBorderPath outerBorderPath @endlink = <code>NULL</code>
+ *	- @link CPTLayer::innerBorderPath innerBorderPath @endlink = <code>NULL</code>
+ *	- @link CPTLayer::identifier identifier @endlink = <code>nil</code>
+ *	- <code>needsDisplayOnBoundsChange</code> = <code>NO</code>
+ *	- <code>opaque</code> = <code>NO</code>
+ *	- <code>masksToBounds</code> = <code>NO</code>
  *
  *	@param newFrame The frame rectangle.
  *  @return The initialized CPTLayer object.
  **/
 -(id)initWithFrame:(CGRect)newFrame
 {
-	if ( (self = [super init]) ) {
-		paddingLeft = 0.0;
-		paddingTop = 0.0;
-		paddingRight = 0.0;
-		paddingBottom = 0.0;
-		masksToBorder = NO;
-		shadow = nil;
-		renderingRecursively = NO;
-		useFastRendering = NO;
-		graph = nil;
-		outerBorderPath = NULL;
-		innerBorderPath = NULL;
+    if ( (self = [super init]) ) {
+        paddingLeft          = 0.0;
+        paddingTop           = 0.0;
+        paddingRight         = 0.0;
+        paddingBottom        = 0.0;
+        masksToBorder        = NO;
+        shadow               = nil;
+        renderingRecursively = NO;
+        useFastRendering     = NO;
+        graph                = nil;
+        outerBorderPath      = NULL;
+        innerBorderPath      = NULL;
+        identifier           = nil;
 
-		self.frame = newFrame;
-		self.needsDisplayOnBoundsChange = NO;
-		self.opaque = NO;
-		self.masksToBounds = NO;
-	}
-	return self;
+        self.frame                      = newFrame;
+        self.needsDisplayOnBoundsChange = NO;
+        self.opaque                     = NO;
+        self.masksToBounds              = NO;
+    }
+    return self;
 }
 
 -(id)init
 {
-	return [self initWithFrame:CGRectZero];
+    return [self initWithFrame:CGRectZero];
 }
 
 -(id)initWithLayer:(id)layer
 {
-	if ( (self = [super initWithLayer:layer]) ) {
-		CPTLayer *theLayer = (CPTLayer *)layer;
-		
-		paddingLeft = theLayer->paddingLeft;
-		paddingTop = theLayer->paddingTop;
-		paddingRight = theLayer->paddingRight;
-		paddingBottom = theLayer->paddingBottom;
-		masksToBorder = theLayer->masksToBorder;
-		shadow = [theLayer->shadow retain];
-		renderingRecursively = theLayer->renderingRecursively;
-		graph = theLayer->graph;
-		outerBorderPath = CGPathRetain(theLayer->outerBorderPath);
-		innerBorderPath = CGPathRetain(theLayer->innerBorderPath);
-	}
-	return self;
+    if ( (self = [super initWithLayer:layer]) ) {
+        CPTLayer *theLayer = (CPTLayer *)layer;
+
+        paddingLeft          = theLayer->paddingLeft;
+        paddingTop           = theLayer->paddingTop;
+        paddingRight         = theLayer->paddingRight;
+        paddingBottom        = theLayer->paddingBottom;
+        masksToBorder        = theLayer->masksToBorder;
+        shadow               = [theLayer->shadow retain];
+        renderingRecursively = theLayer->renderingRecursively;
+        graph                = theLayer->graph;
+        outerBorderPath      = CGPathRetain(theLayer->outerBorderPath);
+        innerBorderPath      = CGPathRetain(theLayer->innerBorderPath);
+        identifier           = [theLayer->identifier retain];
+    }
+    return self;
 }
 
 -(void)dealloc
 {
-	graph = nil;
-	[shadow release];
-	CGPathRelease(outerBorderPath);
-	CGPathRelease(innerBorderPath);
+    graph = nil;
+    [shadow release];
+    [identifier release];
+    CGPathRelease(outerBorderPath);
+    CGPathRelease(innerBorderPath);
 
-	[super dealloc];
+    [super dealloc];
 }
 
 -(void)finalize
 {
-	CGPathRelease(outerBorderPath);
-	CGPathRelease(innerBorderPath);
-	[super finalize];
+    CGPathRelease(outerBorderPath);
+    CGPathRelease(innerBorderPath);
+    [super finalize];
 }
 
 #pragma mark -
@@ -213,44 +233,46 @@
 
 -(void)encodeWithCoder:(NSCoder *)coder
 {
-	[super encodeWithCoder:coder];
-	
-	[coder encodeCGFloat:self.paddingLeft forKey:@"CPTLayer.paddingLeft"];
-	[coder encodeCGFloat:self.paddingTop forKey:@"CPTLayer.paddingTop"];
-	[coder encodeCGFloat:self.paddingRight forKey:@"CPTLayer.paddingRight"];
-	[coder encodeCGFloat:self.paddingBottom forKey:@"CPTLayer.paddingBottom"];
-	[coder encodeBool:self.masksToBorder forKey:@"CPTLayer.masksToBorder"];
-	[coder encodeObject:self.shadow forKey:@"CPTLayer.shadow"];
-	[coder encodeConditionalObject:self.graph forKey:@"CPTLayer.graph"];
+    [super encodeWithCoder:coder];
 
-	// No need to archive these properties:
-	// renderingRecursively
-	// outerBorderPath
-	// innerBorderPath
+    [coder encodeCGFloat:self.paddingLeft forKey:@"CPTLayer.paddingLeft"];
+    [coder encodeCGFloat:self.paddingTop forKey:@"CPTLayer.paddingTop"];
+    [coder encodeCGFloat:self.paddingRight forKey:@"CPTLayer.paddingRight"];
+    [coder encodeCGFloat:self.paddingBottom forKey:@"CPTLayer.paddingBottom"];
+    [coder encodeBool:self.masksToBorder forKey:@"CPTLayer.masksToBorder"];
+    [coder encodeObject:self.shadow forKey:@"CPTLayer.shadow"];
+    [coder encodeConditionalObject:self.graph forKey:@"CPTLayer.graph"];
+    [coder encodeObject:self.identifier forKey:@"CPTLayer.identifier"];
+
+    // No need to archive these properties:
+    // renderingRecursively
+    // outerBorderPath
+    // innerBorderPath
 }
 
 -(id)initWithCoder:(NSCoder *)coder
 {
     if ( (self = [super initWithCoder:coder]) ) {
-		paddingLeft = [coder decodeCGFloatForKey:@"CPTLayer.paddingLeft"];
-		paddingTop = [coder decodeCGFloatForKey:@"CPTLayer.paddingTop"];
-		paddingRight = [coder decodeCGFloatForKey:@"CPTLayer.paddingRight"];
-		paddingBottom = [coder decodeCGFloatForKey:@"CPTLayer.paddingBottom"];
-		masksToBorder = [coder decodeBoolForKey:@"CPTLayer.masksToBorder"];
-		shadow = [[coder decodeObjectForKey:@"CPTLayer.shadow"] copy];
-		graph = [coder decodeObjectForKey:@"CPTLayer.graph"];
-		
-		renderingRecursively = NO;
-		outerBorderPath = NULL;
-		innerBorderPath = NULL;
-	}
+        paddingLeft   = [coder decodeCGFloatForKey:@"CPTLayer.paddingLeft"];
+        paddingTop    = [coder decodeCGFloatForKey:@"CPTLayer.paddingTop"];
+        paddingRight  = [coder decodeCGFloatForKey:@"CPTLayer.paddingRight"];
+        paddingBottom = [coder decodeCGFloatForKey:@"CPTLayer.paddingBottom"];
+        masksToBorder = [coder decodeBoolForKey:@"CPTLayer.masksToBorder"];
+        shadow        = [[coder decodeObjectForKey:@"CPTLayer.shadow"] copy];
+        graph         = [coder decodeObjectForKey:@"CPTLayer.graph"];
+        identifier    = [[coder decodeObjectForKey:@"CPTLayer.identifier"] copy];
+
+        renderingRecursively = NO;
+        outerBorderPath      = NULL;
+        innerBorderPath      = NULL;
+    }
     return self;
 }
 
 #pragma mark -
 #pragma mark Animation
 
--(id <CAAction>)actionForKey:(NSString *)aKey
+-(id<CAAction>)actionForKey:(NSString *)aKey
 {
     return nil;
 }
@@ -260,14 +282,15 @@
 
 -(void)drawInContext:(CGContextRef)context
 {
-	self.useFastRendering = YES;
-	[self renderAsVectorInContext:context];
-	self.useFastRendering = NO;
+    self.useFastRendering = YES;
+    [self renderAsVectorInContext:context];
+    self.useFastRendering = NO;
 }
 
 /**	@brief Draws layer content into the provided graphics context.
  *
- *	This method replaces the drawInContext: method to ensure that layer content is always drawn as vectors
+ *	This method replaces the <code>-[CALayer drawInContext:]</code> method
+ *	to ensure that layer content is always drawn as vectors
  *	and objects rather than as a cached bitmapped image representation.
  *	Subclasses should do all drawing here and must call super to set up the clipping path.
  *
@@ -275,9 +298,9 @@
  **/
 -(void)renderAsVectorInContext:(CGContextRef)context;
 {
-	// This is where subclasses do their drawing
-	[self applyMaskToContext:context];
-	[self.shadow setShadowInContext:context];
+    // This is where subclasses do their drawing
+    [self applyMaskToContext:context];
+    [self.shadow setShadowInContext:context];
 }
 
 /**	@brief Draws layer content and the content of all sublayers into the provided graphics context.
@@ -285,76 +308,81 @@
  **/
 -(void)recursivelyRenderInContext:(CGContextRef)context
 {
-	// render self
-	CGContextSaveGState(context);
-	
-	[self applyTransform:self.transform toContext:context];
-	
-	self.renderingRecursively = YES;
-	if ( !self.masksToBounds ) {
-		CGContextSaveGState(context);
-	}
-	[self renderAsVectorInContext:context];
-	if ( !self.masksToBounds ) {
-		CGContextRestoreGState(context);
-	}
-	self.renderingRecursively = NO;
-	
-	// render sublayers
+    // render self
+    CGContextSaveGState(context);
+
+    [self applyTransform:self.transform toContext:context];
+
+    self.renderingRecursively = YES;
+    if ( !self.masksToBounds ) {
+        CGContextSaveGState(context);
+    }
+    [self renderAsVectorInContext:context];
+    if ( !self.masksToBounds ) {
+        CGContextRestoreGState(context);
+    }
+    self.renderingRecursively = NO;
+
+    // render sublayers
     NSArray *sublayersCopy = [self.sublayers copy];
-	for ( CALayer *currentSublayer in sublayersCopy ) {
-		CGContextSaveGState(context);
-		
-		// Shift origin of context to match starting coordinate of sublayer
-		CGPoint currentSublayerFrameOrigin = currentSublayer.frame.origin;
-		CGRect currentSublayerBounds = currentSublayer.bounds;
-		CGContextTranslateCTM(context,
-							  currentSublayerFrameOrigin.x - currentSublayerBounds.origin.x, 
-							  currentSublayerFrameOrigin.y - currentSublayerBounds.origin.y);
-		[self applyTransform:self.sublayerTransform toContext:context];
-		if ( [currentSublayer isKindOfClass:[CPTLayer class]] ) {
-			[(CPTLayer *)currentSublayer recursivelyRenderInContext:context];
-		} else {
-			if ( self.masksToBounds ) {
-				CGContextClipToRect(context, currentSublayer.bounds);
-			}
-			[currentSublayer drawInContext:context];
-		}
-		CGContextRestoreGState(context);
-	}
+    for ( CALayer *currentSublayer in sublayersCopy ) {
+        CGContextSaveGState(context);
+
+        // Shift origin of context to match starting coordinate of sublayer
+        CGPoint currentSublayerFrameOrigin = currentSublayer.frame.origin;
+        CGRect currentSublayerBounds       = currentSublayer.bounds;
+        CGContextTranslateCTM(context,
+                              currentSublayerFrameOrigin.x - currentSublayerBounds.origin.x,
+                              currentSublayerFrameOrigin.y - currentSublayerBounds.origin.y);
+        [self applyTransform:self.sublayerTransform toContext:context];
+        if ( [currentSublayer isKindOfClass:[CPTLayer class]] ) {
+            [(CPTLayer *) currentSublayer recursivelyRenderInContext:context];
+        }
+        else {
+            if ( self.masksToBounds ) {
+                CGContextClipToRect(context, currentSublayer.bounds);
+            }
+            [currentSublayer drawInContext:context];
+        }
+        CGContextRestoreGState(context);
+    }
     [sublayersCopy release];
-    
-	CGContextRestoreGState(context);
+
+    CGContextRestoreGState(context);
 }
+
+///	@cond
 
 -(void)applyTransform:(CATransform3D)transform3D toContext:(CGContextRef)context
 {
-	if ( !CATransform3DIsIdentity(transform3D) ) {
-		if ( CATransform3DIsAffine(transform3D) ) {
-			CGRect selfBounds = self.bounds;
-			CGPoint anchorPoint = self.anchorPoint;
-			CGPoint anchorOffset = CGPointMake(anchorOffset.x = selfBounds.origin.x + anchorPoint.x * selfBounds.size.width,
-											   anchorOffset.y = selfBounds.origin.y + anchorPoint.y * selfBounds.size.height);
-			
-			CGAffineTransform affineTransform = CGAffineTransformMakeTranslation(-anchorOffset.x, -anchorOffset.y);
-			affineTransform = CGAffineTransformConcat(affineTransform, CATransform3DGetAffineTransform(transform3D));
-			affineTransform = CGAffineTransformTranslate(affineTransform, anchorOffset.x, anchorOffset.y);
-			
-			CGRect transformedBounds = CGRectApplyAffineTransform(selfBounds, affineTransform);
-			
-			CGContextTranslateCTM(context, -transformedBounds.origin.x, -transformedBounds.origin.y);
-			CGContextConcatCTM(context, affineTransform);
-		}
-	}
+    if ( !CATransform3DIsIdentity(transform3D) ) {
+        if ( CATransform3DIsAffine(transform3D) ) {
+            CGRect selfBounds    = self.bounds;
+            CGPoint anchorPoint  = self.anchorPoint;
+            CGPoint anchorOffset = CGPointMake(anchorOffset.x = selfBounds.origin.x + anchorPoint.x * selfBounds.size.width,
+                                               anchorOffset.y = selfBounds.origin.y + anchorPoint.y * selfBounds.size.height);
+
+            CGAffineTransform affineTransform = CGAffineTransformMakeTranslation(-anchorOffset.x, -anchorOffset.y);
+            affineTransform = CGAffineTransformConcat( affineTransform, CATransform3DGetAffineTransform(transform3D) );
+            affineTransform = CGAffineTransformTranslate(affineTransform, anchorOffset.x, anchorOffset.y);
+
+            CGRect transformedBounds = CGRectApplyAffineTransform(selfBounds, affineTransform);
+
+            CGContextTranslateCTM(context, -transformedBounds.origin.x, -transformedBounds.origin.y);
+            CGContextConcatCTM(context, affineTransform);
+        }
+    }
 }
+
+///	@endcond
 
 /**	@brief Updates the layer layout if needed and then draws layer content and the content of all sublayers into the provided graphics context.
  *	@param context The graphics context to draw into.
  */
 -(void)layoutAndRenderInContext:(CGContextRef)context
 {
-	[self layoutIfNeeded];
-	[self recursivelyRenderInContext:context];
+    [self layoutIfNeeded];
+    [self recursivelyRenderInContext:context];
 }
 
 /**	@brief Draws layer content and the content of all sublayers into a PDF document.
@@ -362,121 +390,91 @@
  **/
 -(NSData *)dataForPDFRepresentationOfLayer
 {
-	NSMutableData *pdfData = [[NSMutableData alloc] init];
-	CGDataConsumerRef dataConsumer = CGDataConsumerCreateWithCFData((CFMutableDataRef)pdfData);
-	
-	const CGRect mediaBox = CGRectMake(0.0, 0.0, self.bounds.size.width, self.bounds.size.height);
-	CGContextRef pdfContext = CGPDFContextCreate(dataConsumer, &mediaBox, NULL);
-    CGContextSetInterpolationQuality(pdfContext, kCGInterpolationHigh);
-    CGContextSetRenderingIntent(pdfContext, kCGRenderingIntentDefault);
-	
-	CPTPushCGContext(pdfContext);
-    
-    CGContextSaveGState(pdfContext);
-	
-    CGContextTranslateCTM(pdfContext, 0.0, mediaBox.size.height);
-    CGContextScaleCTM(pdfContext, 1.0, -1.0);
-    
-	CGContextBeginPage(pdfContext, &mediaBox);
-	[self layoutAndRenderInContext:pdfContext];
-	CGContextEndPage(pdfContext);
-	CGPDFContextClose(pdfContext);
-	
-    CGContextRestoreGState(pdfContext);
-    
-	CPTPopCGContext();
-	
-	CGContextRelease(pdfContext);
-	CGDataConsumerRelease(dataConsumer);
-	
-	return [pdfData autorelease];
+    NSMutableData *pdfData         = [[NSMutableData alloc] init];
+    CGDataConsumerRef dataConsumer = CGDataConsumerCreateWithCFData( (CFMutableDataRef)pdfData );
+
+    const CGRect mediaBox   = CGRectMake(0.0, 0.0, self.bounds.size.width, self.bounds.size.height);
+    CGContextRef pdfContext = CGPDFContextCreate(dataConsumer, &mediaBox, NULL);
+
+    CPTPushCGContext(pdfContext);
+
+    CGContextBeginPage(pdfContext, &mediaBox);
+    [self layoutAndRenderInContext:pdfContext];
+    CGContextEndPage(pdfContext);
+    CGPDFContextClose(pdfContext);
+
+    CPTPopCGContext();
+
+    CGContextRelease(pdfContext);
+    CGDataConsumerRelease(dataConsumer);
+
+    return [pdfData autorelease];
 }
 
 #pragma mark -
 #pragma mark Responder Chain and User interaction
 
-/** @brief Informs the receiver that a pinch gesture occurred
- *  @param pinchGestureRecognizer The pinch gesture itself.
- *  @param interactionPoint The coordinates of the gesture's centroid.
- *  @param interactionScale The scale of the pinching gesture.
- *  @return                 YES should be returned if the gesture was handled (exclusively) by the receiver, NO otherwise.
- **/
--(BOOL)recognizer:(id)pinchGestureRecognizer atPoint:(CGPoint)interactionPoint withScale:(CGFloat)interactionScale
+/// @name User Interaction
+/// @{
+
+-(BOOL)pointingDeviceDownEvent:(CPTNativeEvent *)event atPoint:(CGPoint)interactionPoint
 {
-  return NO;
+    return NO;
 }
 
-/**	@brief Abstraction of Mac and iPhone event handling. Handles mouse or finger down event.
- *  @param event Native event object of device.
- *	@param interactionPoint The coordinates of the event in the host view.
- *  @return Whether the event was handled or not.
- **/
--(BOOL)pointingDeviceDownEvent:(id)event atPoint:(CGPoint)interactionPoint
+-(BOOL)pointingDeviceUpEvent:(CPTNativeEvent *)event atPoint:(CGPoint)interactionPoint
 {
-	return NO;
+    return NO;
 }
 
-/**	@brief Abstraction of Mac and iPhone event handling. Handles mouse or finger up event.
- *  @param event Native event object of device.
- *	@param interactionPoint The coordinates of the event in the host view.
- *  @return Whether the event was handled or not.
- **/
--(BOOL)pointingDeviceUpEvent:(id)event atPoint:(CGPoint)interactionPoint
+-(BOOL)pointingDeviceDraggedEvent:(CPTNativeEvent *)event atPoint:(CGPoint)interactionPoint
 {
-	return NO;
+    return NO;
 }
 
-/**	@brief Abstraction of Mac and iPhone event handling. Handles mouse or finger dragged event.
- *  @param event Native event object of device.
- *	@param interactionPoint The coordinates of the event in the host view.
- *  @return Whether the event was handled or not.
- **/
--(BOOL)pointingDeviceDraggedEvent:(id)event atPoint:(CGPoint)interactionPoint
+-(BOOL)pointingDeviceCancelledEvent:(CPTNativeEvent *)event
 {
-	return NO;
+    return NO;
 }
 
-/**	@brief Abstraction of Mac and iPhone event handling. Mouse or finger event cancelled.
- *  @param event Native event object of device.
- *  @return Whether the event was handled or not.
- **/
--(BOOL)pointingDeviceCancelledEvent:(id)event
-{
-	return NO;
-}
+///	@}
 
 #pragma mark -
 #pragma mark Layout
 
-/**	@brief Align the receiver's position with pixel boundaries.
+/**
+ *	@brief Align the receiver's position with pixel boundaries.
  **/
 -(void)pixelAlign
 {
-	CGFloat scale = self.contentsScale;
+    CGFloat scale           = self.contentsScale;
     CGPoint currentPosition = self.position;
-	
-	CGPoint newPosition;
-	if ( scale == 1.0 ) {
-		newPosition.x = round(currentPosition.x);
-		newPosition.y = round(currentPosition.y);
-	}
-	else {
-		newPosition.x = round(currentPosition.x * scale) / scale;
-		newPosition.y = round(currentPosition.y * scale) / scale;
-	}
-	
-	if ( CATransform3DIsIdentity(self.transform) ) {
-		CGSize currentSize = self.bounds.size;
-		CGPoint anchor = self.anchorPoint;  
-		
-		newPosition.x += (currentSize.width * anchor.x) - round(currentSize.width * anchor.x);
-		newPosition.y += (currentSize.height * anchor.y) - round(currentSize.height * anchor.y);
+
+    CGPoint newPosition;
+
+    if ( scale == 1.0 ) {
+        newPosition.x = round(currentPosition.x);
+        newPosition.y = round(currentPosition.y);
     }
-	
-	self.position = newPosition;
+    else {
+        newPosition.x = round(currentPosition.x * scale) / scale;
+        newPosition.y = round(currentPosition.y * scale) / scale;
+    }
+
+    if ( CATransform3DIsIdentity(self.transform) ) {
+        CGSize currentSize = self.bounds.size;
+        CGPoint anchor     = self.anchorPoint;
+
+        newPosition.x += (currentSize.width * anchor.x) - round(currentSize.width * anchor.x);
+        newPosition.y += (currentSize.height * anchor.y) - round(currentSize.height * anchor.y);
+    }
+
+    self.position = newPosition;
 }
 
--(void)setPaddingLeft:(CGFloat)newPadding 
+///	@cond
+
+-(void)setPaddingLeft:(CGFloat)newPadding
 {
     if ( newPadding != paddingLeft ) {
         paddingLeft = newPadding;
@@ -484,7 +482,7 @@
     }
 }
 
--(void)setPaddingRight:(CGFloat)newPadding 
+-(void)setPaddingRight:(CGFloat)newPadding
 {
     if ( newPadding != paddingRight ) {
         paddingRight = newPadding;
@@ -492,7 +490,7 @@
     }
 }
 
--(void)setPaddingTop:(CGFloat)newPadding 
+-(void)setPaddingTop:(CGFloat)newPadding
 {
     if ( newPadding != paddingTop ) {
         paddingTop = newPadding;
@@ -500,7 +498,7 @@
     }
 }
 
--(void)setPaddingBottom:(CGFloat)newPadding 
+-(void)setPaddingBottom:(CGFloat)newPadding
 {
     if ( newPadding != paddingBottom ) {
         paddingBottom = newPadding;
@@ -508,38 +506,42 @@
     }
 }
 
+///	@endcond
+
 -(void)layoutSublayers
 {
-	// This is where we do our custom replacement for the Mac-only layout manager and autoresizing mask
-	// Subclasses should override to lay out their own sublayers
-	// Sublayers fill the super layer's bounds minus any padding by default
-	CGFloat leftPadding, topPadding, rightPadding, bottomPadding;
-	[self sublayerMarginLeft:&leftPadding top:&topPadding right:&rightPadding bottom:&bottomPadding];
-	
-	CGRect selfBounds = self.bounds;
-	CGSize subLayerSize = selfBounds.size;
-	subLayerSize.width -= leftPadding + rightPadding;
-	subLayerSize.width = MAX(subLayerSize.width, (CGFloat)0.0);
-	subLayerSize.width = round(subLayerSize.width);
-	subLayerSize.height -= topPadding + bottomPadding;
-	subLayerSize.height = MAX(subLayerSize.height, (CGFloat)0.0);
-	subLayerSize.height = round(subLayerSize.height);
-	
-	CGRect subLayerFrame;
-	subLayerFrame.origin = CGPointMake(round(leftPadding), round(bottomPadding));
-	subLayerFrame.size = subLayerSize;
-	
+    // This is where we do our custom replacement for the Mac-only layout manager and autoresizing mask
+    // Subclasses should override to lay out their own sublayers
+    // Sublayers fill the super layer's bounds minus any padding by default
+    CGFloat leftPadding, topPadding, rightPadding, bottomPadding;
+
+    [self sublayerMarginLeft:&leftPadding top:&topPadding right:&rightPadding bottom:&bottomPadding];
+
+    CGRect selfBounds   = self.bounds;
+    CGSize subLayerSize = selfBounds.size;
+    subLayerSize.width  -= leftPadding + rightPadding;
+    subLayerSize.width   = MAX(subLayerSize.width, (CGFloat)0.0);
+    subLayerSize.width   = round(subLayerSize.width);
+    subLayerSize.height -= topPadding + bottomPadding;
+    subLayerSize.height  = MAX(subLayerSize.height, (CGFloat)0.0);
+    subLayerSize.height  = round(subLayerSize.height);
+
+    CGRect subLayerFrame;
+    subLayerFrame.origin = CGPointMake( round(leftPadding), round(bottomPadding) );
+    subLayerFrame.size   = subLayerSize;
+
     NSSet *excludedSublayers = [self sublayersExcludedFromAutomaticLayout];
-	for (CALayer *subLayer in self.sublayers) {
-		if (![excludedSublayers containsObject:subLayer] && [subLayer isKindOfClass:[CPTLayer class]]) {
+    Class layerClass         = [CPTLayer class];
+    for ( CALayer *subLayer in self.sublayers ) {
+        if ( ![excludedSublayers containsObject:subLayer] && [subLayer isKindOfClass:layerClass] ) {
             subLayer.frame = subLayerFrame;
-			[subLayer setNeedsLayout];
-			[subLayer setNeedsDisplay];
-		}
-	}
+            [subLayer setNeedsLayout];
+            [subLayer setNeedsDisplay];
+        }
+    }
 }
 
--(NSSet *)sublayersExcludedFromAutomaticLayout 
+-(NSSet *)sublayersExcludedFromAutomaticLayout
 {
     return [NSSet set];
 }
@@ -552,108 +554,114 @@
  **/
 -(void)sublayerMarginLeft:(CGFloat *)left top:(CGFloat *)top right:(CGFloat *)right bottom:(CGFloat *)bottom
 {
-	*left = self.paddingLeft;
-	*top = self.paddingTop;
-	*right = self.paddingRight;
-	*bottom = self.paddingBottom;
+    *left   = self.paddingLeft;
+    *top    = self.paddingTop;
+    *right  = self.paddingRight;
+    *bottom = self.paddingBottom;
 }
 
 #pragma mark -
 #pragma mark Sublayers
 
+///	@cond
+
 -(void)setSublayers:(NSArray *)sublayers
 {
-	[super setSublayers:sublayers];
-	
-	Class layerClass = [CPTLayer class];
-	CGFloat scale = self.contentsScale;
-	for ( CALayer *layer in sublayers ) {
-		if ( [layer isKindOfClass:layerClass] ) {
-			((CPTLayer *)layer).contentsScale = scale;
-		}
-	}
+    [super setSublayers:sublayers];
+
+    Class layerClass = [CPTLayer class];
+    CGFloat scale    = self.contentsScale;
+    for ( CALayer *layer in sublayers ) {
+        if ( [layer isKindOfClass:layerClass] ) {
+            ( (CPTLayer *)layer ).contentsScale = scale;
+        }
+    }
 }
 
 -(void)addSublayer:(CALayer *)layer
 {
-	[super addSublayer:layer];
-	
-	if ( [layer isKindOfClass:[CPTLayer class]] ) {
-		((CPTLayer *)layer).contentsScale = self.contentsScale;
-	}
+    [super addSublayer:layer];
+
+    if ( [layer isKindOfClass:[CPTLayer class]] ) {
+        ( (CPTLayer *)layer ).contentsScale = self.contentsScale;
+    }
 }
 
 -(void)insertSublayer:(CALayer *)layer atIndex:(unsigned)idx
 {
-	[super insertSublayer:layer atIndex:idx];
-	
-	if ( [layer isKindOfClass:[CPTLayer class]] ) {
-		((CPTLayer *)layer).contentsScale = self.contentsScale;
-	}
+    [super insertSublayer:layer atIndex:idx];
+
+    if ( [layer isKindOfClass:[CPTLayer class]] ) {
+        ( (CPTLayer *)layer ).contentsScale = self.contentsScale;
+    }
 }
 
 -(void)insertSublayer:(CALayer *)layer below:(CALayer *)sibling
 {
-	[super insertSublayer:layer below:sibling];
-	
-	if ( [layer isKindOfClass:[CPTLayer class]] ) {
-		((CPTLayer *)layer).contentsScale = self.contentsScale;
-	}
+    [super insertSublayer:layer below:sibling];
+
+    if ( [layer isKindOfClass:[CPTLayer class]] ) {
+        ( (CPTLayer *)layer ).contentsScale = self.contentsScale;
+    }
 }
 
 -(void)insertSublayer:(CALayer *)layer above:(CALayer *)sibling
 {
-	[super insertSublayer:layer above:sibling];
-	
-	if ( [layer isKindOfClass:[CPTLayer class]] ) {
-		((CPTLayer *)layer).contentsScale = self.contentsScale;
-	}
+    [super insertSublayer:layer above:sibling];
+
+    if ( [layer isKindOfClass:[CPTLayer class]] ) {
+        ( (CPTLayer *)layer ).contentsScale = self.contentsScale;
+    }
 }
 
 -(void)replaceSublayer:(CALayer *)layer with:(CALayer *)layer2
 {
-	[super replaceSublayer:layer with:layer2];
-	
-	if ( [layer2 isKindOfClass:[CPTLayer class]] ) {
-		((CPTLayer *)layer2).contentsScale = self.contentsScale;
-	}
+    [super replaceSublayer:layer with:layer2];
+
+    if ( [layer2 isKindOfClass:[CPTLayer class]] ) {
+        ( (CPTLayer *)layer2 ).contentsScale = self.contentsScale;
+    }
 }
+
+///	@endcond
 
 #pragma mark -
 #pragma mark Masking
 
 // default path is the rounded rect layer bounds
--(CGPathRef)maskingPath 
+-(CGPathRef)maskingPath
 {
-	if ( self.masksToBounds ) {
-		CGPathRef path = self.outerBorderPath;
-		if ( path ) return path;
-		
-		CGRect selfBounds = self.bounds;
-		
-		if ( self.cornerRadius > 0.0 ) {
-			CGFloat radius = MIN(MIN(self.cornerRadius, selfBounds.size.width / (CGFloat)2.0), selfBounds.size.height / (CGFloat)2.0);
-			path = CreateRoundedRectPath(selfBounds, radius);
-			self.outerBorderPath = path;
-			CGPathRelease(path);
-		}
-		else {
-			CGMutablePathRef mutablePath = CGPathCreateMutable();
-			CGPathAddRect(mutablePath, NULL, selfBounds);
-			self.outerBorderPath = mutablePath;
-			CGPathRelease(mutablePath);
-		}
-		
-		return self.outerBorderPath;
-	}
-	else {
-		return NULL;
-	}
+    if ( self.masksToBounds ) {
+        CGPathRef path = self.outerBorderPath;
+        if ( path ) {
+            return path;
+        }
+
+        CGRect selfBounds = self.bounds;
+
+        if ( self.cornerRadius > 0.0 ) {
+            CGFloat radius = MIN(MIN(self.cornerRadius, selfBounds.size.width / (CGFloat)2.0), selfBounds.size.height / (CGFloat)2.0);
+            path                 = CreateRoundedRectPath(selfBounds, radius);
+            self.outerBorderPath = path;
+            CGPathRelease(path);
+        }
+        else {
+            CGMutablePathRef mutablePath = CGPathCreateMutable();
+            CGPathAddRect(mutablePath, NULL, selfBounds);
+            self.outerBorderPath = mutablePath;
+            CGPathRelease(mutablePath);
+        }
+
+        return self.outerBorderPath;
+    }
+    else {
+        return NULL;
+    }
 }
 
--(CGPathRef)sublayerMaskingPath 
+-(CGPathRef)sublayerMaskingPath
 {
-	return self.innerBorderPath;
+    return self.innerBorderPath;
 }
 
 /**	@brief Recursively sets the clipping path of the given graphics context to the sublayer masking paths of its superlayers.
@@ -667,40 +675,41 @@
  **/
 -(void)applySublayerMaskToContext:(CGContextRef)context forSublayer:(CPTLayer *)sublayer withOffset:(CGPoint)offset
 {
-	CGPoint sublayerBoundsOrigin = sublayer.bounds.origin;
-	CGPoint layerOffset = offset;
-	if ( !self.renderingRecursively ) {
-		CGPoint convertedOffset = [self convertPoint:sublayerBoundsOrigin fromLayer:sublayer];
-		layerOffset.x += convertedOffset.x;
-		layerOffset.y += convertedOffset.y;
-	}
-	
-	CGAffineTransform sublayerTransform = CATransform3DGetAffineTransform(sublayer.transform);
-	CGContextConcatCTM(context, CGAffineTransformInvert(sublayerTransform));
-	
-	CALayer *superlayer = self.superlayer;
-	if ( [superlayer isKindOfClass:[CPTLayer class]] ) {
-		[(CPTLayer *)superlayer applySublayerMaskToContext:context forSublayer:self withOffset:layerOffset];
-	}
-	
-	CGPathRef maskPath = self.sublayerMaskingPath;
-	if ( maskPath ) {
-		//		CGAffineTransform transform = CATransform3DGetAffineTransform(self.transform);
-		//		CGAffineTransform sublayerTransform = CATransform3DGetAffineTransform(self.sublayerTransform);
-		
-		CGContextTranslateCTM(context, -layerOffset.x, -layerOffset.y);
-		//		CGContextConcatCTM(context, CGAffineTransformInvert(transform));
-		//		CGContextConcatCTM(context, CGAffineTransformInvert(sublayerTransform));
-		
-		CGContextAddPath(context, maskPath);
-		CGContextClip(context);
+    CGPoint sublayerBoundsOrigin = sublayer.bounds.origin;
+    CGPoint layerOffset          = offset;
 
-		//		CGContextConcatCTM(context, sublayerTransform);
-		//		CGContextConcatCTM(context, transform);
-		CGContextTranslateCTM(context, layerOffset.x, layerOffset.y);
-	}
-	
-	CGContextConcatCTM(context, sublayerTransform);
+    if ( !self.renderingRecursively ) {
+        CGPoint convertedOffset = [self convertPoint:sublayerBoundsOrigin fromLayer:sublayer];
+        layerOffset.x += convertedOffset.x;
+        layerOffset.y += convertedOffset.y;
+    }
+
+    CGAffineTransform sublayerTransform = CATransform3DGetAffineTransform(sublayer.transform);
+    CGContextConcatCTM( context, CGAffineTransformInvert(sublayerTransform) );
+
+    CALayer *superlayer = self.superlayer;
+    if ( [superlayer isKindOfClass:[CPTLayer class]] ) {
+        [(CPTLayer *) superlayer applySublayerMaskToContext:context forSublayer:self withOffset:layerOffset];
+    }
+
+    CGPathRef maskPath = self.sublayerMaskingPath;
+    if ( maskPath ) {
+        //		CGAffineTransform transform = CATransform3DGetAffineTransform(self.transform);
+        //		CGAffineTransform sublayerTransform = CATransform3DGetAffineTransform(self.sublayerTransform);
+
+        CGContextTranslateCTM(context, -layerOffset.x, -layerOffset.y);
+        //		CGContextConcatCTM(context, CGAffineTransformInvert(transform));
+        //		CGContextConcatCTM(context, CGAffineTransformInvert(sublayerTransform));
+
+        CGContextAddPath(context, maskPath);
+        CGContextClip(context);
+
+        //		CGContextConcatCTM(context, sublayerTransform);
+        //		CGContextConcatCTM(context, transform);
+        CGContextTranslateCTM(context, layerOffset.x, layerOffset.y);
+    }
+
+    CGContextConcatCTM(context, sublayerTransform);
 }
 
 /**	@brief Sets the clipping path of the given graphics context to mask the content.
@@ -712,167 +721,173 @@
  **/
 -(void)applyMaskToContext:(CGContextRef)context
 {
-	if ( [self.superlayer isKindOfClass:[CPTLayer class]] ) {
-		[(CPTLayer *)self.superlayer applySublayerMaskToContext:context forSublayer:self withOffset:CGPointZero];
-	}
-	
-	CGPathRef maskPath = self.maskingPath;
-	if ( maskPath ) {
-		CGContextAddPath(context, maskPath);
-		CGContextClip(context);
-	}
+    if ( [self.superlayer isKindOfClass:[CPTLayer class]] ) {
+        [(CPTLayer *)self.superlayer applySublayerMaskToContext:context forSublayer:self withOffset:CGPointZero];
+    }
+
+    CGPathRef maskPath = self.maskingPath;
+    if ( maskPath ) {
+        CGContextAddPath(context, maskPath);
+        CGContextClip(context);
+    }
 }
 
 -(void)setNeedsLayout
 {
     [super setNeedsLayout];
-    if ( self.graph ) [[NSNotificationCenter defaultCenter] postNotificationName:CPTGraphNeedsRedrawNotification object:self.graph];
+    if ( self.graph ) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:CPTGraphNeedsRedrawNotification object:self.graph];
+    }
 }
 
 -(void)setNeedsDisplay
 {
     [super setNeedsDisplay];
-    if ( self.graph ) [[NSNotificationCenter defaultCenter] postNotificationName:CPTGraphNeedsRedrawNotification object:self.graph];
-}
-
-#pragma mark -
-#pragma mark Line style delegate
-
--(void)lineStyleDidChange:(CPTLineStyle *)lineStyle
-{
-	[self setNeedsDisplay];
+    if ( self.graph ) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:CPTGraphNeedsRedrawNotification object:self.graph];
+    }
 }
 
 #pragma mark -
 #pragma mark Accessors
 
-- (void)setPosition:(CGPoint)newPosition;
+///	@cond
+
+-(void)setPosition:(CGPoint)newPosition;
 {
-	[super setPosition:newPosition];
-	if ( COREPLOT_LAYER_POSITION_CHANGE_ENABLED() ) {
-		CGRect currentFrame = self.frame;
-		if (!CGRectEqualToRect(currentFrame, CGRectIntegral(self.frame)))
-			COREPLOT_LAYER_POSITION_CHANGE((char *)class_getName([self class]),
-										   (int)ceil(currentFrame.origin.x * 1000.0), 
-										   (int)ceil(currentFrame.origin.y * 1000.0),
-										   (int)ceil(currentFrame.size.width * 1000.0),
-										   (int)ceil(currentFrame.size.height * 1000.0));
-	}
+    [super setPosition:newPosition];
+    if ( COREPLOT_LAYER_POSITION_CHANGE_ENABLED() ) {
+        CGRect currentFrame = self.frame;
+        if ( !CGRectEqualToRect( currentFrame, CGRectIntegral(self.frame) ) ) {
+            COREPLOT_LAYER_POSITION_CHANGE( (char *)class_getName([self class]),
+                                            (int)ceil(currentFrame.origin.x * 1000.0),
+                                            (int)ceil(currentFrame.origin.y * 1000.0),
+                                            (int)ceil(currentFrame.size.width * 1000.0),
+                                            (int)ceil(currentFrame.size.height * 1000.0) );
+        }
+    }
 }
 
 -(void)setHidden:(BOOL)newHidden
 {
-	if ( newHidden != self.hidden ) {
-		[super setHidden:newHidden];
-		if ( !newHidden ) {
-			[self setNeedsDisplay];
-		}
-	}
+    if ( newHidden != self.hidden ) {
+        [super setHidden:newHidden];
+        if ( !newHidden ) {
+            [self setNeedsDisplay];
+        }
+    }
 }
 
 -(void)setContentsScale:(CGFloat)newContentsScale
 {
-	NSParameterAssert(newContentsScale > 0.0);
-	
-	if ( self.contentsScale != newContentsScale ) {
-		if ( [CALayer instancesRespondToSelector:@selector(setContentsScale:)] ) {
-			super.contentsScale = newContentsScale;
-			[self setNeedsDisplay];
-			
-			Class layerClass = [CPTLayer class];
-			for ( CALayer *subLayer in self.sublayers ) {
-				if ( [subLayer isKindOfClass:layerClass] ) {
-					((CPTLayer *)subLayer).contentsScale = newContentsScale;
-				}
-			}
-		}
-	}
+    NSParameterAssert(newContentsScale > 0.0);
+
+    if ( self.contentsScale != newContentsScale ) {
+        if ( [CALayer instancesRespondToSelector:@selector(setContentsScale:)] ) {
+            super.contentsScale = newContentsScale;
+            [self setNeedsDisplay];
+
+            Class layerClass = [CPTLayer class];
+            for ( CALayer *subLayer in self.sublayers ) {
+                if ( [subLayer isKindOfClass:layerClass] ) {
+                    ( (CPTLayer *)subLayer ).contentsScale = newContentsScale;
+                }
+            }
+        }
+    }
 }
 
 -(CGFloat)contentsScale
 {
-	CGFloat scale = 1.0;
-	
-	if ( [CALayer instancesRespondToSelector:@selector(contentsScale)] ) {
-		scale = super.contentsScale;
-	}
+    CGFloat scale = 1.0;
 
-	return scale;
+    if ( [CALayer instancesRespondToSelector:@selector(contentsScale)] ) {
+        scale = super.contentsScale;
+    }
+
+    return scale;
 }
 
 -(void)setShadow:(CPTShadow *)newShadow
 {
-	if ( newShadow != shadow ) {
-		[shadow release];
-		shadow = [newShadow copy];
-		[self setNeedsDisplay];
-	}
+    if ( newShadow != shadow ) {
+        [shadow release];
+        shadow = [newShadow copy];
+        [self setNeedsDisplay];
+    }
 }
 
 -(void)setOuterBorderPath:(CGPathRef)newPath
 {
-	if ( newPath != outerBorderPath ) {
-		CGPathRelease(outerBorderPath);
-		outerBorderPath = CGPathRetain(newPath);
-	}
+    if ( newPath != outerBorderPath ) {
+        CGPathRelease(outerBorderPath);
+        outerBorderPath = CGPathRetain(newPath);
+    }
 }
 
 -(void)setInnerBorderPath:(CGPathRef)newPath
 {
-	if ( newPath != innerBorderPath ) {
-		CGPathRelease(innerBorderPath);
-		innerBorderPath = CGPathRetain(newPath);
-	}
+    if ( newPath != innerBorderPath ) {
+        CGPathRelease(innerBorderPath);
+        innerBorderPath = CGPathRetain(newPath);
+    }
 }
 
 -(void)setBounds:(CGRect)newBounds
 {
-	[super setBounds:newBounds];
-	self.outerBorderPath = NULL;
-	self.innerBorderPath = NULL;
+    [super setBounds:newBounds];
+    self.outerBorderPath = NULL;
+    self.innerBorderPath = NULL;
 }
 
 -(void)setCornerRadius:(CGFloat)newRadius
 {
-	if ( newRadius != self.cornerRadius ) {
-		super.cornerRadius = newRadius;
-		[self setNeedsDisplay];
-		
-		self.outerBorderPath = NULL;
-		self.innerBorderPath = NULL;
-	}
+    if ( newRadius != self.cornerRadius ) {
+        super.cornerRadius = newRadius;
+        [self setNeedsDisplay];
+
+        self.outerBorderPath = NULL;
+        self.innerBorderPath = NULL;
+    }
 }
+
+///	@endcond
 
 #pragma mark -
 #pragma mark Description
 
 -(NSString *)description
 {
-	return [NSString stringWithFormat:@"<%@ bounds: %@>", [super description], CPTStringFromRect(self.bounds)];
-};
+    return [NSString stringWithFormat:@"<%@ bounds: %@>", [super description], CPTStringFromRect(self.bounds)];
+}
 
-/**	@brief Logs this layer and all of its sublayers.
+/**
+ *	@brief Logs this layer and all of its sublayers.
  **/
 -(void)logLayers
 {
-	NSLog(@"Layer tree:\n%@", [self subLayersAtIndex:0]);
+    NSLog(@"Layer tree:\n%@", [self subLayersAtIndex:0]);
 }
+
+///	@cond
 
 -(NSString *)subLayersAtIndex:(NSUInteger)index
 {
-	NSMutableString *result = [NSMutableString string];
-	
-	for ( NSUInteger i = 0; i < index; i++ ) {
-		[result appendString:@"    "];
-	}
-	[result appendString:[self description]];
-	
-	for ( CPTLayer *sublayer in self.sublayers ) {
-		[result appendString:@"\n"];
-		[result appendString:[sublayer subLayersAtIndex:index + 1]];
-	}
-	
-	return result;
+    NSMutableString *result = [NSMutableString string];
+
+    for ( NSUInteger i = 0; i < index; i++ ) {
+        [result appendString:@"    "];
+    }
+    [result appendString:[self description]];
+
+    for ( CPTLayer *sublayer in self.sublayers ) {
+        [result appendString:@"\n"];
+        [result appendString:[sublayer subLayersAtIndex:index + 1]];
+    }
+
+    return result;
 }
+
+///	@endcond
 
 @end

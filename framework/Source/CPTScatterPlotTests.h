@@ -1,9 +1,8 @@
 #import "CPTTestCase.h"
 #import <CorePlot/CorePlot.h>
 
-
 @interface CPTScatterPlotTests : CPTTestCase {
-	CPTScatterPlot *plot;
+    CPTScatterPlot *plot;
     CPTXYPlotSpace *plotSpace;
 }
 

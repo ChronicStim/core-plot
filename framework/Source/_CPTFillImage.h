@@ -1,12 +1,11 @@
-
-#import <Foundation/Foundation.h>
 #import "CPTFill.h"
+#import <Foundation/Foundation.h>
 
 @class CPTImage;
 
-@interface _CPTFillImage : CPTFill <NSCopying, NSCoding> {
-	@private
-	CPTImage *fillImage;
+@interface _CPTFillImage : CPTFill<NSCopying, NSCoding> {
+    @private
+    CPTImage *fillImage;
 }
 
 /// @name Initialization

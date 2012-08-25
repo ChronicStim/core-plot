@@ -1,5 +1,5 @@
-#import "CPTColorTests.h"
 #import "CPTColor.h"
+#import "CPTColorTests.h"
 
 @implementation CPTColorTests
 
@@ -8,11 +8,11 @@
 
 -(void)testKeyedArchivingRoundTrip
 {
-	CPTColor *color = [CPTColor redColor];
-	
-	CPTColor *newColor = [NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:color]];
+    CPTColor *color = [CPTColor redColor];
 
-	STAssertEqualObjects(color, newColor, @"Colors not equal");
+    CPTColor *newColor = [NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:color]];
+
+    STAssertEqualObjects(color, newColor, @"Colors not equal");
 }
 
 @end

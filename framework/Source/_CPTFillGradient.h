@@ -1,12 +1,11 @@
-
-#import <Foundation/Foundation.h>
 #import "CPTFill.h"
+#import <Foundation/Foundation.h>
 
 @class CPTGradient;
 
-@interface _CPTFillGradient : CPTFill <NSCopying, NSCoding> {
-	@private
-	CPTGradient *fillGradient;
+@interface _CPTFillGradient : CPTFill<NSCopying, NSCoding> {
+    @private
+    CPTGradient *fillGradient;
 }
 
 /// @name Initialization

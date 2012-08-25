@@ -8,8 +8,9 @@
 
 #import "PlotItem.h"
 
-@interface SimplePieChart : PlotItem <CPTPlotSpaceDelegate,
-									  CPTPlotDataSource>
+@interface SimplePieChart : PlotItem<CPTPlotSpaceDelegate,
+                                     CPTPieChartDelegate,
+                                     CPTPlotDataSource>
 {
     NSArray *plotData;
 }

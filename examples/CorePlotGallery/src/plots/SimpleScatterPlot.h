@@ -8,18 +8,13 @@
 
 #import "PlotItem.h"
 
-@interface SimpleScatterPlot : PlotItem < CPTPlotSpaceDelegate,
-                                          CPTPlotDataSource,
-                                          CPTScatterPlotDelegate>
+@interface SimpleScatterPlot : PlotItem<CPTPlotSpaceDelegate,
+                                        CPTPlotDataSource,
+                                        CPTScatterPlotDelegate>
 {
-    CPTPlotSpaceAnnotation   *symbolTextAnnotation;
+    CPTPlotSpaceAnnotation *symbolTextAnnotation;
 
-    CGFloat             xShift;
-    CGFloat             yShift;
-
-    CGFloat             labelRotation;
-
-    NSArray*            plotData;
+    NSArray *plotData;
 }
 
 @end
