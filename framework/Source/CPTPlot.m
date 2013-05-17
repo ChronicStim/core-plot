@@ -812,7 +812,9 @@ NSString *const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data labels.
             [self.cachedData setObject:mutableNumbers forKey:cacheKey];
         }
         else {
-            [self.cachedData removeObjectForKey:cacheKey];
+            if (nil != cacheKey) {
+                [self.cachedData removeObjectForKey:cacheKey];
+            }
         }
 
         self.cachedDataCount = sampleCount;
@@ -832,7 +834,9 @@ NSString *const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data labels.
         }
     }
     else {
-        [self.cachedData removeObjectForKey:cacheKey];
+        if (nil != cacheKey) {
+            [self.cachedData removeObjectForKey:cacheKey];
+        }
         self.cachedDataCount = 0;
     }
     self.needsRelabel = YES;
@@ -1137,13 +1141,17 @@ NSString *const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data labels.
             [self.cachedData setObject:array forKey:key];
         }
         else {
-            [self.cachedData removeObjectForKey:key];
+            if (nil != key) {
+                [self.cachedData removeObjectForKey:key];
+            }
         }
 
         self.cachedDataCount = sampleCount;
     }
     else {
-        [self.cachedData removeObjectForKey:key];
+        if (nil != key) {
+            [self.cachedData removeObjectForKey:key];
+        }
         self.cachedDataCount = 0;
     }
 }
