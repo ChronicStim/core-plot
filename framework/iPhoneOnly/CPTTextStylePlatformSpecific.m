@@ -17,7 +17,18 @@
 -(CGSize)sizeWithTextStyle:(CPTTextStyle *)style
 {
     UIFont *theFont = [UIFont fontWithName:style.fontName size:style.fontSize];
-    CGSize textSize = [self sizeWithFont:theFont constrainedToSize:CGSizeMake(10000.0, 10000.0)];
+    
+    CGSize textSize;
+
+    // Using NSAttributedString methods to avoid thread related crashes seen with NSString's sizeWithFont method
+    BOOL useAttributedTextMethod = YES;
+    if (useAttributedTextMethod) {
+        NSAttributedString *attributedText = [[NSAttributedString alloc] initWithString:self attributes:@{NSFontAttributeName: theFont}];
+        textSize = [attributedText size];
+        textSize.width += 5.0f;
+    } else {
+        textSize = [self sizeWithFont:theFont constrainedToSize:CGSizeMake(10000.0f, 10000.0f)];
+    }
 
     return textSize;
 }
