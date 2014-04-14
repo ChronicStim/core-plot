@@ -9,7 +9,7 @@
 ///	@cond
 @interface CPTGraphHostingView()
 
-@property (nonatomic, readwrite, assign) __weak id pinchGestureRecognizer;
+@property (nonatomic, readwrite, assign) __weak UIPinchGestureRecognizer *pinchGestureRecognizer;
 
 -(void)updateNotifications;
 -(void)graphNeedsRedraw:(NSNotification *)notification;
@@ -209,7 +209,7 @@
     }
 }
 
--(void)handlePinchGesture:(id)aPinchGestureRecognizer
+-(void)handlePinchGesture:(UIPinchGestureRecognizer *)aPinchGestureRecognizer;
 {
     CGPoint interactionPoint = [aPinchGestureRecognizer locationInView:self];
 
