@@ -1091,10 +1091,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
 				OTHER_CPTLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
-				OTHER_LDFLAGS = (
-					"-all_load",
-					"-ObjC",
-				);
+				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "CorePlot-CocoaTouch";
 				PUBLIC_HEADERS_FOLDER_PATH = "include/$(PROJECT_NAME)";
 				SYMROOT = "$(PROJECT_DIR)/../build";
@@ -1114,10 +1111,7 @@
 				GCC_ENABLE_SYMBOL_SEPARATION = YES;
 				INSTALL_PATH = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
 				OTHER_CPTLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
-				OTHER_LDFLAGS = (
-					"-all_load",
-					"-ObjC",
-				);
+				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "CorePlot-CocoaTouch";
 				PUBLIC_HEADERS_FOLDER_PATH = "include/$(PROJECT_NAME)";
 				SYMROOT = "$(PROJECT_DIR)/../build";
