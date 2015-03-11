@@ -11,7 +11,6 @@
 
 @property (nonatomic, readwrite, assign) __weak UIPinchGestureRecognizer *pinchGestureRecognizer;
 
--(void)updateNotifications;
 -(void)graphNeedsRedraw:(NSNotification *)notification;
 
 @end
@@ -94,7 +93,6 @@
 -(void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [hostedGraph release];
     [super dealloc];
 }
 
@@ -187,24 +185,22 @@
 
 ///	@cond
 
--(void)setAllowPinchScaling:(BOOL)yn
+-(void)setAllowPinchScaling:(BOOL)allowScaling
 {
-    if ( allowPinchScaling != yn ) {
-        allowPinchScaling = yn;
+    if ( allowPinchScaling != allowScaling ) {
+        allowPinchScaling = allowScaling;
         if ( allowPinchScaling ) {
             // Register for pinches
-            Class pinchClass = NSClassFromString(@"UIPinchGestureRecognizer");
-            if ( pinchClass ) {
-                pinchGestureRecognizer = [[pinchClass alloc] initWithTarget:self action:@selector(handlePinchGesture:)];
-                [self addGestureRecognizer:pinchGestureRecognizer];
-                [pinchGestureRecognizer release];
-            }
+            UIPinchGestureRecognizer *gestureRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinchGesture:)];
+            [self addGestureRecognizer:gestureRecognizer];
+            self.pinchGestureRecognizer = gestureRecognizer;
         }
         else {
-            if ( pinchGestureRecognizer ) {
-                [self removeGestureRecognizer:pinchGestureRecognizer];
+            UIPinchGestureRecognizer *pinchRecognizer = self.pinchGestureRecognizer;
+            if ( pinchRecognizer ) {
+                [self removeGestureRecognizer:pinchRecognizer];
+                self.pinchGestureRecognizer = nil;
             }
-            pinchGestureRecognizer = nil;
         }
     }
 }
@@ -212,23 +208,31 @@
 -(void)handlePinchGesture:(UIPinchGestureRecognizer *)aPinchGestureRecognizer;
 {
     CGPoint interactionPoint = [aPinchGestureRecognizer locationInView:self];
-
-    if ( !collapsesLayers ) {
-        interactionPoint = [self.layer convertPoint:interactionPoint toLayer:hostedGraph];
-    }
-    else {
+    CPTGraph *theHostedGraph = self.hostedGraph;
+    
+    theHostedGraph.frame = self.bounds;
+    [theHostedGraph layoutIfNeeded];
+    
+    if ( self.collapsesLayers ) {
         interactionPoint.y = self.frame.size.height - interactionPoint.y;
     }
-
-    CGPoint pointInPlotArea = [hostedGraph convertPoint:interactionPoint toLayer:hostedGraph.plotAreaFrame.plotArea];
-
-    for ( CPTPlotSpace *space in hostedGraph.allPlotSpaces ) {
+    else {
+        interactionPoint = [self.layer convertPoint:interactionPoint toLayer:theHostedGraph];
+    }
+    
+    CGPoint pointInPlotArea = [theHostedGraph convertPoint:interactionPoint toLayer:theHostedGraph.plotAreaFrame.plotArea];
+    
+    UIPinchGestureRecognizer *pinchRecognizer = self.pinchGestureRecognizer;
+    
+    CGFloat scale = pinchRecognizer.scale;
+    
+    for ( CPTPlotSpace *space in theHostedGraph.allPlotSpaces ) {
         if ( space.allowsUserInteraction ) {
-            [space scaleBy:[[pinchGestureRecognizer valueForKey:@"scale"] cgFloatValue] aboutPoint:pointInPlotArea];
+            [space scaleBy:scale aboutPoint:pointInPlotArea];
         }
     }
-
-    [pinchGestureRecognizer setScale:1.0f];
+    
+    pinchRecognizer.scale = 1.0;
 }
 
 ///	@endcond
@@ -240,15 +244,15 @@
 
 -(void)drawRect:(CGRect)rect
 {
-    if ( !collapsesLayers ) {
-        return;
+    if ( self.collapsesLayers ) {
+        CGContextRef context = UIGraphicsGetCurrentContext();
+        CGContextTranslateCTM(context, 0, self.bounds.size.height);
+        CGContextScaleCTM(context, 1, -1);
+        
+        CPTGraph *theHostedGraph = self.hostedGraph;
+        theHostedGraph.frame = self.bounds;
+        [theHostedGraph layoutAndRenderInContext:context];
     }
-
-    CGContextRef context = UIGraphicsGetCurrentContext();
-    CGContextTranslateCTM(context, 0, self.bounds.size.height);
-    CGContextScaleCTM(context, 1, -1);
-    hostedGraph.frame = self.bounds;
-    [hostedGraph layoutAndRenderInContext:context];
 }
 
 -(void)graphNeedsRedraw:(NSNotification *)notification
@@ -263,16 +267,6 @@
 
 ///	@cond
 
--(void)updateNotifications
-{
-    if ( collapsesLayers ) {
-        [[NSNotificationCenter defaultCenter] removeObserver:self];
-        if ( hostedGraph ) {
-            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(graphNeedsRedraw:) name:CPTGraphNeedsRedrawNotification object:hostedGraph];
-        }
-    }
-}
-
 -(void)setHostedGraph:(CPTGraph *)newLayer
 {
     NSParameterAssert( (newLayer == nil) || [newLayer isKindOfClass:[CPTGraph class]] );
@@ -281,10 +275,12 @@
         return;
     }
 
-    [hostedGraph removeFromSuperlayer];
-    hostedGraph.hostingView = nil;
-    [hostedGraph release];
-    hostedGraph = [newLayer retain];
+    if (hostedGraph) {
+        [hostedGraph removeFromSuperlayer];
+        hostedGraph.hostingView = nil;
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:CPTGraphNeedsRedrawNotification object:hostedGraph];
+    }
+    hostedGraph = newLayer;
 
     // Screen scaling
     UIScreen *screen = [UIScreen mainScreen];
@@ -297,61 +293,80 @@
     }
     hostedGraph.hostingView = self;
 
-    if ( !collapsesLayers ) {
+    if ( self.collapsesLayers ) {
+        [self setNeedsDisplay];
+        if ( hostedGraph ) {
+            [[NSNotificationCenter defaultCenter] addObserver:self
+                                                     selector:@selector(graphNeedsRedraw:)
+                                                         name:CPTGraphNeedsRedrawNotification
+                                                       object:hostedGraph];
+        }
+    }
+    else {
         if ( hostedGraph ) {
             hostedGraph.frame = self.layer.bounds;
             [self.layer addSublayer:hostedGraph];
         }
     }
-    else {
-        [self setNeedsDisplay];
-    }
-
-    [self updateNotifications];
 }
 
--(void)setCollapsesLayers:(BOOL)yn
+-(void)setCollapsesLayers:(BOOL)collapse
 {
-    if ( yn != collapsesLayers ) {
-        collapsesLayers = yn;
+    if ( collapse != collapsesLayers ) {
+        collapsesLayers = collapse;
+        
+        CPTGraph *theHostedGraph = self.hostedGraph;
+        
         if ( collapsesLayers ) {
-            [hostedGraph removeFromSuperlayer];
+            [theHostedGraph removeFromSuperlayer];
             [self setNeedsDisplay];
-        }
-        else {
-            if ( hostedGraph ) {
-                [self.layer addSublayer:hostedGraph];
+            
+            if ( theHostedGraph ) {
+                [[NSNotificationCenter defaultCenter] addObserver:self
+                                                         selector:@selector(graphNeedsRedraw:)
+                                                             name:CPTGraphNeedsRedrawNotification
+                                                           object:theHostedGraph];
             }
         }
-        [self updateNotifications];
+        else {
+            if ( theHostedGraph ) {
+                [self.layer addSublayer:theHostedGraph];
+                
+                [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                                name:CPTGraphNeedsRedrawNotification
+                                                              object:theHostedGraph];
+            }
+        }
     }
 }
 
 -(void)setFrame:(CGRect)newFrame
 {
     [super setFrame:newFrame];
-
-    [hostedGraph setNeedsLayout];
-
-    if ( collapsesLayers ) {
+    
+    CPTGraph *theHostedGraph = self.hostedGraph;
+    [theHostedGraph setNeedsLayout];
+    
+    if ( self.collapsesLayers ) {
         [self setNeedsDisplay];
     }
     else {
-        hostedGraph.frame = self.bounds;
+        theHostedGraph.frame = self.bounds;
     }
 }
 
 -(void)setBounds:(CGRect)newBounds
 {
     [super setBounds:newBounds];
-
-    [hostedGraph setNeedsLayout];
-
-    if ( collapsesLayers ) {
+    
+    CPTGraph *theHostedGraph = self.hostedGraph;
+    [theHostedGraph setNeedsLayout];
+    
+    if ( self.collapsesLayers ) {
         [self setNeedsDisplay];
     }
     else {
-        hostedGraph.frame = newBounds;
+        theHostedGraph.frame = newBounds;
     }
 }
 
