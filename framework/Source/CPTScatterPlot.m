@@ -891,8 +891,7 @@ NSString *const CPTScatterPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot sym
     static NSArray *keys = nil;
 
     if ( !keys ) {
-        keys = [[NSArray alloc] initWithObjects:
-                nil];
+        keys = [NSArray new];
     }
 
     if ( [keys containsObject:aKey] ) {
