@@ -60,7 +60,7 @@
     [self drawInRect:rect
             withFont:theFont
        lineBreakMode:NSLineBreakByWordWrapping
-           alignment:(UITextAlignment)style.textAlignment];
+           alignment:(NSTextAlignment)style.textAlignment];
 
     CGContextRestoreGState(context);
     CPTPopCGContext();
