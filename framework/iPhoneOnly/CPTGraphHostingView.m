@@ -9,7 +9,7 @@
 ///	@cond
 @interface CPTGraphHostingView()
 
-@property (nonatomic, readwrite, assign) __weak UIPinchGestureRecognizer *pinchGestureRecognizer;
+@property (nonatomic, readwrite, assign) __cpt_weak UIPinchGestureRecognizer *pinchGestureRecognizer;
 
 -(void)graphNeedsRedraw:(NSNotification *)notification;
 
