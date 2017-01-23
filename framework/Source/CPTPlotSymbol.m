@@ -565,6 +565,10 @@
 {
     CGPathRef theSymbolPath = self.cachedSymbolPath;
 
+    if (isnan((float)center.x) || isnan((float)center.y)) {
+        return;
+        //NSLog(@"Bad center point supplied for plotSymbol: (%f,%f)",center.x,center.y);
+    }
     if ( theSymbolPath ) {
         CPTLineStyle *theLineStyle = nil;
         CPTFill *theFill           = nil;
