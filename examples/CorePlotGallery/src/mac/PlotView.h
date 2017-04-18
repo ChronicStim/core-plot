@@ -1,25 +1,17 @@
 //
-//  PlotView.h
-//  CorePlotGallery
-//
-//  Created by Jeff Buck on 9/6/10.
-//  Copyright 2010 Jeff Buck. All rights reserved.
+// PlotView.h
+// CorePlotGallery
 //
 
 #import <Cocoa/Cocoa.h>
 
-@protocol PlotViewDelegate <NSObject>
+@protocol PlotViewDelegate<NSObject>
 
-- (void)setFrameSize:(NSSize)newSize;
+-(void)setFrameSize:(NSSize)newSize;
 
 @end
 
-
-@interface PlotView : NSView
-{
-    id<PlotViewDelegate> delegate;
-}
-
-@property (nonatomic, retain) id<PlotViewDelegate> delegate;
+@interface PlotView : NSView<PlotViewDelegate>
+@property (nonatomic, weak, nullable) id<PlotViewDelegate> delegate;
 
 @end

@@ -1,31 +1,35 @@
 #import "CPTXYGraph.h"
-#import "CPTXYPlotSpace.h"
-#import "CPTExceptions.h"
-#import "CPTXYAxisSet.h"
-#import "CPTXYAxis.h"
 
-/**	@cond */
+#import "CPTXYAxis.h"
+#import "CPTXYAxisSet.h"
+#import "CPTXYPlotSpace.h"
+
+/// @cond
 @interface CPTXYGraph()
 
 @property (nonatomic, readwrite, assign) CPTScaleType xScaleType;
 @property (nonatomic, readwrite, assign) CPTScaleType yScaleType;
 
 @end
-/**	@endcond */
+
+/// @endcond
 
 #pragma mark -
 
-/**	@brief A graph using a cartesian (X-Y) plot space.
+/**
+ *  @brief A graph using a cartesian (X-Y) plot space.
  **/
 @implementation CPTXYGraph
 
-/**	@property xScaleType
- *	@brief The scale type for the x-axis.
+/** @internal
+ *  @property CPTScaleType xScaleType
+ *  @brief The scale type for the x-axis.
  **/
 @synthesize xScaleType;
 
-/**	@property yScaleType
- *	@brief The scale type for the y-axis.
+/** @internal
+ *  @property CPTScaleType yScaleType
+ *  @brief The scale type for the y-axis.
  **/
 @synthesize yScaleType;
 
@@ -34,75 +38,116 @@
 
 /** @brief Initializes a newly allocated CPTXYGraph object with the provided frame rectangle and scale types.
  *
- *	This is the designated initializer.
+ *  This is the designated initializer.
  *
- *	@param newFrame The frame rectangle.
- *	@param newXScaleType The scale type for the x-axis.
- *	@param newYScaleType The scale type for the y-axis.
+ *  @param newFrame The frame rectangle.
+ *  @param newXScaleType The scale type for the x-axis.
+ *  @param newYScaleType The scale type for the y-axis.
  *  @return The initialized CPTXYGraph object.
  **/
--(id)initWithFrame:(CGRect)newFrame xScaleType:(CPTScaleType)newXScaleType yScaleType:(CPTScaleType)newYScaleType;
+-(nonnull instancetype)initWithFrame:(CGRect)newFrame xScaleType:(CPTScaleType)newXScaleType yScaleType:(CPTScaleType)newYScaleType
 {
     if ( (self = [super initWithFrame:newFrame]) ) {
-		xScaleType = newXScaleType;
-		yScaleType = newYScaleType;
+        xScaleType = newXScaleType;
+        yScaleType = newYScaleType;
     }
     return self;
 }
 
--(id)initWithFrame:(CGRect)newFrame
+/// @name Initialization
+/// @{
+
+/** @brief Initializes a newly allocated CPTXYGraph object with the provided frame rectangle.
+ *
+ *  The initialized layer will have the following properties:
+ *  - @link CPTXYPlotSpace::xScaleType xScaleType @endlink = #CPTScaleTypeLinear
+ *  - @link CPTXYPlotSpace::yScaleType yScaleType @endlink = #CPTScaleTypeLinear
+ *
+ *  @param newFrame The frame rectangle.
+ *  @return The initialized CPTXYGraph object.
+ *  @see @link CPTXYGraph::initWithFrame:xScaleType:yScaleType: -initWithFrame:xScaleType:yScaleType: @endlink
+ **/
+-(nonnull instancetype)initWithFrame:(CGRect)newFrame
 {
     return [self initWithFrame:newFrame xScaleType:CPTScaleTypeLinear yScaleType:CPTScaleTypeLinear];
 }
 
--(id)initWithLayer:(id)layer
-{
-	if ( (self = [super initWithLayer:layer]) ) {
-		CPTXYGraph *theLayer = (CPTXYGraph *)layer;
-		
-		xScaleType = theLayer->xScaleType;
-		yScaleType = theLayer->yScaleType;
-	}
-	return self;
-}
+/// @}
 
-#pragma mark -
-#pragma mark NSCoding methods
+/// @cond
 
--(void)encodeWithCoder:(NSCoder *)coder
+-(nonnull instancetype)initWithLayer:(nonnull id)layer
 {
-	[super encodeWithCoder:coder];
-	
-	[coder encodeInteger:self.xScaleType forKey:@"CPTXYGraph.xScaleType"];
-	[coder encodeInteger:self.yScaleType forKey:@"CPTXYGraph.yScaleType"];
-}
+    if ( (self = [super initWithLayer:layer]) ) {
+        CPTXYGraph *theLayer = (CPTXYGraph *)layer;
 
--(id)initWithCoder:(NSCoder *)coder
-{
-    if ( (self = [super initWithCoder:coder]) ) {
-		xScaleType = [coder decodeIntegerForKey:@"CPTXYGraph.xScaleType"];
-		yScaleType = [coder decodeIntegerForKey:@"CPTXYGraph.yScaleType"];
-	}
+        xScaleType = theLayer->xScaleType;
+        yScaleType = theLayer->yScaleType;
+    }
     return self;
 }
+
+/// @endcond
+
+#pragma mark -
+#pragma mark NSCoding Methods
+
+/// @cond
+
+-(void)encodeWithCoder:(nonnull NSCoder *)coder
+{
+    [super encodeWithCoder:coder];
+
+    [coder encodeInteger:self.xScaleType forKey:@"CPTXYGraph.xScaleType"];
+    [coder encodeInteger:self.yScaleType forKey:@"CPTXYGraph.yScaleType"];
+}
+
+-(nullable instancetype)initWithCoder:(nonnull NSCoder *)coder
+{
+    if ( (self = [super initWithCoder:coder]) ) {
+        xScaleType = (CPTScaleType)[coder decodeIntegerForKey:@"CPTXYGraph.xScaleType"];
+        yScaleType = (CPTScaleType)[coder decodeIntegerForKey:@"CPTXYGraph.yScaleType"];
+    }
+    return self;
+}
+
+/// @endcond
+
+#pragma mark -
+#pragma mark NSSecureCoding Methods
+
+/// @cond
+
++(BOOL)supportsSecureCoding
+{
+    return YES;
+}
+
+/// @endcond
 
 #pragma mark -
 #pragma mark Factory Methods
 
--(CPTPlotSpace *)newPlotSpace 
+/// @cond
+
+-(nullable CPTPlotSpace *)newPlotSpace
 {
     CPTXYPlotSpace *space = [[CPTXYPlotSpace alloc] init];
+
     space.xScaleType = self.xScaleType;
     space.yScaleType = self.yScaleType;
     return space;
 }
 
--(CPTAxisSet *)newAxisSet
+-(nullable CPTAxisSet *)newAxisSet
 {
-    CPTXYAxisSet *newAxisSet = [(CPTXYAxisSet *)[CPTXYAxisSet alloc] initWithFrame:self.bounds];
+    CPTXYAxisSet *newAxisSet = [[CPTXYAxisSet alloc] initWithFrame:self.bounds];
+
     newAxisSet.xAxis.plotSpace = self.defaultPlotSpace;
     newAxisSet.yAxis.plotSpace = self.defaultPlotSpace;
     return newAxisSet;
 }
+
+/// @endcond
 
 @end

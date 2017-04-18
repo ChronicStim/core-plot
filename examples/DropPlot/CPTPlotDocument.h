@@ -1,18 +1,13 @@
 #import <Cocoa/Cocoa.h>
 #import <CorePlot/CorePlot.h>
 
-@interface CPTPlotDocument : NSDocument <CPTPlotDataSource>
-{
-	IBOutlet CPTGraphHostingView *graphView;
-    CPTXYGraph *graph;
-	
-	double minimumValueForXAxis, maximumValueForXAxis, minimumValueForYAxis, maximumValueForYAxis;
-	double majorIntervalLengthForX, majorIntervalLengthForY;
-	NSMutableArray *dataPoints;
-}
+@interface CPTPlotDocument : NSDocument<CPTPlotDataSource, CPTPlotSpaceDelegate>
+
+-(IBAction)zoomIn;
+-(IBAction)zoomOut;
 
 // PDF / image export
--(IBAction)exportToPDF:(id)sender;
--(IBAction)exportToPNG:(id)sender;
+-(IBAction)exportToPDF:(nullable id)sender;
+-(IBAction)exportToPNG:(nullable id)sender;
 
 @end

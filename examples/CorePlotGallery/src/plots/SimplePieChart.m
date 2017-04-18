@@ -1,160 +1,233 @@
 //
-//  SimplePieChart.m
-//  CorePlotGallery
-//
-//  Created by Jeff Buck on 8/2/10.
-//  Copyright 2010 Jeff Buck. All rights reserved.
+// SimplePieChart.m
+// CorePlotGallery
 //
 
 #import "SimplePieChart.h"
 
+@interface SimplePieChart()
+
+@property (nonatomic, readwrite, strong, nonnull) CPTNumberArray *plotData;
+@property (nonatomic, readwrite) NSUInteger offsetIndex;
+@property (nonatomic, readwrite) CGFloat sliceOffset;
+
+@end
+
 @implementation SimplePieChart
 
-+ (void)load
+@synthesize plotData;
+@synthesize offsetIndex;
+@synthesize sliceOffset;
+
++(void)load
 {
     [super registerPlotItem:self];
 }
 
-- (id)init
+-(nonnull instancetype)init
 {
-	if ((self = [super init])) {
-        title = @"Simple Pie Chart";
+    if ( (self = [super init]) ) {
+        self.title   = @"Simple Pie Chart";
+        self.section = kPieCharts;
+
+        self.offsetIndex = NSNotFound;
     }
 
     return self;
 }
 
-- (void)killGraph
+-(void)generateData
 {
-    [super killGraph];
-}
-
-- (void)dealloc
-{
-    [plotData release];
-    [super dealloc];
-}
-
-- (void)generateData
-{
-    if (plotData == nil) {
-        plotData = [[NSMutableArray alloc] initWithObjects:
-                    [NSNumber numberWithDouble:20.0],
-                    [NSNumber numberWithDouble:30.0],
-                    [NSNumber numberWithDouble:60.0],
-                    nil];
+    if ( self.plotData.count == 0 ) {
+        self.plotData = @[@20.0, @30.0, @60.0];
     }
 }
 
-- (void)renderInLayer:(CPTGraphHostingView *)layerHostingView withTheme:(CPTTheme *)theme
+-(void)renderInGraphHostingView:(nonnull CPTGraphHostingView *)hostingView withTheme:(nullable CPTTheme *)theme animated:(BOOL)animated
 {
-#if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
-    CGRect bounds = layerHostingView.bounds;
+#if TARGET_OS_SIMULATOR || TARGET_OS_IPHONE
+    CGRect bounds = hostingView.bounds;
 #else
-    CGRect bounds = NSRectToCGRect(layerHostingView.bounds);
+    CGRect bounds = NSRectToCGRect(hostingView.bounds);
 #endif
-    
-    CPTGraph *graph = [[[CPTXYGraph alloc] initWithFrame:[layerHostingView bounds]] autorelease];
-    [self addGraph:graph toHostingView:layerHostingView];
+
+    CPTGraph *graph = [[CPTXYGraph alloc] initWithFrame:bounds];
+    [self addGraph:graph toHostingView:hostingView];
     [self applyTheme:theme toGraph:graph withDefault:[CPTTheme themeNamed:kCPTDarkGradientTheme]];
 
-    graph.title = title;
-    CPTMutableTextStyle *textStyle = [CPTMutableTextStyle textStyle];
-    textStyle.color = [CPTColor grayColor];
-    textStyle.fontName = @"Helvetica-Bold";
-    textStyle.fontSize = bounds.size.height / 20.0f;
-    graph.titleTextStyle = textStyle;
-    graph.titleDisplacement = CGPointMake(0.0f, bounds.size.height / 18.0f);
-    graph.titlePlotAreaFrameAnchor = CPTRectAnchorTop;
-
     graph.plotAreaFrame.masksToBorder = NO;
+    graph.axisSet                     = nil;
 
-    // Graph padding
-    CGFloat boundsPadding = bounds.size.width / 20.0f;
-    graph.paddingLeft = boundsPadding;
-    graph.paddingTop = graph.titleDisplacement.y * 2;
-    graph.paddingRight = boundsPadding;
-    graph.paddingBottom = boundsPadding;
-
-    graph.axisSet = nil;
-    
     // Overlay gradient for pie chart
-    CPTGradient *overlayGradient = [[[CPTGradient alloc] init] autorelease];
+    CPTGradient *overlayGradient = [[CPTGradient alloc] init];
     overlayGradient.gradientType = CPTGradientTypeRadial;
-	overlayGradient = [overlayGradient addColorStop:[[CPTColor blackColor] colorWithAlphaComponent:0.0] atPosition:0.0];
-    overlayGradient = [overlayGradient addColorStop:[[CPTColor blackColor] colorWithAlphaComponent:0.3] atPosition:0.9];
-	overlayGradient = [overlayGradient addColorStop:[[CPTColor blackColor] colorWithAlphaComponent:0.7] atPosition:1.0];
+    overlayGradient              = [overlayGradient addColorStop:[[CPTColor blackColor] colorWithAlphaComponent:CPTFloat(0.0)] atPosition:CPTFloat(0.0)];
+    overlayGradient              = [overlayGradient addColorStop:[[CPTColor blackColor] colorWithAlphaComponent:CPTFloat(0.3)] atPosition:CPTFloat(0.9)];
+    overlayGradient              = [overlayGradient addColorStop:[[CPTColor blackColor] colorWithAlphaComponent:CPTFloat(0.7)] atPosition:CPTFloat(1.0)];
 
     // Add pie chart
     CPTPieChart *piePlot = [[CPTPieChart alloc] init];
     piePlot.dataSource = self;
-    piePlot.pieRadius = MIN(0.7 * (layerHostingView.frame.size.height - 2 * graph.paddingLeft) / 2.0,
-                            0.7 * (layerHostingView.frame.size.width - 2 * graph.paddingTop) / 2.0);
-    piePlot.identifier = title;
-    piePlot.startAngle = M_PI_4;
+    piePlot.pieRadius  = MIN( CPTFloat(0.7) * (hostingView.frame.size.height - CPTFloat(2.0) * graph.paddingLeft) / CPTFloat(2.0),
+                              CPTFloat(0.7) * (hostingView.frame.size.width - CPTFloat(2.0) * graph.paddingTop) / CPTFloat(2.0) );
+    piePlot.identifier     = self.title;
+    piePlot.startAngle     = CPTFloat(M_PI_4);
     piePlot.sliceDirection = CPTPieDirectionCounterClockwise;
-    piePlot.overlayFill = [CPTFill fillWithGradient:overlayGradient];
+    piePlot.overlayFill    = [CPTFill fillWithGradient:overlayGradient];
+
+    piePlot.labelRotationRelativeToRadius = YES;
+    piePlot.labelRotation                 = CPTFloat(-M_PI_2);
+    piePlot.labelOffset                   = -50.0;
 
     piePlot.delegate = self;
     [graph addPlot:piePlot];
-    [piePlot release];
 
-	// Add legend
-	CPTLegend *theLegend = [CPTLegend legendWithGraph:graph];
-	theLegend.numberOfColumns = 1;
-	theLegend.fill = [CPTFill fillWithColor:[CPTColor whiteColor]];
-	theLegend.borderLineStyle = [CPTLineStyle lineStyle];
-	theLegend.cornerRadius = 5.0;
-	
-	graph.legend = theLegend;
+    // Add legend
+    CPTLegend *theLegend = [CPTLegend legendWithGraph:graph];
+    theLegend.numberOfColumns = 1;
+    theLegend.fill            = [CPTFill fillWithColor:[CPTColor whiteColor]];
+    theLegend.borderLineStyle = [CPTLineStyle lineStyle];
 
-	graph.legendAnchor = CPTRectAnchorRight;
-	graph.legendDisplacement = CGPointMake(-boundsPadding - 10.0, 0.0);
+    theLegend.entryFill            = [CPTFill fillWithColor:[CPTColor lightGrayColor]];
+    theLegend.entryBorderLineStyle = [CPTLineStyle lineStyle];
+    theLegend.entryCornerRadius    = CPTFloat(3.0);
+    theLegend.entryPaddingLeft     = CPTFloat(3.0);
+    theLegend.entryPaddingTop      = CPTFloat(3.0);
+    theLegend.entryPaddingRight    = CPTFloat(3.0);
+    theLegend.entryPaddingBottom   = CPTFloat(3.0);
+
+    theLegend.cornerRadius = 5.0;
+    theLegend.delegate     = self;
+
+    graph.legend = theLegend;
+
+    graph.legendAnchor       = CPTRectAnchorRight;
+    graph.legendDisplacement = CGPointMake(-graph.paddingRight - CPTFloat(10.0), 0.0);
 }
 
--(CPTLayer *)dataLabelForPlot:(CPTPlot *)plot recordIndex:(NSUInteger)index
+-(nullable CPTLayer *)dataLabelForPlot:(nonnull CPTPlot *)plot recordIndex:(NSUInteger)index
 {
     static CPTMutableTextStyle *whiteText = nil;
+    static dispatch_once_t onceToken      = 0;
 
-    if ( !whiteText ) {
+    dispatch_once(&onceToken, ^{
         whiteText = [[CPTMutableTextStyle alloc] init];
         whiteText.color = [CPTColor whiteColor];
-    }
+        whiteText.fontSize = self.titleSize * CPTFloat(0.5);
+    });
 
-    CPTTextLayer *newLayer = [[[CPTTextLayer alloc] initWithText:[NSString stringWithFormat:@"%3.0f", [[plotData objectAtIndex:index] floatValue]]
-                                                         style:whiteText] autorelease];
+    CPTTextLayer *newLayer = [[CPTTextLayer alloc] initWithText:[NSString stringWithFormat:@"%1.0f", self.plotData[index].doubleValue]
+                                                          style:whiteText];
     return newLayer;
 }
 
--(void)pieChart:(CPTPieChart *)plot sliceWasSelectedAtRecordIndex:(NSUInteger)index
+#pragma mark -
+#pragma mark CPTPieChartDelegate Methods
+
+-(void)Plot:(nonnull CPTPlot *)plot dataLabelWasSelectedAtRecordIndex:(NSUInteger)index
 {
-    NSLog(@"Slice was selected at index %d. Value = %f", (int)index, [[plotData objectAtIndex:index] floatValue]);
+    NSLog(@"Data label for '%@' was selected at index %d.", plot.identifier, (int)index);
+}
+
+-(void)pieChart:(nonnull CPTPieChart *)plot sliceWasSelectedAtRecordIndex:(NSUInteger)index
+{
+    NSLog(@"Slice was selected at index %d. Value = %f", (int)index, self.plotData[index].doubleValue);
+
+    self.offsetIndex = NSNotFound;
+
+    CPTMutableNumberArray *newData = [[NSMutableArray alloc] init];
+    NSUInteger dataCount           = (NSUInteger)lrint( ceil(10.0 * arc4random() / (double)UINT32_MAX) ) + 1;
+    for ( NSUInteger i = 1; i < dataCount; i++ ) {
+        [newData addObject:@(100.0 * arc4random() / (double)UINT32_MAX)];
+    }
+    NSLog(@"newData: %@", newData);
+
+    self.plotData = newData;
+
+    [plot reloadData];
+}
+
+#pragma mark -
+#pragma mark CPTLegendDelegate Methods
+
+-(void)legend:(nonnull CPTLegend *)legend legendEntryForPlot:(nonnull CPTPlot *)plot wasSelectedAtIndex:(NSUInteger)idx
+{
+    NSLog(@"Legend entry for '%@' was selected at index %lu.", plot.identifier, (unsigned long)idx);
+
+    [CPTAnimation animate:self
+                 property:@"sliceOffset"
+                     from:( idx == self.offsetIndex ? CPTNAN : CPTFloat(0.0) )
+                       to:( idx == self.offsetIndex ? CPTFloat(0.0) : CPTFloat(35.0) )
+                 duration:0.5
+           animationCurve:CPTAnimationCurveCubicOut
+                 delegate:nil];
+
+    self.offsetIndex = idx;
 }
 
 #pragma mark -
 #pragma mark Plot Data Source Methods
 
--(NSUInteger)numberOfRecordsForPlot:(CPTPlot *)plot
+-(NSUInteger)numberOfRecordsForPlot:(nonnull CPTPlot *)plot
 {
-    return [plotData count];
+    return self.plotData.count;
 }
 
--(NSNumber *)numberForPlot:(CPTPlot *)plot field:(NSUInteger)fieldEnum recordIndex:(NSUInteger)index
+-(nullable id)numberForPlot:(nonnull CPTPlot *)plot field:(NSUInteger)fieldEnum recordIndex:(NSUInteger)index
 {
     NSNumber *num;
-    if (fieldEnum == CPTPieChartFieldSliceWidth) {
-        num = [plotData objectAtIndex:index];
+
+    if ( fieldEnum == CPTPieChartFieldSliceWidth ) {
+        num = self.plotData[index];
     }
     else {
-        return [NSNumber numberWithInt:index];
+        num = @(index);
     }
 
     return num;
 }
 
--(NSString *)legendTitleForPieChart:(CPTPieChart *)pieChart recordIndex:(NSUInteger)index
+-(NSAttributedString *)attributedLegendTitleForPieChart:(nonnull CPTPieChart *)pieChart recordIndex:(NSUInteger)index
 {
-	return [NSString stringWithFormat:@"Pie Slice %u", index];
+#if TARGET_OS_SIMULATOR || TARGET_OS_IPHONE
+    UIColor *sliceColor = [CPTPieChart defaultPieSliceColorForIndex:index].uiColor;
+    UIFont *labelFont   = [UIFont fontWithName:@"Helvetica" size:self.titleSize * CPTFloat(0.5)];
+#else
+    NSColor *sliceColor = [CPTPieChart defaultPieSliceColorForIndex:index].nsColor;
+    NSFont *labelFont   = [NSFont fontWithName:@"Helvetica" size:self.titleSize * CPTFloat(0.5)];
+#endif
+
+    NSMutableAttributedString *title = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"Pie Slice %lu", (unsigned long)index]];
+    [title addAttribute:NSForegroundColorAttributeName
+                  value:sliceColor
+                  range:NSMakeRange(4, 5)];
+
+    [title addAttribute:NSFontAttributeName
+                  value:labelFont
+                  range:NSMakeRange(0, title.length)];
+
+    return title;
+}
+
+-(CGFloat)radialOffsetForPieChart:(nonnull CPTPieChart *)pieChart recordIndex:(NSUInteger)index
+{
+    return index == self.offsetIndex ? self.sliceOffset : 0.0;
+}
+
+#pragma mark -
+#pragma mark Accessors
+
+-(void)setSliceOffset:(CGFloat)newOffset
+{
+    if ( newOffset != sliceOffset ) {
+        sliceOffset = newOffset;
+
+        [self.graphs[0] reloadData];
+
+        if ( newOffset == CPTFloat(0.0) ) {
+            self.offsetIndex = NSNotFound;
+        }
+    }
 }
 
 @end

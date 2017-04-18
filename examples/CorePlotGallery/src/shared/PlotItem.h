@@ -1,67 +1,65 @@
 //
-//  PlotItem.h
-//  CorePlotGallery
-//
-//  Created by Jeff Buck on 8/31/10.
-//  Copyright 2010 Jeff Buck. All rights reserved.
+// PlotItem.h
+// CorePlotGallery
 //
 
 #import <Foundation/Foundation.h>
 
-#if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
+#import <CorePlot/CorePlot.h>
+
+#if TARGET_OS_SIMULATOR || TARGET_OS_IPHONE
 #import <UIKit/UIKit.h>
-#import "CorePlot-CocoaTouch.h"
 
 typedef CGRect CGNSRect;
+typedef UIView PlotGalleryNativeView;
 
 #else
 
-#import <CorePlot/CorePlot.h>
 typedef NSRect CGNSRect;
-
+typedef NSView PlotGalleryNativeView;
 #endif
+
+extern NSString *__nonnull const kDemoPlots;
+extern NSString *__nonnull const kPieCharts;
+extern NSString *__nonnull const kLinePlots;
+extern NSString *__nonnull const kBarPlots;
+extern NSString *__nonnull const kFinancialPlots;
 
 @class CPTGraph;
 @class CPTTheme;
 
 @interface PlotItem : NSObject
-{
-    CPTGraphHostingView  *defaultLayerHostingView;
 
-    NSMutableArray      *graphs;
-    NSString            *title;
-    CPTNativeImage       *cachedImage;
-}
+@property (nonatomic, readwrite, strong, nullable) CPTGraphHostingView *defaultLayerHostingView;
 
-@property (nonatomic, retain) CPTGraphHostingView *defaultLayerHostingView;
-@property (nonatomic, retain) NSMutableArray *graphs;
-@property (nonatomic, retain) NSString *title;
+@property (nonatomic, readwrite, strong, nonnull) NSMutableArray<__kindof CPTGraph *> *graphs;
+@property (nonatomic, readwrite, strong, nonnull) NSString *section;
+@property (nonatomic, readwrite, strong, nonnull) NSString *title;
 
-+ (void)registerPlotItem:(id)item;
+@property (nonatomic, readonly) CGFloat titleSize;
 
++(void)registerPlotItem:(nonnull id)item;
+
+-(void)renderInView:(nonnull PlotGalleryNativeView *)hostingView withTheme:(nullable CPTTheme *)theme animated:(BOOL)animated;
+-(nonnull CPTNativeImage *)image;
 #if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
-- (void)renderInView:(UIView *)hostingView withTheme:(CPTTheme *)theme;
 #else
-- (void)renderInView:(NSView *)hostingView withTheme:(CPTTheme *)theme;
-- (void)setFrameSize:(NSSize)size;
+-(void)setFrameSize:(NSSize)size;
 #endif
-- (CPTNativeImage *)image;
 
+-(void)renderInGraphHostingView:(nonnull CPTGraphHostingView *)hostingView withTheme:(nullable CPTTheme *)theme animated:(BOOL)animated;
 
-- (void)renderInLayer:(CPTGraphHostingView *)layerHostingView withTheme:(CPTTheme *)theme;
+-(void)formatAllGraphs;
 
-- (void)setTitleDefaultsForGraph:(CPTGraph *)graph withBounds:(CGRect)bounds;
-- (void)setPaddingDefaultsForGraph:(CPTGraph *)graph withBounds:(CGRect)bounds;
+-(void)reloadData;
+-(void)applyTheme:(nullable CPTTheme *)theme toGraph:(nonnull CPTGraph *)graph withDefault:(nullable CPTTheme *)defaultTheme;
 
-- (void)reloadData;
-- (void)applyTheme:(CPTTheme *)theme toGraph:(CPTGraph *)graph withDefault:(CPTTheme *)defaultTheme;
+-(void)addGraph:(nonnull CPTGraph *)graph;
+-(void)addGraph:(nonnull CPTGraph *)graph toHostingView:(nullable CPTGraphHostingView *)hostingView;
+-(void)killGraph;
 
-- (void)addGraph:(CPTGraph *)graph;
-- (void)addGraph:(CPTGraph *)graph toHostingView:(CPTGraphHostingView *)layerHostingView;
-- (void)killGraph;
+-(void)generateData;
 
-- (void)generateData;
-
-- (NSComparisonResult)titleCompare:(PlotItem *)other;
+-(NSComparisonResult)titleCompare:(nonnull PlotItem *)other;
 
 @end

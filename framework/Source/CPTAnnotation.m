@@ -1,119 +1,155 @@
 #import "CPTAnnotation.h"
-#import "CPTLayer.h"
+
 #import "CPTAnnotationHostLayer.h"
 #import "NSCoderExtensions.h"
 
-/**	@brief An annotation positions a content layer relative to some anchor point.
+/** @brief An annotation positions a content layer relative to some anchor point.
  *
- *	Annotations can be used to add text or images that are anchored to a feature
- *	of a graph. For example, the graph title is an annotation anchored to the 
- *	plot area frame.
- *
- *	@todo More documentation needed.
+ *  Annotations can be used to add text or images that are anchored to a feature
+ *  of a graph. For example, the graph title is an annotation anchored to the graph.
+ *  The annotation content layer can be any CPTLayer.
  **/
 @implementation CPTAnnotation
 
-/**	@property contentLayer
- *	@brief The annotation content.
+/** @property nullable CPTLayer *contentLayer
+ *  @brief The annotation content.
  **/
 @synthesize contentLayer;
 
-/**	@property annotationHostLayer
- *	@brief The host layer for the annotation content.
+/** @property nullable CPTAnnotationHostLayer *annotationHostLayer
+ *  @brief The host layer for the annotation content.
  **/
 @synthesize annotationHostLayer;
 
-/**	@property displacement
- *	@brief The displacement from the layer anchor point.
+/** @property CGPoint displacement
+ *  @brief The displacement from the layer anchor point.
  **/
 @synthesize displacement;
 
-/**	@property contentAnchorPoint
- *	@brief The anchor point for the content layer.
+/** @property CGPoint contentAnchorPoint
+ *  @brief The anchor point for the content layer.
  **/
 @synthesize contentAnchorPoint;
 
-/**	@property rotation
- *	@brief The rotation of the label in radians.
+/** @property CGFloat rotation
+ *  @brief The rotation of the label in radians.
  **/
 @synthesize rotation;
 
 #pragma mark -
 #pragma mark Init/Dealloc
 
--(id)init
+/// @name Initialization
+/// @{
+
+/** @brief Initializes a newly allocated CPTAnnotation object.
+ *
+ *  The initialized object will have the following properties:
+ *  - @ref annotationHostLayer = @nil
+ *  - @ref contentLayer = @nil
+ *  - @ref displacement = (@num{0.0}, @num{0.0})
+ *  - @ref contentAnchorPoint = (@num{0.5}, @num{0.5})
+ *  - @ref rotation = @num{0.0}
+ *
+ *  @return The initialized object.
+ **/
+-(nonnull instancetype)init
 {
     if ( (self = [super init]) ) {
-		annotationHostLayer = nil;
-		contentLayer = nil;
-        displacement = CGPointZero;
-		contentAnchorPoint = CGPointMake(0.5, 0.5);
-		rotation = 0.0;
+        annotationHostLayer = nil;
+        contentLayer        = nil;
+        displacement        = CGPointZero;
+        contentAnchorPoint  = CPTPointMake(0.5, 0.5);
+        rotation            = CPTFloat(0.0);
     }
     return self;
 }
 
--(void)dealloc
-{
-	[contentLayer release];
-    [super dealloc];
-}
+/// @}
 
 #pragma mark -
-#pragma mark NSCoding methods
+#pragma mark NSCoding Methods
 
--(void)encodeWithCoder:(NSCoder *)coder
+/// @cond
+
+-(void)encodeWithCoder:(nonnull NSCoder *)coder
 {
-	[coder encodeConditionalObject:self.annotationHostLayer forKey:@"CPTAnnotation.annotationHostLayer"];
-	[coder encodeObject:self.contentLayer forKey:@"CPTAnnotation.contentLayer"];
-	[coder encodeCPTPoint:self.contentAnchorPoint forKey:@"CPTAnnotation.contentAnchorPoint"];
-	[coder encodeCPTPoint:self.displacement forKey:@"CPTAnnotation.displacement"];
-	[coder encodeCGFloat:self.rotation forKey:@"CPTAnnotation.rotation"];
+    [coder encodeConditionalObject:self.annotationHostLayer forKey:@"CPTAnnotation.annotationHostLayer"];
+    [coder encodeObject:self.contentLayer forKey:@"CPTAnnotation.contentLayer"];
+    [coder encodeCPTPoint:self.contentAnchorPoint forKey:@"CPTAnnotation.contentAnchorPoint"];
+    [coder encodeCPTPoint:self.displacement forKey:@"CPTAnnotation.displacement"];
+    [coder encodeCGFloat:self.rotation forKey:@"CPTAnnotation.rotation"];
 }
 
--(id)initWithCoder:(NSCoder *)coder
+-(nullable instancetype)initWithCoder:(nonnull NSCoder *)coder
 {
     if ( (self = [super init]) ) {
-		annotationHostLayer = [coder decodeObjectForKey:@"CPTAnnotation.annotationHostLayer"];
-		contentLayer = [[coder decodeObjectForKey:@"CPTAnnotation.contentLayer"] retain];
-		contentAnchorPoint = [coder decodeCPTPointForKey:@"CPTAnnotation.contentAnchorPoint"];
-		displacement = [coder decodeCPTPointForKey:@"CPTAnnotation.displacement"];
-		rotation = [coder decodeCGFloatForKey:@"CPTAnnotation.rotation"];
-	}
+        annotationHostLayer = [coder decodeObjectOfClass:[CPTAnnotationHostLayer class]
+                                                  forKey:@"CPTAnnotation.annotationHostLayer"];
+        contentLayer = [coder decodeObjectOfClass:[CPTLayer class]
+                                           forKey:@"CPTAnnotation.contentLayer"];
+        contentAnchorPoint = [coder decodeCPTPointForKey:@"CPTAnnotation.contentAnchorPoint"];
+        displacement       = [coder decodeCPTPointForKey:@"CPTAnnotation.displacement"];
+        rotation           = [coder decodeCGFloatForKey:@"CPTAnnotation.rotation"];
+    }
     return self;
 }
+
+/// @endcond
+
+#pragma mark -
+#pragma mark NSSecureCoding Methods
+
+/// @cond
+
++(BOOL)supportsSecureCoding
+{
+    return YES;
+}
+
+/// @endcond
 
 #pragma mark -
 #pragma mark Description
 
--(NSString *)description
+/// @cond
+
+-(nullable NSString *)description
 {
-	return [NSString stringWithFormat:@"<%@ {%@}>", [super description], self.contentLayer];
+    return [NSString stringWithFormat:@"<%@ {%@}>", super.description, self.contentLayer];
 }
+
+/// @endcond
 
 #pragma mark -
 #pragma mark Accessors
 
--(void)setContentLayer:(CPTLayer *)newLayer 
+/// @cond
+
+-(void)setContentLayer:(nullable CPTLayer *)newLayer
 {
     if ( newLayer != contentLayer ) {
-    	[contentLayer removeFromSuperlayer];
-        [contentLayer release];
-        contentLayer = [newLayer retain];
-		if ( contentLayer ) {
-			[annotationHostLayer addSublayer:contentLayer];
-		}
+        [contentLayer removeFromSuperlayer];
+        contentLayer = newLayer;
+        if ( newLayer ) {
+            CPTLayer *layer = newLayer;
+
+            CPTAnnotationHostLayer *hostLayer = self.annotationHostLayer;
+            [hostLayer addSublayer:layer];
+        }
     }
 }
 
--(void)setAnnotationHostLayer:(CPTAnnotationHostLayer *)newLayer 
+-(void)setAnnotationHostLayer:(nullable CPTAnnotationHostLayer *)newLayer
 {
     if ( newLayer != annotationHostLayer ) {
-    	[contentLayer removeFromSuperlayer];
+        CPTLayer *myContent = self.contentLayer;
+
+        [myContent removeFromSuperlayer];
         annotationHostLayer = newLayer;
-		if ( contentLayer ) {
-			[annotationHostLayer addSublayer:contentLayer];
-		}
+        if ( myContent ) {
+            [newLayer addSublayer:myContent];
+        }
     }
 }
 
@@ -121,7 +157,7 @@
 {
     if ( !CGPointEqualToPoint(newDisplacement, displacement) ) {
         displacement = newDisplacement;
-        [self.contentLayer setNeedsLayout];
+        [self.contentLayer.superlayer setNeedsLayout];
     }
 }
 
@@ -129,7 +165,7 @@
 {
     if ( !CGPointEqualToPoint(newAnchorPoint, contentAnchorPoint) ) {
         contentAnchorPoint = newAnchorPoint;
-        [self.contentLayer setNeedsLayout];
+        [self.contentLayer.superlayer setNeedsLayout];
     }
 }
 
@@ -137,9 +173,11 @@
 {
     if ( newRotation != rotation ) {
         rotation = newRotation;
-        [self.contentLayer setNeedsLayout];
+        [self.contentLayer.superlayer setNeedsLayout];
     }
 }
+
+/// @endcond
 
 @end
 
@@ -148,14 +186,14 @@
 
 @implementation CPTAnnotation(AbstractMethods)
 
-/**	@brief Positions the content layer relative to its reference anchor.
+/** @brief Positions the content layer relative to its reference anchor.
  *
- *	This method must be overridden by subclasses. The default implementation
- *	does nothing.
+ *  This method must be overridden by subclasses. The default implementation
+ *  does nothing.
  **/
 -(void)positionContentLayer
 {
-	// Do nothing--implementation provided by subclasses
+    // Do nothing--implementation provided by subclasses
 }
 
 @end

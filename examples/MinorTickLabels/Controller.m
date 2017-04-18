@@ -1,103 +1,111 @@
-
 #import "Controller.h"
 #import <CorePlot/CorePlot.h>
 
+@interface Controller()
+
+@property (nonatomic, readwrite, strong, nullable) IBOutlet CPTGraphHostingView *hostView;
+@property (nonatomic, readwrite, strong, nonnull) CPTXYGraph *graph;
+@property (nonatomic, readwrite, strong, nonnull) NSArray<NSDictionary *> *plotData;
+
+@end
+
+#pragma mark -
 
 @implementation Controller
 
--(void)dealloc 
-{
-	[plotData release];
-    [graph release];
-    [super dealloc];
-}
+@synthesize hostView;
+@synthesize graph;
+@synthesize plotData;
 
 -(void)awakeFromNib
 {
     [super awakeFromNib];
-    
-    // If you make sure your dates are calculated at noon, you shouldn't have to 
+
+    // If you make sure your dates are calculated at noon, you shouldn't have to
     // worry about daylight savings. If you use midnight, you will have to adjust
     // for daylight savings time.
-    NSDate *refDate = [NSDate dateWithNaturalLanguageString:@"00:00 Oct 29, 2009"];
-    NSTimeInterval oneDay = 24 * 60 * 60;
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    NSDate *refDate            = [formatter dateFromString:@"12:00 Oct 29, 2009"];
+    NSTimeInterval oneDay      = 24 * 60 * 60;
 
     // Create graph from theme
-    graph = [(CPTXYGraph *)[CPTXYGraph alloc] initWithFrame:CGRectZero];
-	CPTTheme *theme = [CPTTheme themeNamed:kCPTDarkGradientTheme];
-	[graph applyTheme:theme];
-	hostView.hostedGraph = graph;
-    
-    // Setup scatter plot space
-    CPTXYPlotSpace *plotSpace = (CPTXYPlotSpace *)graph.defaultPlotSpace;
-    NSTimeInterval xLow = 0.0f;
-    plotSpace.xRange = [CPTPlotRange plotRangeWithLocation:CPTDecimalFromFloat(xLow) length:CPTDecimalFromFloat(oneDay*3.0f)];
-    plotSpace.yRange = [CPTPlotRange plotRangeWithLocation:CPTDecimalFromFloat(1.0) length:CPTDecimalFromFloat(3.0)];
-    
-    // Axes
-	CPTXYAxisSet *axisSet = (CPTXYAxisSet *)graph.axisSet;
-    CPTXYAxis *x = axisSet.xAxis;
-    x.majorIntervalLength = CPTDecimalFromFloat(oneDay);
-    x.orthogonalCoordinateDecimal = CPTDecimalFromString(@"2");
-    x.minorTicksPerInterval = 3;
-	
-    NSDateFormatter *dateFormatter = [[[NSDateFormatter alloc] init] autorelease];
-    dateFormatter.dateStyle = kCFDateFormatterShortStyle;
-    CPTTimeFormatter *myDateFormatter = [[[CPTTimeFormatter alloc] initWithDateFormatter:dateFormatter] autorelease];
-    myDateFormatter.referenceDate = refDate;
-    x.labelFormatter = myDateFormatter;
+    CPTXYGraph *newGraph = [[CPTXYGraph alloc] initWithFrame:CGRectZero];
+    CPTTheme *theme      = [CPTTheme themeNamed:kCPTDarkGradientTheme];
+    [newGraph applyTheme:theme];
 
-	NSDateFormatter *timeFormatter = [[[NSDateFormatter alloc] init] autorelease];
+    self.graph = newGraph;
+
+    self.hostView.hostedGraph = newGraph;
+
+    // Setup scatter plot space
+    CPTXYPlotSpace *plotSpace = (CPTXYPlotSpace *)newGraph.defaultPlotSpace;
+    NSTimeInterval xLow       = 0.0;
+    plotSpace.xRange = [CPTPlotRange plotRangeWithLocation:@(xLow) length:@(oneDay * 3.0)];
+    plotSpace.yRange = [CPTPlotRange plotRangeWithLocation:@1.0 length:@3.0];
+
+    // Axes
+    CPTXYAxisSet *axisSet = (CPTXYAxisSet *)newGraph.axisSet;
+    CPTXYAxis *x          = axisSet.xAxis;
+    x.majorIntervalLength   = @(oneDay);
+    x.orthogonalPosition    = @2.0;
+    x.minorTicksPerInterval = 3;
+
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    dateFormatter.dateStyle = kCFDateFormatterShortStyle;
+    CPTTimeFormatter *myDateFormatter = [[CPTTimeFormatter alloc] initWithDateFormatter:dateFormatter];
+    myDateFormatter.referenceDate = refDate;
+    x.labelFormatter              = myDateFormatter;
+
+    NSDateFormatter *timeFormatter = [[NSDateFormatter alloc] init];
     timeFormatter.timeStyle = kCFDateFormatterShortStyle;
-    CPTTimeFormatter *myTimeFormatter = [[[CPTTimeFormatter alloc] initWithDateFormatter:timeFormatter] autorelease];
+    CPTTimeFormatter *myTimeFormatter = [[CPTTimeFormatter alloc] initWithDateFormatter:timeFormatter];
     myTimeFormatter.referenceDate = refDate;
-    x.minorTickLabelFormatter = myTimeFormatter;
-//	x.minorTickLabelRotation = M_PI/2;
-	
+    x.minorTickLabelFormatter     = myTimeFormatter;
+// x.minorTickLabelRotation = M_PI_2;
+
     CPTXYAxis *y = axisSet.yAxis;
-    y.majorIntervalLength = CPTDecimalFromString(@"0.5");
+    y.majorIntervalLength   = @0.5;
     y.minorTicksPerInterval = 5;
-    y.orthogonalCoordinateDecimal = CPTDecimalFromFloat(0.5*oneDay);
-            
+    y.orthogonalPosition    = @(0.5 * oneDay);
+
     // Create a plot that uses the data source method
-	CPTScatterPlot *dataSourceLinePlot = [[[CPTScatterPlot alloc] init] autorelease];
+    CPTScatterPlot *dataSourceLinePlot = [[CPTScatterPlot alloc] init];
     dataSourceLinePlot.identifier = @"Date Plot";
 
-	CPTMutableLineStyle *lineStyle = [[dataSourceLinePlot.dataLineStyle mutableCopy] autorelease];
-	lineStyle.lineWidth = 3.f;
-    lineStyle.lineColor = [CPTColor greenColor];
+    CPTMutableLineStyle *lineStyle = [dataSourceLinePlot.dataLineStyle mutableCopy];
+    lineStyle.lineWidth              = 3.;
+    lineStyle.lineColor              = [CPTColor greenColor];
     dataSourceLinePlot.dataLineStyle = lineStyle;
-    
+
     dataSourceLinePlot.dataSource = self;
-    [graph addPlot:dataSourceLinePlot];
-    	
+    [newGraph addPlot:dataSourceLinePlot];
+
     // Add some data
-	NSMutableArray *newData = [NSMutableArray array];
-	NSUInteger i;
-	for ( i = 0; i < 7; i++ ) {
-		NSTimeInterval x = oneDay*i*0.5f;
-		id y = [NSDecimalNumber numberWithFloat:1.2*rand()/(float)RAND_MAX + 1.2];
-		[newData addObject:
-        	[NSDictionary dictionaryWithObjectsAndKeys:
-                [NSDecimalNumber numberWithFloat:x], [NSNumber numberWithInt:CPTScatterPlotFieldX], 
-                y, [NSNumber numberWithInt:CPTScatterPlotFieldY], 
-                nil]];
-	}
-	plotData = newData;
+    NSMutableArray<NSDictionary *> *newData = [NSMutableArray array];
+    for ( NSUInteger i = 0; i < 7; i++ ) {
+        NSTimeInterval xVal = oneDay * i * 0.5;
+
+        double yVal = 1.2 * arc4random() / (double)UINT32_MAX + 1.2;
+
+        [newData addObject:
+         @{ @(CPTScatterPlotFieldX): @(xVal),
+            @(CPTScatterPlotFieldY): @(yVal) }
+        ];
+    }
+    self.plotData = newData;
 }
 
 #pragma mark -
 #pragma mark Plot Data Source Methods
 
--(NSUInteger)numberOfRecordsForPlot:(CPTPlot *)plot
+-(NSUInteger)numberOfRecordsForPlot:(nonnull CPTPlot *)plot
 {
-    return plotData.count;
+    return self.plotData.count;
 }
 
--(NSNumber *)numberForPlot:(CPTPlot *)plot field:(NSUInteger)fieldEnum recordIndex:(NSUInteger)index
+-(nullable id)numberForPlot:(nonnull CPTPlot *)plot field:(NSUInteger)fieldEnum recordIndex:(NSUInteger)index
 {
-    NSDecimalNumber *num = [[plotData objectAtIndex:index] objectForKey:[NSNumber numberWithInt:fieldEnum]];
-    return num;
+    return self.plotData[index][@(fieldEnum)];
 }
 
 @end

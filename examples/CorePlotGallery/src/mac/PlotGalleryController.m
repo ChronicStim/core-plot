@@ -1,52 +1,67 @@
 //
-//  PlotGalleryController.m
-//  CorePlotGallery
-//
-//  Created by Jeff Buck on 9/5/10.
-//  Copyright 2010 Jeff Buck. All rights reserved.
+// PlotGalleryController.m
+// CorePlotGallery
 //
 
 #import "PlotGalleryController.h"
 
 #import "dlfcn.h"
-//#define EMBED_NU	1
+// #define EMBED_NU  1
 
-const float CPT_SPLIT_VIEW_MIN_LHS_WIDTH = 150.0f;
+static const CGFloat CPT_SPLIT_VIEW_MIN_LHS_WIDTH = 150.0;
 
-#define kThemeTableViewControllerNoTheme        @"None"
-#define kThemeTableViewControllerDefaultTheme   @"Default"
+static NSString *const kThemeTableViewControllerNoTheme      = @"None";
+static NSString *const kThemeTableViewControllerDefaultTheme = @"Default";
+
+@interface PlotGalleryController()
+
+@property (nonatomic, readwrite, strong, nullable) IBOutlet NSSplitView *splitView;
+@property (nonatomic, readwrite, strong, nullable) IBOutlet NSScrollView *scrollView;
+@property (nonatomic, readwrite, strong, nullable) IBOutlet IKImageBrowserView *imageBrowser;
+@property (nonatomic, readwrite, strong, nullable) IBOutlet NSPopUpButton *themePopUpButton;
+
+@property (nonatomic, readwrite, strong, nullable) IBOutlet PlotView *hostingView;
+
+@end
 
 @implementation PlotGalleryController
 
-@dynamic plotItem;
+@synthesize splitView;
+@synthesize scrollView;
+@synthesize imageBrowser;
+@synthesize themePopUpButton;
+
+@synthesize hostingView;
+
+@synthesize plotItem;
 @synthesize currentThemeName;
 
-- (void)setupThemes
+-(void)setupThemes
 {
-    [themePopUpButton addItemWithTitle:kThemeTableViewControllerDefaultTheme];
-    [themePopUpButton addItemWithTitle:kThemeTableViewControllerNoTheme];
+    [self.themePopUpButton addItemWithTitle:kThemeTableViewControllerDefaultTheme];
+    [self.themePopUpButton addItemWithTitle:kThemeTableViewControllerNoTheme];
 
-    for (Class c in [CPTTheme themeClasses]) {
-        [themePopUpButton addItemWithTitle:[c name]];
+    for ( Class c in [CPTTheme themeClasses] ) {
+        [self.themePopUpButton addItemWithTitle:[c name]];
     }
 
     self.currentThemeName = kThemeTableViewControllerDefaultTheme;
-    [themePopUpButton selectItemWithTitle:kThemeTableViewControllerDefaultTheme];
+    [self.themePopUpButton selectItemWithTitle:kThemeTableViewControllerDefaultTheme];
 }
 
-- (void)awakeFromNib
+-(void)awakeFromNib
 {
     [[PlotGallery sharedPlotGallery] sortByTitle];
 
-    [splitView setDelegate:self];
+    self.splitView.delegate = self;
 
-    [imageBrowser setDelegate:self];
-    [imageBrowser setDataSource:self];
-    [imageBrowser setCellsStyleMask:IKCellsStyleShadowed | IKCellsStyleTitled ]; //| IKCellsStyleSubtitled];
+    [self.imageBrowser setDelegate:self];
+    [self.imageBrowser setDataSource:self];
+    [self.imageBrowser setCellsStyleMask:IKCellsStyleShadowed | IKCellsStyleTitled]; // | IKCellsStyleSubtitled];
 
-    [imageBrowser reloadData];
+    [self.imageBrowser reloadData];
 
-    [hostingView setDelegate:self];
+    self.hostingView.delegate = self;
 
     [self setupThemes];
 
@@ -55,22 +70,21 @@ const float CPT_SPLIT_VIEW_MIN_LHS_WIDTH = 150.0f;
     // an explicit link of the Nu framework, which may not be installed
     nuHandle = dlopen("/Library/Frameworks/Nu.framework/Nu", RTLD_LAZY);
 
-    if (nuHandle)
-    {		
+    if ( nuHandle ) {
         NSString *consoleStartup =
-        @"(progn \
+            @"(progn \
            (load \"console\") \
            (set $console ((NuConsoleWindowController alloc) init)))";
 
         Class nuClass = NSClassFromString(@"Nu");
-        id parser = [nuClass performSelector:@selector(parser)];
-        id code = [parser performSelector:@selector(parse:) withObject:consoleStartup];
+        id parser     = [nuClass performSelector:@selector(parser)];
+        id code       = [parser performSelector:@selector(parse:) withObject:consoleStartup];
         [parser performSelector:@selector(eval:) withObject:code];
     }
 #endif
 }
 
-- (void)dealloc
+-(void)dealloc
 {
     [self setPlotItem:nil];
 
@@ -80,120 +94,256 @@ const float CPT_SPLIT_VIEW_MIN_LHS_WIDTH = 150.0f;
     [hostingView setDelegate:nil];
 
 #ifdef EMBED_NU
-    if (nuHandle) dlclose(nuHandle);
+    if ( nuHandle ) {
+        dlclose(nuHandle);
+    }
 #endif
-
-    [super dealloc];
 }
 
-- (void)setFrameSize:(NSSize)newSize
+-(void)setFrameSize:(NSSize)newSize
 {
-    if ([plotItem respondsToSelector:@selector(setFrameSize:)]) {
-        [plotItem setFrameSize:newSize];
+    if ( [self.plotItem respondsToSelector:@selector(setFrameSize:)] ) {
+        [self.plotItem setFrameSize:newSize];
     }
 }
 
 #pragma mark -
 #pragma mark Theme Selection
 
-- (CPTTheme *)currentTheme
+-(nullable CPTTheme *)currentTheme
 {
     CPTTheme *theme;
 
-    if (currentThemeName == kThemeTableViewControllerNoTheme) {
+    if ( [self.currentThemeName isEqualToString:kThemeTableViewControllerNoTheme] ) {
         theme = (id)[NSNull null];
     }
-    else if (currentThemeName == kThemeTableViewControllerDefaultTheme) {
+    else if ( [self.currentThemeName isEqualToString:kThemeTableViewControllerDefaultTheme] ) {
         theme = nil;
     }
     else {
-        theme = [CPTTheme themeNamed:currentThemeName];
+        theme = [CPTTheme themeNamed:self.currentThemeName];
     }
 
     return theme;
 }
 
-- (IBAction)themeSelectionDidChange:(id)sender
+-(IBAction)themeSelectionDidChange:(nonnull id)sender
 {
     self.currentThemeName = [sender titleOfSelectedItem];
-	[plotItem renderInView:hostingView withTheme:[self currentTheme]];
+
+    PlotView *hostView = self.hostingView;
+    if ( hostView ) {
+        [self.plotItem renderInView:hostView withTheme:[self currentTheme] animated:YES];
+    }
+}
+
+#pragma mark -
+#pragma mark Export Images
+
+-(void)exportTVImageWithSize:(CGSize)size toURL:(NSURL *)url showPlots:(BOOL)showPlots showBackground:(BOOL)showBackground
+{
+    if ( url ) {
+        CGRect imageFrame = CGRectMake(0.0, 0.0, size.width, size.height);
+
+        NSView *imageView = [[NSView alloc] initWithFrame:NSRectFromCGRect(imageFrame)];
+        [imageView setWantsLayer:YES];
+
+        [self.plotItem renderInView:imageView withTheme:nil animated:NO];
+
+        if ( !showBackground ) {
+            for ( CPTGraphHostingView *view in imageView.subviews ) {
+                CPTGraph *graph = view.hostedGraph;
+
+                graph.fill    = [CPTFill fillWithColor:[CPTColor clearColor]];
+                graph.axisSet = nil;
+
+                graph.plotAreaFrame.fill            = [CPTFill fillWithColor:[CPTColor clearColor]];
+                graph.plotAreaFrame.borderLineStyle = nil;
+
+                graph.plotAreaFrame.plotArea.fill            = [CPTFill fillWithColor:[CPTColor clearColor]];
+                graph.plotAreaFrame.plotArea.borderLineStyle = nil;
+            }
+        }
+
+        if ( !showPlots ) {
+            for ( CPTGraphHostingView *view in imageView.subviews ) {
+                for ( CPTPlot *plot in view.hostedGraph.allPlots ) {
+                    plot.hidden = YES;
+                }
+            }
+        }
+
+        CGSize boundsSize = imageFrame.size;
+
+        NSBitmapImageRep *layerImage = [[NSBitmapImageRep alloc]
+                                        initWithBitmapDataPlanes:NULL
+                                                      pixelsWide:(NSInteger)boundsSize.width
+                                                      pixelsHigh:(NSInteger)boundsSize.height
+                                                   bitsPerSample:8
+                                                 samplesPerPixel:4
+                                                        hasAlpha:YES
+                                                        isPlanar:NO
+                                                  colorSpaceName:NSCalibratedRGBColorSpace
+                                                     bytesPerRow:(NSInteger)boundsSize.width * 4
+                                                    bitsPerPixel:32];
+
+        NSGraphicsContext *bitmapContext = [NSGraphicsContext graphicsContextWithBitmapImageRep:layerImage];
+        CGContextRef context             = (CGContextRef)bitmapContext.graphicsPort;
+
+        CGContextClearRect( context, CGRectMake(0.0, 0.0, boundsSize.width, boundsSize.height) );
+        CGContextSetAllowsAntialiasing(context, true);
+        CGContextSetShouldSmoothFonts(context, false);
+        [imageView.layer renderInContext:context];
+        CGContextFlush(context);
+
+        NSImage *image = [[NSImage alloc] initWithSize:NSSizeFromCGSize(boundsSize)];
+        [image addRepresentation:layerImage];
+
+        NSData *tiffData          = image.TIFFRepresentation;
+        NSBitmapImageRep *tiffRep = [NSBitmapImageRep imageRepWithData:tiffData];
+        NSData *pngData           = [tiffRep representationUsingType:NSPNGFileType properties:@{}];
+
+        [pngData writeToURL:url atomically:NO];
+    }
+}
+
+-(IBAction)exportTVImagesToPNG:(id)sender
+{
+    NSOpenPanel *pngSavingDialog = [NSOpenPanel openPanel];
+
+    pngSavingDialog.canChooseFiles          = NO;
+    pngSavingDialog.canChooseDirectories    = YES;
+    pngSavingDialog.allowsMultipleSelection = NO;
+
+    if ( [pngSavingDialog runModal] == NSOKButton ) {
+        NSURL *url = pngSavingDialog.URL;
+        if ( url ) {
+            // top image
+            CGSize topShelfSize = CGSizeMake(1920.0, 720.0);
+
+            NSURL *topURL = [NSURL URLWithString:@"PlotGalleryTopShelf.png" relativeToURL:url];
+            [self exportTVImageWithSize:topShelfSize toURL:topURL showPlots:YES showBackground:YES];
+
+            // large icon image
+            CGSize largeIconSize = CGSizeMake(1280.0, 768.0);
+
+            NSURL *largeBackURL = [NSURL URLWithString:@"PlotGalleryLargeIconBack.png" relativeToURL:url];
+            [self exportTVImageWithSize:largeIconSize toURL:largeBackURL showPlots:NO showBackground:YES];
+
+            NSURL *largeFrontURL = [NSURL URLWithString:@"PlotGalleryLargeIconFront.png" relativeToURL:url];
+            [self exportTVImageWithSize:largeIconSize toURL:largeFrontURL showPlots:YES showBackground:NO];
+
+            // small icon image
+            CGSize smallIconSize = CGSizeMake(400.0, 240.0);
+
+            NSURL *smallBackURL = [NSURL URLWithString:@"PlotGallerySmallIconBack.png" relativeToURL:url];
+            [self exportTVImageWithSize:smallIconSize toURL:smallBackURL showPlots:NO showBackground:YES];
+
+            NSURL *smallFrontURL = [NSURL URLWithString:@"PlotGallerySmallIconFront.png" relativeToURL:url];
+            [self exportTVImageWithSize:smallIconSize toURL:smallFrontURL showPlots:YES showBackground:NO];
+        }
+    }
 }
 
 #pragma mark -
 #pragma mark PlotItem Property
 
-- (PlotItem *)plotItem
+-(void)setPlotItem:(nullable PlotItem *)item
 {
-    return plotItem;
-}
-
-- (void)setPlotItem:(PlotItem *)item
-{
-    if (plotItem != item) {
+    if ( plotItem != item ) {
         [plotItem killGraph];
-        [plotItem release];
 
-        plotItem = [item retain];
+        plotItem = item;
 
-        [plotItem renderInView:hostingView withTheme:[self currentTheme]];
+        PlotView *hostView = self.hostingView;
+        if ( hostView ) {
+            [plotItem renderInView:hostView withTheme:[self currentTheme] animated:YES];
+        }
     }
 }
 
+#pragma mark -
 #pragma mark IKImageBrowserViewDataSource methods
 
-- (NSUInteger)numberOfItemsInImageBrowser:(IKImageBrowserView *)browser
-{	
-    return [[PlotGallery sharedPlotGallery] count];
-}
-
-- (id)imageBrowser:(IKImageBrowserView *)browser itemAtIndex:(NSUInteger)index
+-(NSUInteger)numberOfItemsInImageBrowser:(nonnull IKImageBrowserView *)browser
 {
-    return [[PlotGallery sharedPlotGallery] objectAtIndex:index];
+    return [PlotGallery sharedPlotGallery].count;
 }
 
+-(nonnull id)imageBrowser:(nonnull IKImageBrowserView *)browser itemAtIndex:(NSUInteger)index
+{
+    return [[PlotGallery sharedPlotGallery] objectInSection:0 atIndex:index];
+}
+
+-(NSUInteger)numberOfGroupsInImageBrowser:(nonnull IKImageBrowserView *)aBrowser
+{
+    return [PlotGallery sharedPlotGallery].numberOfSections;
+}
+
+-(nonnull CPTDictionary *)imageBrowser:(nonnull IKImageBrowserView *)aBrowser groupAtIndex:(NSUInteger)index
+{
+    NSString *groupTitle = [PlotGallery sharedPlotGallery].sectionTitles[index];
+
+    NSUInteger offset = 0;
+
+    for ( NSUInteger i = 0; i < index; i++ ) {
+        offset += [[PlotGallery sharedPlotGallery] numberOfRowsInSection:i];
+    }
+
+    NSValue *groupRange = [NSValue valueWithRange:NSMakeRange(offset, [[PlotGallery sharedPlotGallery] numberOfRowsInSection:index])];
+
+    return @{
+               IKImageBrowserGroupStyleKey: @(IKGroupDisclosureStyle),
+               IKImageBrowserGroupTitleKey: groupTitle,
+               IKImageBrowserGroupRangeKey: groupRange
+    };
+}
+
+#pragma mark -
 #pragma mark IKImageBrowserViewDelegate methods
 
-- (void)imageBrowserSelectionDidChange:(IKImageBrowserView *)browser
+-(void)imageBrowserSelectionDidChange:(nonnull IKImageBrowserView *)browser
 {
-    NSUInteger index = [[browser selectionIndexes] firstIndex];
+    NSUInteger index = [browser selectionIndexes].firstIndex;
 
-    if (index != NSNotFound) {
-        PlotItem *item = [[PlotGallery sharedPlotGallery] objectAtIndex:index];
+    if ( index != NSNotFound ) {
+        PlotItem *item = [[PlotGallery sharedPlotGallery] objectInSection:0 atIndex:index];
         self.plotItem = item;
     }
 }
 
+#pragma mark -
 #pragma mark NSSplitViewDelegate methods
 
-- (CGFloat)splitView:(NSSplitView *)sv constrainMinCoordinate:(CGFloat)coord ofSubviewAt:(NSInteger)index
+-(CGFloat)splitView:(nonnull NSSplitView *)sv constrainMinCoordinate:(CGFloat)coord ofSubviewAt:(NSInteger)index
 {
     return coord + CPT_SPLIT_VIEW_MIN_LHS_WIDTH;
 }
 
-- (CGFloat)splitView:(NSSplitView *)sv constrainMaxCoordinate:(CGFloat)coord ofSubviewAt:(NSInteger)index
+-(CGFloat)splitView:(nonnull NSSplitView *)sv constrainMaxCoordinate:(CGFloat)coord ofSubviewAt:(NSInteger)index
 {
     return coord - CPT_SPLIT_VIEW_MIN_LHS_WIDTH;
 }
 
-- (void)splitView:(NSSplitView*)sender resizeSubviewsWithOldSize:(NSSize)oldSize
+-(void)splitView:(nonnull NSSplitView *)sender resizeSubviewsWithOldSize:(NSSize)oldSize
 {
     // Lock the LHS width
-    NSRect frame = [sender frame];
-    NSView *lhs = [[sender subviews] objectAtIndex:0];
-    NSRect lhsRect = [lhs frame];
-    NSView *rhs = [[sender subviews] objectAtIndex:1];
-    NSRect rhsRect = [rhs frame];
+    NSRect frame   = sender.frame;
+    NSView *lhs    = sender.subviews[0];
+    NSRect lhsRect = lhs.frame;
+    NSView *rhs    = sender.subviews[1];
+    NSRect rhsRect = rhs.frame;
 
-    CGFloat dividerThickness = [sender dividerThickness];
+    CGFloat dividerThickness = sender.dividerThickness;
 
     lhsRect.size.height = frame.size.height;
 
-    rhsRect.size.width = frame.size.width - lhsRect.size.width - dividerThickness;
+    rhsRect.size.width  = frame.size.width - lhsRect.size.width - dividerThickness;
     rhsRect.size.height = frame.size.height;
-    rhsRect.origin.x = lhsRect.size.width + dividerThickness;
-	
-    [lhs setFrame:lhsRect];
-    [rhs setFrame:rhsRect];
+    rhsRect.origin.x    = lhsRect.size.width + dividerThickness;
+
+    lhs.frame = lhsRect;
+    rhs.frame = rhsRect;
 }
 
 @end

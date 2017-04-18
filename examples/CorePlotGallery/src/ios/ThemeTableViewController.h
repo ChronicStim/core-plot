@@ -1,31 +1,16 @@
 //
-//  ThemeTableViewController.h
-//  CorePlotGallery
-//
-//  Created by Jeff Buck on 8/31/10.
-//  Copyright 2010 Jeff Buck. All rights reserved.
+// ThemeTableViewController.h
+// CorePlotGallery
 //
 
-#import <UIKit/UIKit.h>
+extern NSString *__nonnull const kThemeTableViewControllerNoTheme;
+extern NSString *__nonnull const kThemeTableViewControllerDefaultTheme;
 
-#define kThemeTableViewControllerNoTheme @"None"
-#define kThemeTableViewControllerDefaultTheme @"Default"
+extern NSString *__nonnull const PlotGalleryThemeDidChangeNotification;
+extern NSString *__nonnull const PlotGalleryThemeNameKey;
 
-@protocol ThemeTableViewControllerDelegate <NSObject>
-
-- (void)themeSelectedAtIndex:(NSString*)themeName;
-
-@end
-
+#pragma mark -
 
 @interface ThemeTableViewController : UITableViewController
-{
-    UIPopoverController                     *themePopoverController;
-    id<ThemeTableViewControllerDelegate>    delegate;
-    NSMutableArray                          *themes;
-}
-
-@property (nonatomic, retain) UIPopoverController *themePopoverController;
-@property (nonatomic, retain) id<ThemeTableViewControllerDelegate> delegate;
 
 @end

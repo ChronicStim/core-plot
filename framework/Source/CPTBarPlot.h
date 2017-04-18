@@ -1,114 +1,230 @@
-#import <Foundation/Foundation.h>
-#import "CPTPlot.h"
 #import "CPTDefinitions.h"
+#import "CPTFill.h"
+#import "CPTLineStyle.h"
+#import "CPTPlot.h"
 
-///	@file
+/// @file
 
-@class CPTLineStyle;
 @class CPTMutableNumericData;
 @class CPTNumericData;
-@class CPTFill;
 @class CPTPlotRange;
 @class CPTColor;
 @class CPTBarPlot;
 @class CPTTextLayer;
 @class CPTTextStyle;
 
-///	@ingroup plotBindingsBarPlot
+/**
+ *  @brief Bar plot bindings.
+ **/
+typedef NSString *CPTBarPlotBinding cpt_swift_struct;
+
+/// @ingroup plotBindingsBarPlot
 /// @{
-extern NSString * const CPTBarPlotBindingBarLocations;
-extern NSString * const CPTBarPlotBindingBarTips;
-extern NSString * const CPTBarPlotBindingBarBases;
-///	@}
+extern CPTBarPlotBinding __nonnull const CPTBarPlotBindingBarLocations;
+extern CPTBarPlotBinding __nonnull const CPTBarPlotBindingBarTips;
+extern CPTBarPlotBinding __nonnull const CPTBarPlotBindingBarBases;
+extern CPTBarPlotBinding __nonnull const CPTBarPlotBindingBarFills;
+extern CPTBarPlotBinding __nonnull const CPTBarPlotBindingBarLineStyles;
+/// @}
 
-/**	@brief Enumeration of bar plot data source field types
+/**
+ *  @brief Enumeration of bar plot data source field types
  **/
-typedef enum _CPTBarPlotField {
-    CPTBarPlotFieldBarLocation = 2,  ///< Bar location on independent coordinate axis.
-    CPTBarPlotFieldBarTip   	  = 3,	///< Bar tip value.
-    CPTBarPlotFieldBarBase     = 4	///< Bar base (used only if barBasesVary is YES).
-} CPTBarPlotField;
+typedef NS_ENUM (NSInteger, CPTBarPlotField) {
+    CPTBarPlotFieldBarLocation, ///< Bar location on independent coordinate axis.
+    CPTBarPlotFieldBarTip,      ///< Bar tip value.
+    CPTBarPlotFieldBarBase      ///< Bar base (used only if @link CPTBarPlot::barBasesVary barBasesVary @endlink is YES).
+};
 
 #pragma mark -
 
-/**	@brief A bar plot data source.
+/**
+ *  @brief A bar plot data source.
  **/
-@protocol CPTBarPlotDataSource <CPTPlotDataSource> 
-@optional 
+@protocol CPTBarPlotDataSource<CPTPlotDataSource>
+@optional
 
-/**	@brief Gets a bar fill for the given bar plot. This method is optional.
- *	@param barPlot The bar plot.
- *	@param index The data index of interest.
- *	@return The bar fill for the bar with the given index. If the data source returns nil, the default fill is used.
- *	If the data source returns an NSNull object, no fill is drawn.
+/// @name Bar Style
+/// @{
+
+/** @brief @optional Gets an array of bar fills for the given bar plot.
+ *  @param barPlot The bar plot.
+ *  @param indexRange The range of the data indexes of interest.
+ *  @return An array of bar fills.
  **/
--(CPTFill *)barFillForBarPlot:(CPTBarPlot *)barPlot recordIndex:(NSUInteger)index; 
+-(nullable CPTFillArray *)barFillsForBarPlot:(nonnull CPTBarPlot *)barPlot recordIndexRange:(NSRange)indexRange;
 
-/**	@brief Gets a bar line style for the given bar plot. This method is optional.
- *	@param barPlot The bar plot.
- *	@param index The data index of interest.
- *	@return The bar line style for the bar with the given index. If the data source returns nil, the default line style is used.
- *	If the data source returns an NSNull object, no line is drawn.
+/** @brief @optional Gets a bar fill for the given bar plot.
+ *  This method will not be called if
+ *  @link CPTBarPlotDataSource::barFillsForBarPlot:recordIndexRange: -barFillsForBarPlot:recordIndexRange: @endlink
+ *  is also implemented in the datasource.
+ *  @param barPlot The bar plot.
+ *  @param idx The data index of interest.
+ *  @return The bar fill for the bar with the given index. If the data source returns @nil, the default fill is used.
+ *  If the data source returns an NSNull object, no fill is drawn.
  **/
--(CPTLineStyle *)barLineStyleForBarPlot:(CPTBarPlot *)barPlot recordIndex:(NSUInteger)index; 
+-(nullable CPTFill *)barFillForBarPlot:(nonnull CPTBarPlot *)barPlot recordIndex:(NSUInteger)idx;
 
-@end 
+/** @brief @optional Gets an array of bar line styles for the given bar plot.
+ *  @param barPlot The bar plot.
+ *  @param indexRange The range of the data indexes of interest.
+ *  @return An array of line styles.
+ **/
+-(nullable CPTLineStyleArray *)barLineStylesForBarPlot:(nonnull CPTBarPlot *)barPlot recordIndexRange:(NSRange)indexRange;
+
+/** @brief @optional Gets a bar line style for the given bar plot.
+ *  This method will not be called if
+ *  @link CPTBarPlotDataSource::barLineStylesForBarPlot:recordIndexRange: -barLineStylesForBarPlot:recordIndexRange: @endlink
+ *  is also implemented in the datasource.
+ *  @param barPlot The bar plot.
+ *  @param idx The data index of interest.
+ *  @return The bar line style for the bar with the given index. If the data source returns @nil, the default line style is used.
+ *  If the data source returns an NSNull object, no line is drawn.
+ **/
+-(nullable CPTLineStyle *)barLineStyleForBarPlot:(nonnull CPTBarPlot *)barPlot recordIndex:(NSUInteger)idx;
+
+/// @}
+
+/// @name Legends
+/// @{
+
+/** @brief @optional Gets the legend title for the given bar plot bar.
+ *  @param barPlot The bar plot.
+ *  @param idx The data index of interest.
+ *  @return The title text for the legend entry for the point with the given index.
+ **/
+-(nullable NSString *)legendTitleForBarPlot:(nonnull CPTBarPlot *)barPlot recordIndex:(NSUInteger)idx;
+
+/** @brief @optional Gets the styled legend title for the given bar plot bar.
+ *  @param barPlot The bar plot.
+ *  @param idx The data index of interest.
+ *  @return The styled title text for the legend entry for the point with the given index.
+ **/
+-(nullable NSAttributedString *)attributedLegendTitleForBarPlot:(nonnull CPTBarPlot *)barPlot recordIndex:(NSUInteger)idx;
+
+/// @}
+@end
 
 #pragma mark -
 
-/**	@brief Bar plot delegate.
+/**
+ *  @brief Bar plot delegate.
  **/
-@protocol CPTBarPlotDelegate <NSObject>
+@protocol CPTBarPlotDelegate<CPTPlotDelegate>
 
 @optional
 
-// @name Point selection
+/// @name Point Selection
 /// @{
 
-/**	@brief Informs delegate that a point was touched.
- *	@param plot The scatter plot.
- *	@param index Index of touched point
+/** @brief @optional Informs the delegate that a bar
+ *  @if MacOnly was both pressed and released. @endif
+ *  @if iOSOnly received both the touch down and up events. @endif
+ *  @param plot The bar plot.
+ *  @param idx The index of the
+ *
+ *  @if MacOnly clicked bar. @endif
+ *  @if iOSOnly touched bar. @endif
  **/
--(void)barPlot:(CPTBarPlot *)plot barWasSelectedAtRecordIndex:(NSUInteger)index;
+-(void)barPlot:(nonnull CPTBarPlot *)plot barWasSelectedAtRecordIndex:(NSUInteger)idx;
 
-///	@}
+/** @brief @optional Informs the delegate that a bar
+ *  @if MacOnly was both pressed and released. @endif
+ *  @if iOSOnly received both the touch down and up events. @endif
+ *  @param plot The bar plot.
+ *  @param idx The index of the
+ *
+ *  @if MacOnly clicked bar. @endif
+ *  @if iOSOnly touched bar. @endif
+ *  @param event The event that triggered the selection.
+ **/
+-(void)barPlot:(nonnull CPTBarPlot *)plot barWasSelectedAtRecordIndex:(NSUInteger)idx withEvent:(nonnull CPTNativeEvent *)event;
+
+/** @brief @optional Informs the delegate that a bar
+ *  @if MacOnly was pressed. @endif
+ *  @if iOSOnly touch started. @endif
+ *  @param plot The bar plot.
+ *  @param idx The index of the
+ *  @if MacOnly clicked bar. @endif
+ *  @if iOSOnly touched bar. @endif
+ **/
+-(void)barPlot:(nonnull CPTBarPlot *)plot barTouchDownAtRecordIndex:(NSUInteger)idx;
+
+/** @brief @optional Informs the delegate that a bar
+ *  @if MacOnly was pressed. @endif
+ *  @if iOSOnly touch started. @endif
+ *  @param plot The bar plot.
+ *  @param idx The index of the
+ *  @if MacOnly clicked bar. @endif
+ *  @if iOSOnly touched bar. @endif
+ *  @param event The event that triggered the selection.
+ **/
+-(void)barPlot:(nonnull CPTBarPlot *)plot barTouchDownAtRecordIndex:(NSUInteger)idx withEvent:(nonnull CPTNativeEvent *)event;
+
+/** @brief @optional Informs the delegate that a bar
+ *  @if MacOnly was released. @endif
+ *  @if iOSOnly touch ended. @endif
+ *  @param plot The bar plot.
+ *  @param idx The index of the
+ *  @if MacOnly clicked bar. @endif
+ *  @if iOSOnly touched bar. @endif
+ **/
+-(void)barPlot:(nonnull CPTBarPlot *)plot barTouchUpAtRecordIndex:(NSUInteger)idx;
+
+/** @brief @optional Informs the delegate that a bar
+ *  @if MacOnly was released. @endif
+ *  @if iOSOnly touch ended. @endif
+ *  @param plot The bar plot.
+ *  @param idx The index of the
+ *  @if MacOnly clicked bar. @endif
+ *  @if iOSOnly touched bar. @endif
+ *  @param event The event that triggered the selection.
+ **/
+-(void)barPlot:(nonnull CPTBarPlot *)plot barTouchUpAtRecordIndex:(NSUInteger)idx withEvent:(nonnull CPTNativeEvent *)event;
+
+/// @}
 
 @end
 
 #pragma mark -
 
-@interface CPTBarPlot : CPTPlot {
-	@private
-    CPTLineStyle *lineStyle;
-    CPTFill *fill;
-    NSDecimal barWidth;
-	CGFloat barWidthScale;
-    NSDecimal barOffset;
-    CGFloat barOffsetScale;
-    CGFloat barCornerRadius;
-    NSDecimal baseValue;	
-    BOOL barsAreHorizontal;
-    BOOL barBasesVary;
-    BOOL barWidthsAreInViewCoordinates;
-    CPTPlotRange *plotRange;
-} 
+@interface CPTBarPlot : CPTPlot
 
+/// @name Appearance
+/// @{
 @property (nonatomic, readwrite, assign) BOOL barWidthsAreInViewCoordinates;
-@property (nonatomic, readwrite, assign) NSDecimal barWidth;
-@property (nonatomic, readwrite, assign) CGFloat barWidthScale;
-@property (nonatomic, readwrite, assign) NSDecimal barOffset;
-@property (nonatomic, readwrite, assign) CGFloat barOffsetScale;
+@property (nonatomic, readwrite, strong, nonnull) NSNumber *barWidth;
+@property (nonatomic, readwrite, strong, nonnull) NSNumber *barOffset;
 @property (nonatomic, readwrite, assign) CGFloat barCornerRadius;
-@property (nonatomic, readwrite, copy) CPTLineStyle *lineStyle;
-@property (nonatomic, readwrite, copy) CPTFill *fill;
+@property (nonatomic, readwrite, assign) CGFloat barBaseCornerRadius;
 @property (nonatomic, readwrite, assign) BOOL barsAreHorizontal;
-@property (nonatomic, readwrite, assign) NSDecimal baseValue;
+@property (nonatomic, readwrite, strong, nonnull) NSNumber *baseValue;
 @property (nonatomic, readwrite, assign) BOOL barBasesVary;
-@property (nonatomic, readwrite, copy) CPTPlotRange *plotRange;
+@property (nonatomic, readwrite, copy, nullable) CPTPlotRange *plotRange;
+/// @}
+
+/// @name Drawing
+/// @{
+@property (nonatomic, readwrite, copy, nullable) CPTLineStyle *lineStyle;
+@property (nonatomic, readwrite, copy, nullable) CPTFill *fill;
+/// @}
 
 /// @name Factory Methods
 /// @{
-+(CPTBarPlot *)tubularBarPlotWithColor:(CPTColor *)color horizontalBars:(BOOL)horizontal;
-///	@}
++(nonnull instancetype)tubularBarPlotWithColor:(nonnull CPTColor *)color horizontalBars:(BOOL)horizontal;
+/// @}
+
+/// @name Data Ranges
+/// @{
+-(nullable CPTPlotRange *)plotRangeEnclosingBars;
+/// @}
+
+/// @name Bar Style
+/// @{
+-(void)reloadBarFills;
+-(void)reloadBarFillsInIndexRange:(NSRange)indexRange;
+-(void)reloadBarLineStyles;
+-(void)reloadBarLineStylesInIndexRange:(NSRange)indexRange;
+/// @}
 
 @end

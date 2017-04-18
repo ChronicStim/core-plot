@@ -1,8 +1,8 @@
 #import "PlotItem.h"
 
-@interface DonutChart : PlotItem <CPTPlotSpaceDelegate, CPTPlotDataSource>
-{
-    NSArray *plotData;
-}
+@interface DonutChart : PlotItem<CPTPlotSpaceDelegate,
+                                 CPTPlotDataSource,
+                                 CPTPieChartDelegate,
+                                 CPTAnimationDelegate>
 
 @end

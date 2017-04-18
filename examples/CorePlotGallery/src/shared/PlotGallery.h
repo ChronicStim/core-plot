@@ -1,24 +1,23 @@
 //
-//  PlotGallery.h
-//  CorePlotGallery
-//
-//  Created by Jeff Buck on 7/31/10.
-//  Copyright 2010 Jeff Buck. All rights reserved.
+// PlotGallery.h
+// CorePlotGallery
 //
 
 #import "PlotItem.h"
 
-@interface PlotGallery : NSObject
-{
-    NSMutableArray *plotItems;
-}
+@interface PlotGallery : NSObject<NSCopying>
 
-+ (PlotGallery *)sharedPlotGallery;
+@property (nonatomic, readonly) NSUInteger count;
+@property (nonatomic, readonly) NSUInteger numberOfSections;
+@property (nonatomic, readonly, strong, nonnull) CPTStringArray *sectionTitles;
 
-- (void)addPlotItem:(PlotItem *)plotItem;
++(nonnull PlotGallery *)sharedPlotGallery;
 
-- (void)sortByTitle;
-- (NSUInteger)count;
-- (PlotItem *)objectAtIndex:(NSUInteger)index;
+-(void)addPlotItem:(nonnull PlotItem *)plotItem;
+
+-(void)sortByTitle;
+
+-(nonnull PlotItem *)objectInSection:(NSUInteger)section atIndex:(NSUInteger)index;
+-(NSUInteger)numberOfRowsInSection:(NSUInteger)section;
 
 @end

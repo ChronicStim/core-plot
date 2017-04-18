@@ -1,9 +1,3 @@
-
-#import <Foundation/Foundation.h>
-
-
-@interface CPTDecimalNumberValueTransformer : NSValueTransformer {
-
-}
+@interface CPTDecimalNumberValueTransformer : NSValueTransformer
 
 @end

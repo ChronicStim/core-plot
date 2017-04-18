@@ -1,19 +1,14 @@
 //
-//  StockPlotAppDelegate.h
-//  StockPlot
+// StockPlotAppDelegate.h
+// StockPlot
 //
-//  Created by Jonathan Saggau on 6/19/09.
-//  Copyright __MyCompanyName__ 2009. All rights reserved.
+// Created by Jonathan Saggau on 6/19/09.
+// Copyright __MyCompanyName__ 2009. All rights reserved.
 //
 
-@interface StockPlotAppDelegate : NSObject <UIApplicationDelegate> {
-    
-    UIWindow *window;
-    UINavigationController *navigationController;
-}
+@interface StockPlotAppDelegate : NSObject<UIApplicationDelegate>
 
-@property (nonatomic, retain) IBOutlet UIWindow *window;
-@property (nonatomic, retain) IBOutlet UINavigationController *navigationController;
+@property (nonatomic, strong, nullable) IBOutlet UIWindow *window;
+@property (nonatomic, strong, nullable) IBOutlet UINavigationController *navigationController;
 
 @end
-

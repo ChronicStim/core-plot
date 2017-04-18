@@ -2,17 +2,13 @@
 
 @class CPTPlot;
 
-@interface CPTPlotGroup : CPTLayer {
-	@private
-	id <NSCopying, NSCoding, NSObject> identifier;
-}
-
-@property (nonatomic, readwrite, copy) id <NSCopying, NSCoding, NSObject> identifier;
+@interface CPTPlotGroup : CPTLayer
 
 /// @name Adding and Removing Plots
 /// @{
--(void)addPlot:(CPTPlot *)plot; 
--(void)removePlot:(CPTPlot *)plot;
-///	@}
+-(void)addPlot:(nonnull CPTPlot *)plot;
+-(void)removePlot:(nullable CPTPlot *)plot;
+-(void)insertPlot:(nonnull CPTPlot *)plot atIndex:(NSUInteger)idx;
+/// @}
 
 @end

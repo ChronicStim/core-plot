@@ -1,9 +1,6 @@
 //
-//  Plot_Gallery_MacAppDelegate.m
-//  CorePlotGallery
-//
-//  Created by Jeff Buck on 9/5/10.
-//  Copyright 2010 Jeff Buck. All rights reserved.
+// Plot_Gallery_MacAppDelegate.m
+// CorePlotGallery
 //
 
 #import "Plot_Gallery_MacAppDelegate.h"
@@ -12,11 +9,11 @@
 
 @synthesize window;
 
-- (void)applicationDidFinishLaunching:(NSNotification *)aNotification
+-(void)applicationDidFinishLaunching:(nonnull NSNotification *)aNotification
 {
 }
 
-- (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender
+-(BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender
 {
     return YES;
 }

@@ -1,750 +1,1074 @@
 #import "CPTUtilities.h"
+
+#import "CPTLineStyle.h"
 #import <tgmath.h>
 
 // cache common values to improve performance
-#define kCacheSize 3
-static NSDecimal cache[kCacheSize];
-static BOOL cacheValueInitialized[kCacheSize] = {NO, NO, NO};
 
+#define kCacheSize 4 ///< @hideinitializer The size of the decimal number cache used by various utility functions.
+
+static NSDecimal cache[kCacheSize];
+static BOOL cacheValueInitialized[kCacheSize] = { NO, NO, NO, NO };
+
+#pragma mark -
 #pragma mark Convert NSDecimal to primitive types
 
 /**
- *	@brief Converts an NSDecimal value to an 8-bit integer.
- *	@param decimalNumber The NSDecimal value.
- *	@return The converted value.
+ *  @brief Converts an @ref NSDecimal value to an 8-bit integer.
+ *  @param decimalNumber The @ref NSDecimal value.
+ *  @return The converted value.
  **/
 int8_t CPTDecimalCharValue(NSDecimal decimalNumber)
 {
-	return (int8_t)[[NSDecimalNumber decimalNumberWithDecimal:decimalNumber] charValue]; 
+    return (int8_t)[NSDecimalNumber decimalNumberWithDecimal:decimalNumber].charValue;
 }
 
 /**
- *	@brief Converts an NSDecimal value to a 16-bit integer.
- *	@param decimalNumber The NSDecimal value.
- *	@return The converted value.
+ *  @brief Converts an @ref NSDecimal value to a 16-bit integer.
+ *  @param decimalNumber The @ref NSDecimal value.
+ *  @return The converted value.
  **/
 int16_t CPTDecimalShortValue(NSDecimal decimalNumber)
 {
-	return (int16_t)[[NSDecimalNumber decimalNumberWithDecimal:decimalNumber] shortValue]; 
+    return (int16_t)[NSDecimalNumber decimalNumberWithDecimal:decimalNumber].shortValue;
 }
 
 /**
- *	@brief Converts an NSDecimal value to a 32-bit integer.
- *	@param decimalNumber The NSDecimal value.
- *	@return The converted value.
+ *  @brief Converts an @ref NSDecimal value to a 32-bit integer.
+ *  @param decimalNumber The @ref NSDecimal value.
+ *  @return The converted value.
  **/
 int32_t CPTDecimalLongValue(NSDecimal decimalNumber)
 {
-	return (int32_t)[[NSDecimalNumber decimalNumberWithDecimal:decimalNumber] longValue]; 
+    return (int32_t)[NSDecimalNumber decimalNumberWithDecimal:decimalNumber].longValue;
 }
 
 /**
- *	@brief Converts an NSDecimal value to a 64-bit integer.
- *	@param decimalNumber The NSDecimal value.
- *	@return The converted value.
+ *  @brief Converts an @ref NSDecimal value to a 64-bit integer.
+ *  @param decimalNumber The @ref NSDecimal value.
+ *  @return The converted value.
  **/
 int64_t CPTDecimalLongLongValue(NSDecimal decimalNumber)
 {
-	return (int64_t)[[NSDecimalNumber decimalNumberWithDecimal:decimalNumber] longLongValue]; 
+    return (int64_t)[NSDecimalNumber decimalNumberWithDecimal:decimalNumber].longLongValue;
 }
 
 /**
- *	@brief Converts an NSDecimal value to an int.
- *	@param decimalNumber The NSDecimal value.
- *	@return The converted value.
+ *  @brief Converts an @ref NSDecimal value to an @int.
+ *  @param decimalNumber The @ref NSDecimal value.
+ *  @return The converted value.
  **/
 int CPTDecimalIntValue(NSDecimal decimalNumber)
 {
-	return (int)[[NSDecimalNumber decimalNumberWithDecimal:decimalNumber] intValue]; 
+    return [NSDecimalNumber decimalNumberWithDecimal:decimalNumber].intValue;
 }
 
 /**
- *	@brief Converts an NSDecimal value to an NSInteger.
- *	@param decimalNumber The NSDecimal value.
- *	@return The converted value.
+ *  @brief Converts an @ref NSDecimal value to an @ref NSInteger.
+ *  @param decimalNumber The @ref NSDecimal value.
+ *  @return The converted value.
  **/
 NSInteger CPTDecimalIntegerValue(NSDecimal decimalNumber)
 {
-	return (NSInteger)[[NSDecimalNumber decimalNumberWithDecimal:decimalNumber] integerValue]; 
+    return (NSInteger)[NSDecimalNumber decimalNumberWithDecimal:decimalNumber].integerValue;
 }
 
 /**
- *	@brief Converts an NSDecimal value to an unsigned 8-bit integer.
- *	@param decimalNumber The NSDecimal value.
- *	@return The converted value.
+ *  @brief Converts an @ref NSDecimal value to an unsigned 8-bit integer.
+ *  @param decimalNumber The @ref NSDecimal value.
+ *  @return The converted value.
  **/
 uint8_t CPTDecimalUnsignedCharValue(NSDecimal decimalNumber)
 {
-	return (uint8_t)[[NSDecimalNumber decimalNumberWithDecimal:decimalNumber] unsignedCharValue]; 
+    return (uint8_t)[NSDecimalNumber decimalNumberWithDecimal:decimalNumber].unsignedCharValue;
 }
 
 /**
- *	@brief Converts an NSDecimal value to an unsigned 16-bit integer.
- *	@param decimalNumber The NSDecimal value.
- *	@return The converted value.
+ *  @brief Converts an @ref NSDecimal value to an unsigned 16-bit integer.
+ *  @param decimalNumber The @ref NSDecimal value.
+ *  @return The converted value.
  **/
 uint16_t CPTDecimalUnsignedShortValue(NSDecimal decimalNumber)
 {
-	return (uint16_t)[[NSDecimalNumber decimalNumberWithDecimal:decimalNumber] unsignedShortValue]; 
+    return (uint16_t)[NSDecimalNumber decimalNumberWithDecimal:decimalNumber].unsignedShortValue;
 }
 
 /**
- *	@brief Converts an NSDecimal value to an unsigned 32-bit integer.
- *	@param decimalNumber The NSDecimal value.
- *	@return The converted value.
+ *  @brief Converts an @ref NSDecimal value to an unsigned 32-bit integer.
+ *  @param decimalNumber The @ref NSDecimal value.
+ *  @return The converted value.
  **/
 uint32_t CPTDecimalUnsignedLongValue(NSDecimal decimalNumber)
 {
-	return (uint32_t)[[NSDecimalNumber decimalNumberWithDecimal:decimalNumber] unsignedLongValue]; 
+    return (uint32_t)[NSDecimalNumber decimalNumberWithDecimal:decimalNumber].unsignedLongValue;
 }
 
 /**
- *	@brief Converts an NSDecimal value to an unsigned 64-bit integer.
- *	@param decimalNumber The NSDecimal value.
- *	@return The converted value.
+ *  @brief Converts an @ref NSDecimal value to an unsigned 64-bit integer.
+ *  @param decimalNumber The @ref NSDecimal value.
+ *  @return The converted value.
  **/
 uint64_t CPTDecimalUnsignedLongLongValue(NSDecimal decimalNumber)
 {
-	return (uint64_t)[[NSDecimalNumber decimalNumberWithDecimal:decimalNumber] unsignedLongLongValue]; 
+    return (uint64_t)[NSDecimalNumber decimalNumberWithDecimal:decimalNumber].unsignedLongLongValue;
 }
 
 /**
- *	@brief Converts an NSDecimal value to an unsigned int.
- *	@param decimalNumber The NSDecimal value.
- *	@return The converted value.
+ *  @brief Converts an @ref NSDecimal value to an @uint.
+ *  @param decimalNumber The @ref NSDecimal value.
+ *  @return The converted value.
  **/
 unsigned int CPTDecimalUnsignedIntValue(NSDecimal decimalNumber)
 {
-	return (unsigned int)[[NSDecimalNumber decimalNumberWithDecimal:decimalNumber] unsignedIntValue]; 
+    return [NSDecimalNumber decimalNumberWithDecimal:decimalNumber].unsignedIntValue;
 }
 
 /**
- *	@brief Converts an NSDecimal value to an NSUInteger.
- *	@param decimalNumber The NSDecimal value.
- *	@return The converted value.
+ *  @brief Converts an @ref NSDecimal value to an @ref NSUInteger.
+ *  @param decimalNumber The @ref NSDecimal value.
+ *  @return The converted value.
  **/
 NSUInteger CPTDecimalUnsignedIntegerValue(NSDecimal decimalNumber)
 {
-	return (NSUInteger)[[NSDecimalNumber decimalNumberWithDecimal:decimalNumber] unsignedIntegerValue]; 
+    return (NSUInteger)[NSDecimalNumber decimalNumberWithDecimal:decimalNumber].unsignedIntegerValue;
 }
 
 /**
- *	@brief Converts an NSDecimal value to a float.
- *	@param decimalNumber The NSDecimal value.
- *	@return The converted value.
+ *  @brief Converts an @ref NSDecimal value to a @float.
+ *  @param decimalNumber The @ref NSDecimal value.
+ *  @return The converted value.
  **/
 float CPTDecimalFloatValue(NSDecimal decimalNumber)
 {
-	return (float)[[NSDecimalNumber decimalNumberWithDecimal:decimalNumber] floatValue]; 
+    return [NSDecimalNumber decimalNumberWithDecimal:decimalNumber].floatValue;
 }
 
 /**
- *	@brief Converts an NSDecimal value to a double.
- *	@param decimalNumber The NSDecimal value.
- *	@return The converted value.
+ *  @brief Converts an @ref NSDecimal value to a @double.
+ *  @param decimalNumber The @ref NSDecimal value.
+ *  @return The converted value.
  **/
 double CPTDecimalDoubleValue(NSDecimal decimalNumber)
 {
-	return (double)[[NSDecimalNumber decimalNumberWithDecimal:decimalNumber] doubleValue]; 
+    return [NSDecimalNumber decimalNumberWithDecimal:decimalNumber].doubleValue;
 }
 
 /**
- *	@brief Converts an NSDecimal value to a CGFloat.
- *	@param decimalNumber The NSDecimal value.
- *	@return The converted value.
+ *  @brief Converts an @ref NSDecimal value to a @ref CGFloat.
+ *  @param decimalNumber The @ref NSDecimal value.
+ *  @return The converted value.
  **/
 CGFloat CPTDecimalCGFloatValue(NSDecimal decimalNumber)
 {
 #if CGFLOAT_IS_DOUBLE
-	return (CGFloat)[[NSDecimalNumber decimalNumberWithDecimal:decimalNumber] doubleValue]; 
+    return (CGFloat)[NSDecimalNumber decimalNumberWithDecimal:decimalNumber].doubleValue;
+
 #else
-	return (CGFloat)[[NSDecimalNumber decimalNumberWithDecimal:decimalNumber] floatValue]; 
+    return (CGFloat)[[NSDecimalNumber decimalNumberWithDecimal:decimalNumber] floatValue];
 #endif
 }
 
 /**
- *	@brief Converts an NSDecimal value to an NSString.
- *	@param decimalNumber The NSDecimal value.
- *	@return The converted value.
+ *  @brief Converts an @ref NSDecimal value to an NSString.
+ *  @param decimalNumber The @ref NSDecimal value.
+ *  @return The converted value.
  **/
-NSString *CPTDecimalStringValue(NSDecimal decimalNumber)
+NSString *__nonnull CPTDecimalStringValue(NSDecimal decimalNumber)
 {
-	return (NSString *)[[NSDecimalNumber decimalNumberWithDecimal:decimalNumber] stringValue]; 
+    return [NSDecimalNumber decimalNumberWithDecimal:decimalNumber].stringValue;
 }
 
 #pragma mark -
 #pragma mark Convert primitive types to NSDecimal
 
 /**
- *	@brief Converts an 8-bit integer value to an NSDecimal.
- *	@param i The integer value.
- *	@return The converted value.
+ *  @brief Converts an 8-bit integer value to an @ref NSDecimal.
+ *  @param anInt The integer value.
+ *  @return The converted value.
  **/
-NSDecimal CPTDecimalFromChar(int8_t i)
+NSDecimal CPTDecimalFromChar(int8_t anInt)
 {
-	if ( (i >= 0) && (i < kCacheSize) ) {
-		if ( !cacheValueInitialized[i] ) {
-			cache[i] = [[NSNumber numberWithChar:i] decimalValue];
-			cacheValueInitialized[i] = YES;
-		}
-		return cache[i];
-	}
-	return [[NSNumber numberWithChar:i] decimalValue];
-}
+    if ( (anInt >= 0) && (anInt < kCacheSize) ) {
+        if ( !cacheValueInitialized[anInt] ) {
+            NSString *stringValue = [[NSString alloc] initWithFormat:@"%hhd", anInt];
+            cache[anInt] = CPTDecimalFromString(stringValue);
 
-/**
- *	@brief Converts a 16-bit integer value to an NSDecimal.
- *	@param i The integer value.
- *	@return The converted value.
- **/
-NSDecimal CPTDecimalFromShort(int16_t i)
-{
-	if ( (i >= 0) && (i < kCacheSize) ) {
-		if ( !cacheValueInitialized[i] ) {
-			cache[i] = [[NSNumber numberWithShort:i] decimalValue];
-			cacheValueInitialized[i] = YES;
-		}
-		return cache[i];
-	}
-	return [[NSNumber numberWithShort:i] decimalValue];
-}
-
-/**
- *	@brief Converts a 32-bit integer value to an NSDecimal.
- *	@param i The integer value.
- *	@return The converted value.
- **/
-NSDecimal CPTDecimalFromLong(int32_t i)
-{
-	if ( (i >= 0) && (i < kCacheSize) ) {
-		if ( !cacheValueInitialized[i] ) {
-			cache[i] = [[NSNumber numberWithLong:i] decimalValue];
-			cacheValueInitialized[i] = YES;
-		}
-		return cache[i];
-	}
-	return [[NSNumber numberWithLong:i] decimalValue];
-}
-
-/**
- *	@brief Converts a 64-bit integer value to an NSDecimal.
- *	@param i The integer value.
- *	@return The converted value.
- **/
-NSDecimal CPTDecimalFromLongLong(int64_t i)
-{
-	if ( (i >= 0) && (i < kCacheSize) ) {
-		if ( !cacheValueInitialized[i] ) {
-			cache[i] = [[NSNumber numberWithLongLong:i] decimalValue];
-			cacheValueInitialized[i] = YES;
-		}
-		return cache[i];
-	}
-	return [[NSNumber numberWithLongLong:i] decimalValue];
-}
-
-/**
- *	@brief Converts an int value to an NSDecimal.
- *	@param i The int value.
- *	@return The converted value.
- **/
-NSDecimal CPTDecimalFromInt(int i)
-{
-	if ( (i >= 0) && (i < kCacheSize) ) {
-		if ( !cacheValueInitialized[i] ) {
-			cache[i] = [[NSNumber numberWithInt:i] decimalValue];
-			cacheValueInitialized[i] = YES;
-		}
-		return cache[i];
-	}
-	return [[NSNumber numberWithInt:i] decimalValue];
-}
-
-/**
- *	@brief Converts an NSInteger value to an NSDecimal.
- *	@param i The NSInteger value.
- *	@return The converted value.
- **/
-NSDecimal CPTDecimalFromInteger(NSInteger i)
-{
-	if ( (i >= 0) && (i < kCacheSize) ) {
-		if ( !cacheValueInitialized[i] ) {
-			cache[i] = [[NSNumber numberWithInteger:i] decimalValue];
-			cacheValueInitialized[i] = YES;
-		}
-		return cache[i];
+            cacheValueInitialized[anInt] = YES;
+        }
+        return cache[anInt];
     }
-	return [[NSNumber numberWithInteger:i] decimalValue];
+
+    NSString *stringValue = [[NSString alloc] initWithFormat:@"%hhd", anInt];
+    NSDecimal result      = CPTDecimalFromString(stringValue);
+
+    return result;
 }
 
 /**
- *	@brief Converts an unsigned 8-bit integer value to an NSDecimal.
- *	@param i The unsigned integer value.
- *	@return The converted value.
+ *  @brief Converts a 16-bit integer value to an @ref NSDecimal.
+ *  @param anInt The integer value.
+ *  @return The converted value.
  **/
-NSDecimal CPTDecimalFromUnsignedChar(uint8_t i)
+NSDecimal CPTDecimalFromShort(int16_t anInt)
 {
-	if ( i < kCacheSize ) {
-		if ( !cacheValueInitialized[i] ) {
-			cache[i] = [[NSNumber numberWithUnsignedChar:i] decimalValue];
-			cacheValueInitialized[i] = YES;
-		}
-		return cache[i];
+    if ( (anInt >= 0) && (anInt < kCacheSize) ) {
+        if ( !cacheValueInitialized[anInt] ) {
+            NSString *stringValue = [[NSString alloc] initWithFormat:@"%hd", anInt];
+            cache[anInt] = CPTDecimalFromString(stringValue);
+
+            cacheValueInitialized[anInt] = YES;
+        }
+        return cache[anInt];
     }
-	return [[NSNumber numberWithUnsignedChar:i] decimalValue]; 
+
+    NSString *stringValue = [[NSString alloc] initWithFormat:@"%hd", anInt];
+    NSDecimal result      = CPTDecimalFromString(stringValue);
+
+    return result;
 }
 
 /**
- *	@brief Converts an unsigned 16-bit integer value to an NSDecimal.
- *	@param i The unsigned integer value.
- *	@return The converted value.
+ *  @brief Converts a 32-bit integer value to an @ref NSDecimal.
+ *  @param anInt The integer value.
+ *  @return The converted value.
  **/
-NSDecimal CPTDecimalFromUnsignedShort(uint16_t i)
+NSDecimal CPTDecimalFromLong(int32_t anInt)
 {
-	if ( i < kCacheSize ) {
-		if ( !cacheValueInitialized[i] ) {
-			cache[i] = [[NSNumber numberWithUnsignedShort:i] decimalValue];
-			cacheValueInitialized[i] = YES;
-		}
-		return cache[i];
+    if ( (anInt >= 0) && (anInt < kCacheSize) ) {
+        if ( !cacheValueInitialized[anInt] ) {
+            NSString *stringValue = [[NSString alloc] initWithFormat:@"%d", anInt];
+            cache[anInt] = CPTDecimalFromString(stringValue);
+
+            cacheValueInitialized[anInt] = YES;
+        }
+        return cache[anInt];
     }
-	return [[NSNumber numberWithUnsignedShort:i] decimalValue]; 
+
+    NSString *stringValue = [[NSString alloc] initWithFormat:@"%d", anInt];
+    NSDecimal result      = CPTDecimalFromString(stringValue);
+
+    return result;
 }
 
 /**
- *	@brief Converts an unsigned 32-bit integer value to an NSDecimal.
- *	@param i The unsigned integer value.
- *	@return The converted value.
+ *  @brief Converts a 64-bit integer value to an @ref NSDecimal.
+ *  @param anInt The integer value.
+ *  @return The converted value.
  **/
-NSDecimal CPTDecimalFromUnsignedLong(uint32_t i)
+NSDecimal CPTDecimalFromLongLong(int64_t anInt)
 {
-	if ( i < kCacheSize ) {
-		if ( !cacheValueInitialized[i] ) {
-			cache[i] = [[NSNumber numberWithUnsignedLong:i] decimalValue];
-			cacheValueInitialized[i] = YES;
-		}
-		return cache[i];
+    if ( (anInt >= 0) && (anInt < kCacheSize) ) {
+        if ( !cacheValueInitialized[anInt] ) {
+            NSString *stringValue = [[NSString alloc] initWithFormat:@"%lld", anInt];
+            cache[anInt] = CPTDecimalFromString(stringValue);
+
+            cacheValueInitialized[anInt] = YES;
+        }
+        return cache[anInt];
     }
-	return [[NSNumber numberWithUnsignedLong:i] decimalValue]; 
+
+    NSString *stringValue = [[NSString alloc] initWithFormat:@"%lld", anInt];
+    NSDecimal result      = CPTDecimalFromString(stringValue);
+
+    return result;
 }
 
 /**
- *	@brief Converts an unsigned 64-bit integer value to an NSDecimal.
- *	@param i The unsigned integer value.
- *	@return The converted value.
+ *  @brief Converts an @int value to an @ref NSDecimal.
+ *  @param anInt The @int value.
+ *  @return The converted value.
  **/
-NSDecimal CPTDecimalFromUnsignedLongLong(uint64_t i)
+NSDecimal CPTDecimalFromInt(int anInt)
 {
-	if ( i < kCacheSize ) {
-		if ( !cacheValueInitialized[i] ) {
-			cache[i] = [[NSNumber numberWithUnsignedLongLong:i] decimalValue];
-			cacheValueInitialized[i] = YES;
-		}
-		return cache[i];
+    if ( (anInt >= 0) && (anInt < kCacheSize) ) {
+        if ( !cacheValueInitialized[anInt] ) {
+            NSString *stringValue = [[NSString alloc] initWithFormat:@"%d", anInt];
+            cache[anInt] = CPTDecimalFromString(stringValue);
+
+            cacheValueInitialized[anInt] = YES;
+        }
+        return cache[anInt];
     }
-	return [[NSNumber numberWithUnsignedLongLong:i] decimalValue]; 
+
+    NSString *stringValue = [[NSString alloc] initWithFormat:@"%d", anInt];
+    NSDecimal result      = CPTDecimalFromString(stringValue);
+
+    return result;
 }
 
 /**
- *	@brief Converts an unsigned int value to an NSDecimal.
- *	@param i The unsigned int value.
- *	@return The converted value.
+ *  @brief Converts an @ref NSInteger value to an @ref NSDecimal.
+ *  @param anInt The @ref NSInteger value.
+ *  @return The converted value.
  **/
-NSDecimal CPTDecimalFromUnsignedInt(unsigned int i)
+NSDecimal CPTDecimalFromInteger(NSInteger anInt)
 {
-	if ( i < kCacheSize ) {
-		if ( !cacheValueInitialized[i] ) {
-			cache[i] = [[NSNumber numberWithUnsignedInt:i] decimalValue];
-			cacheValueInitialized[i] = YES;
-		}
-		return cache[i];
+    if ( (anInt >= 0) && (anInt < kCacheSize) ) {
+        if ( !cacheValueInitialized[anInt] ) {
+            NSString *stringValue = [[NSString alloc] initWithFormat:@"%ld", (long)anInt];
+            cache[anInt] = CPTDecimalFromString(stringValue);
+
+            cacheValueInitialized[anInt] = YES;
+        }
+        return cache[anInt];
     }
-	return [[NSNumber numberWithUnsignedInt:i] decimalValue]; 
+
+    NSString *stringValue = [[NSString alloc] initWithFormat:@"%ld", (long)anInt];
+    NSDecimal result      = CPTDecimalFromString(stringValue);
+
+    return result;
 }
 
 /**
- *	@brief Converts an NSUInteger value to an NSDecimal.
- *	@param i The NSUInteger value.
- *	@return The converted value.
+ *  @brief Converts an unsigned 8-bit integer value to an @ref NSDecimal.
+ *  @param anInt The unsigned integer value.
+ *  @return The converted value.
  **/
-NSDecimal CPTDecimalFromUnsignedInteger(NSUInteger i)
+NSDecimal CPTDecimalFromUnsignedChar(uint8_t anInt)
 {
-	if ( i < kCacheSize ) {
-		if ( !cacheValueInitialized[i] ) {
-			cache[i] = [[NSNumber numberWithUnsignedInteger:i] decimalValue];
-			cacheValueInitialized[i] = YES;
-		}
-		return cache[i];
+    if ( anInt < kCacheSize ) {
+        if ( !cacheValueInitialized[anInt] ) {
+            NSString *stringValue = [[NSString alloc] initWithFormat:@"%hhu", anInt];
+            cache[anInt] = CPTDecimalFromString(stringValue);
+
+            cacheValueInitialized[anInt] = YES;
+        }
+        return cache[anInt];
     }
-	return [[NSNumber numberWithUnsignedInteger:i] decimalValue]; 
+
+    NSString *stringValue = [[NSString alloc] initWithFormat:@"%hhu", anInt];
+    NSDecimal result      = CPTDecimalFromString(stringValue);
+
+    return result;
 }
 
 /**
- *	@brief Converts a float value to an NSDecimal.
- *	@param f The float value.
- *	@return The converted value.
+ *  @brief Converts an unsigned 16-bit integer value to an @ref NSDecimal.
+ *  @param anInt The unsigned integer value.
+ *  @return The converted value.
  **/
-NSDecimal CPTDecimalFromFloat(float f)
+NSDecimal CPTDecimalFromUnsignedShort(uint16_t anInt)
 {
-	return [[NSNumber numberWithFloat:f] decimalValue]; 
+    if ( anInt < kCacheSize ) {
+        if ( !cacheValueInitialized[anInt] ) {
+            NSString *stringValue = [[NSString alloc] initWithFormat:@"%hu", anInt];
+            cache[anInt] = CPTDecimalFromString(stringValue);
+
+            cacheValueInitialized[anInt] = YES;
+        }
+        return cache[anInt];
+    }
+
+    NSString *stringValue = [[NSString alloc] initWithFormat:@"%hu", anInt];
+    NSDecimal result      = CPTDecimalFromString(stringValue);
+
+    return result;
 }
 
 /**
- *	@brief Converts a double value to an NSDecimal.
- *	@param d The double value.
- *	@return The converted value.
+ *  @brief Converts an unsigned 32-bit integer value to an @ref NSDecimal.
+ *  @param anInt The unsigned integer value.
+ *  @return The converted value.
  **/
-NSDecimal CPTDecimalFromDouble(double d)
+NSDecimal CPTDecimalFromUnsignedLong(uint32_t anInt)
 {
-	return [[NSNumber numberWithDouble:d] decimalValue]; 
+    if ( anInt < kCacheSize ) {
+        if ( !cacheValueInitialized[anInt] ) {
+            NSString *stringValue = [[NSString alloc] initWithFormat:@"%u", anInt];
+            cache[anInt] = CPTDecimalFromString(stringValue);
+
+            cacheValueInitialized[anInt] = YES;
+        }
+        return cache[anInt];
+    }
+
+    NSString *stringValue = [[NSString alloc] initWithFormat:@"%u", anInt];
+    NSDecimal result      = CPTDecimalFromString(stringValue);
+
+    return result;
 }
 
 /**
- *	@brief Converts a CGFloat value to an NSDecimal.
- *	@param f The CGFloat value.
- *	@return The converted value.
+ *  @brief Converts an unsigned 64-bit integer value to an @ref NSDecimal.
+ *  @param anInt The unsigned integer value.
+ *  @return The converted value.
  **/
-NSDecimal CPTDecimalFromCGFloat(CGFloat f)
+NSDecimal CPTDecimalFromUnsignedLongLong(uint64_t anInt)
 {
-#if CGFLOAT_IS_DOUBLE
-	return [[NSNumber numberWithDouble:f] decimalValue];
-#else
-	return [[NSNumber numberWithFloat:f] decimalValue]; 
-#endif
+    if ( anInt < kCacheSize ) {
+        if ( !cacheValueInitialized[anInt] ) {
+            NSString *stringValue = [[NSString alloc] initWithFormat:@"%llu", anInt];
+            cache[anInt] = CPTDecimalFromString(stringValue);
+
+            cacheValueInitialized[anInt] = YES;
+        }
+        return cache[anInt];
+    }
+
+    NSString *stringValue = [[NSString alloc] initWithFormat:@"%llu", anInt];
+    NSDecimal result      = CPTDecimalFromString(stringValue);
+
+    return result;
 }
 
 /**
- *	@brief Parses a string and extracts the numeric value as an NSDecimal.
- *	@param stringRepresentation The string value.
- *	@return The numeric value extracted from the string.
+ *  @brief Converts an @uint value to an @ref NSDecimal.
+ *  @param anInt The @uint value.
+ *  @return The converted value.
  **/
-NSDecimal CPTDecimalFromString(NSString *stringRepresentation)
+NSDecimal CPTDecimalFromUnsignedInt(unsigned int anInt)
 {
-	// The following NSDecimalNumber-based creation of NSDecimals from strings is slower than 
-	// the NSScanner-based method: (307000 operations per second vs. 582000 operations per second for NSScanner)
-	
-	/*	NSDecimalNumber *newNumber = [[NSDecimalNumber alloc] initWithString:@"1.0" locale:[NSLocale currentLocale]];
-	 newDecimal = [newNumber decimalValue];
-	 [newNumber release];*/
-	
-	NSDecimal result;
-	NSScanner *theScanner = [[NSScanner alloc] initWithString:stringRepresentation];
-	[theScanner scanDecimal:&result];
-	[theScanner release];
-	
-	return result;
+    if ( anInt < kCacheSize ) {
+        if ( !cacheValueInitialized[anInt] ) {
+            NSString *stringValue = [[NSString alloc] initWithFormat:@"%u", anInt];
+            cache[anInt] = CPTDecimalFromString(stringValue);
+
+            cacheValueInitialized[anInt] = YES;
+        }
+        return cache[anInt];
+    }
+
+    NSString *stringValue = [[NSString alloc] initWithFormat:@"%u", anInt];
+    NSDecimal result      = CPTDecimalFromString(stringValue);
+
+    return result;
+}
+
+/**
+ *  @brief Converts an @ref NSUInteger value to an @ref NSDecimal.
+ *  @param anInt The @ref NSUInteger value.
+ *  @return The converted value.
+ **/
+NSDecimal CPTDecimalFromUnsignedInteger(NSUInteger anInt)
+{
+    if ( anInt < kCacheSize ) {
+        if ( !cacheValueInitialized[anInt] ) {
+            NSString *stringValue = [[NSString alloc] initWithFormat:@"%lu", (unsigned long)anInt];
+            cache[anInt] = CPTDecimalFromString(stringValue);
+
+            cacheValueInitialized[anInt] = YES;
+        }
+        return cache[anInt];
+    }
+
+    NSString *stringValue = [[NSString alloc] initWithFormat:@"%lu", (unsigned long)anInt];
+    NSDecimal result      = CPTDecimalFromString(stringValue);
+
+    return result;
+}
+
+/**
+ *  @brief Converts a @float value to an @ref NSDecimal.
+ *  @param aFloat The @float value.
+ *  @return The converted value.
+ **/
+NSDecimal CPTDecimalFromFloat(float aFloat)
+{
+    if ( isnan(aFloat) ) {
+        return CPTDecimalNaN();
+    }
+    else {
+        NSString *stringValue = [[NSString alloc] initWithFormat:@"%f", (double)aFloat];
+        NSDecimal result      = CPTDecimalFromString(stringValue);
+
+        return result;
+    }
+}
+
+/**
+ *  @brief Converts a @double value to an @ref NSDecimal.
+ *  @param aDouble The @double value.
+ *  @return The converted value.
+ **/
+NSDecimal CPTDecimalFromDouble(double aDouble)
+{
+    if ( isnan(aDouble) ) {
+        return CPTDecimalNaN();
+    }
+    else {
+        NSString *stringValue = [[NSString alloc] initWithFormat:@"%f", aDouble];
+        NSDecimal result      = CPTDecimalFromString(stringValue);
+
+        return result;
+    }
+}
+
+/**
+ *  @brief Converts a @ref CGFloat value to an @ref NSDecimal.
+ *  @param aCGFloat The @ref CGFloat value.
+ *  @return The converted value.
+ **/
+NSDecimal CPTDecimalFromCGFloat(CGFloat aCGFloat)
+{
+    if ( isnan(aCGFloat) ) {
+        return CPTDecimalNaN();
+    }
+    else {
+        NSString *stringValue = [[NSString alloc] initWithFormat:@"%f", (double)aCGFloat];
+        NSDecimal result      = CPTDecimalFromString(stringValue);
+
+        return result;
+    }
+}
+
+/**
+ *  @brief Parses a string and extracts the numeric value as an @ref NSDecimal.
+ *  @param stringRepresentation The string value.
+ *  @return The numeric value extracted from the string.
+ **/
+NSDecimal CPTDecimalFromString(NSString *__nonnull stringRepresentation)
+{
+    // The following NSDecimalNumber-based creation of NSDecimal structs from strings is slower than
+    // the NSScanner-based method: (307000 operations per second vs. 582000 operations per second for NSScanner)
+
+    /*    NSDecimalNumber *newNumber = [[NSDecimalNumber alloc] initWithString:@"1.0" locale:[NSLocale currentLocale]];
+     * newDecimal = [newNumber decimalValue];
+     * [newNumber release];*/
+
+    NSDecimal result;
+    NSScanner *theScanner = [[NSScanner alloc] initWithString:stringRepresentation];
+
+    [theScanner scanDecimal:&result];
+
+    return result;
 }
 
 #pragma mark -
 #pragma mark NSDecimal arithmetic
 
 /**
- *	@brief Adds two NSDecimals together.
- *	@param leftOperand The left-hand side of the addition operation.
- *	@param rightOperand The right-hand side of the addition operation.
- *	@return The result of the addition.
+ *  @brief Adds two @ref NSDecimal structs together.
+ *  @param leftOperand The left-hand side of the addition operation.
+ *  @param rightOperand The right-hand side of the addition operation.
+ *  @return The result of the addition.
  **/
 NSDecimal CPTDecimalAdd(NSDecimal leftOperand, NSDecimal rightOperand)
 {
-	NSDecimal result;
-	NSDecimalAdd(&result, &leftOperand, &rightOperand, NSRoundBankers);
-	return result;
+    NSDecimal result;
+
+    NSDecimalAdd(&result, &leftOperand, &rightOperand, NSRoundBankers);
+    return result;
 }
 
 /**
- *	@brief Subtracts one NSDecimal from another.
- *	@param leftOperand The left-hand side of the subtraction operation.
- *	@param rightOperand The right-hand side of the subtraction operation.
- *	@return The result of the subtraction.
+ *  @brief Subtracts one @ref NSDecimal from another.
+ *  @param leftOperand The left-hand side of the subtraction operation.
+ *  @param rightOperand The right-hand side of the subtraction operation.
+ *  @return The result of the subtraction.
  **/
 NSDecimal CPTDecimalSubtract(NSDecimal leftOperand, NSDecimal rightOperand)
 {
-	NSDecimal result;
-	NSDecimalSubtract(&result, &leftOperand, &rightOperand, NSRoundBankers);
-	return result;
+    NSDecimal result;
+
+    NSDecimalSubtract(&result, &leftOperand, &rightOperand, NSRoundBankers);
+    return result;
 }
 
 /**
- *	@brief Multiplies two NSDecimals together.
- *	@param leftOperand The left-hand side of the multiplication operation.
- *	@param rightOperand The right-hand side of the multiplication operation.
- *	@return The result of the multiplication.
+ *  @brief Multiplies two @ref NSDecimal structs together.
+ *  @param leftOperand The left-hand side of the multiplication operation.
+ *  @param rightOperand The right-hand side of the multiplication operation.
+ *  @return The result of the multiplication.
  **/
 NSDecimal CPTDecimalMultiply(NSDecimal leftOperand, NSDecimal rightOperand)
 {
-	NSDecimal result;
-	NSDecimalMultiply(&result, &leftOperand, &rightOperand, NSRoundBankers);
-	return result;
+    NSDecimal result;
+
+    NSDecimalMultiply(&result, &leftOperand, &rightOperand, NSRoundBankers);
+    return result;
 }
 
 /**
- *	@brief Divides one NSDecimal by another.
- *	@param numerator The numerator of the multiplication operation.
- *	@param denominator The denominator of the multiplication operation.
- *	@return The result of the division.
+ *  @brief Divides one @ref NSDecimal by another.
+ *  @param numerator The numerator of the multiplication operation.
+ *  @param denominator The denominator of the multiplication operation.
+ *  @return The result of the division.
  **/
 NSDecimal CPTDecimalDivide(NSDecimal numerator, NSDecimal denominator)
 {
-	NSDecimal result;
-	NSDecimalDivide(&result, &numerator, &denominator, NSRoundBankers);
-	return result;
+    NSDecimal result;
+
+    NSCalculationError calcError = NSDecimalDivide(&result, &numerator, &denominator, NSRoundBankers);
+
+    switch ( calcError ) {
+        case NSCalculationUnderflow:
+        case NSCalculationDivideByZero:
+            result = CPTDecimalFromInteger(0);
+            break;
+
+        default:
+            // no error--return the result of the division
+            break;
+    }
+    return result;
 }
 
 #pragma mark -
 #pragma mark NSDecimal comparison
 
 /**
- *	@brief Checks to see if one NSDecimal is greater than another.
- *	@param leftOperand The left side of the comparison.
- *	@param rightOperand The right side of the comparison.
- *	@return YES if the left operand is greater than the right, NO otherwise.
+ *  @brief Checks to see if one @ref NSDecimal is greater than another.
+ *  @param leftOperand The left side of the comparison.
+ *  @param rightOperand The right side of the comparison.
+ *  @return @YES if the left operand is greater than the right, @NO otherwise.
  **/
 BOOL CPTDecimalGreaterThan(NSDecimal leftOperand, NSDecimal rightOperand)
 {
-	return (NSDecimalCompare(&leftOperand, &rightOperand) == NSOrderedDescending);
+    return NSDecimalCompare(&leftOperand, &rightOperand) == NSOrderedDescending;
 }
 
 /**
- *	@brief Checks to see if one NSDecimal is greater than or equal to another.
- *	@param leftOperand The left side of the comparison.
- *	@param rightOperand The right side of the comparison.
- *	@return YES if the left operand is greater than or equal to the right, NO otherwise.
+ *  @brief Checks to see if one @ref NSDecimal is greater than or equal to another.
+ *  @param leftOperand The left side of the comparison.
+ *  @param rightOperand The right side of the comparison.
+ *  @return @YES if the left operand is greater than or equal to the right, @NO otherwise.
  **/
 BOOL CPTDecimalGreaterThanOrEqualTo(NSDecimal leftOperand, NSDecimal rightOperand)
 {
-	return (NSDecimalCompare(&leftOperand, &rightOperand) != NSOrderedAscending);
+    return NSDecimalCompare(&leftOperand, &rightOperand) != NSOrderedAscending;
 }
 
 /**
- *	@brief Checks to see if one NSDecimal is less than another.
- *	@param leftOperand The left side of the comparison.
- *	@param rightOperand The right side of the comparison.
- *	@return YES if the left operand is less than the right, NO otherwise.
+ *  @brief Checks to see if one @ref NSDecimal is less than another.
+ *  @param leftOperand The left side of the comparison.
+ *  @param rightOperand The right side of the comparison.
+ *  @return @YES if the left operand is less than the right, @NO otherwise.
  **/
 BOOL CPTDecimalLessThan(NSDecimal leftOperand, NSDecimal rightOperand)
 {
-	return (NSDecimalCompare(&leftOperand, &rightOperand) == NSOrderedAscending);
+    return NSDecimalCompare(&leftOperand, &rightOperand) == NSOrderedAscending;
 }
 
 /**
- *	@brief Checks to see if one NSDecimal is less than or equal to another.
- *	@param leftOperand The left side of the comparison.
- *	@param rightOperand The right side of the comparison.
- *	@return YES if the left operand is less than or equal to the right, NO otherwise.
+ *  @brief Checks to see if one @ref NSDecimal is less than or equal to another.
+ *  @param leftOperand The left side of the comparison.
+ *  @param rightOperand The right side of the comparison.
+ *  @return @YES if the left operand is less than or equal to the right, @NO otherwise.
  **/
 BOOL CPTDecimalLessThanOrEqualTo(NSDecimal leftOperand, NSDecimal rightOperand)
 {
-	return (NSDecimalCompare(&leftOperand, &rightOperand) != NSOrderedDescending);
+    return NSDecimalCompare(&leftOperand, &rightOperand) != NSOrderedDescending;
 }
 
 /**
- *	@brief Checks to see if one NSDecimal is equal to another.
- *	@param leftOperand The left side of the comparison.
- *	@param rightOperand The right side of the comparison.
- *	@return YES if the left operand is equal to the right, NO otherwise.
+ *  @brief Checks to see if one @ref NSDecimal is equal to another.
+ *  @param leftOperand The left side of the comparison.
+ *  @param rightOperand The right side of the comparison.
+ *  @return @YES if the left operand is equal to the right, @NO otherwise.
  **/
 BOOL CPTDecimalEquals(NSDecimal leftOperand, NSDecimal rightOperand)
 {
-	return (NSDecimalCompare(&leftOperand, &rightOperand) == NSOrderedSame);	
+    return NSDecimalCompare(&leftOperand, &rightOperand) == NSOrderedSame;
 }
 
 #pragma mark -
 #pragma mark NSDecimal utilities
 
 /**
- *	@brief Creates and returns an NSDecimal struct that represents the value "not a number".
+ *  @brief Creates and returns an @ref NSDecimal struct that represents the value @quote{not a number} (@NAN).
  *
- *	Calling <code>NSDecimalIsNotANumber()</code> on this value will return <code>YES</code>.
+ *  Calling @ref NSDecimalIsNotANumber() on this value will return @YES.
  *
- *	@return An NSDecimal struct that represents the value "not a number".
+ *  @return An @ref NSDecimal struct that represents the value @quote{not a number} (@NAN).
  **/
 NSDecimal CPTDecimalNaN(void)
 {
-	NSDecimal decimalNaN = [[NSDecimalNumber zero] decimalValue];
-	decimalNaN._length = 0;
-	decimalNaN._isNegative = YES;
-	
-	return decimalNaN;
+    return [NSDecimalNumber notANumber].decimalValue;
+}
+
+/**
+ *  @brief Determines the smaller of two @ref NSDecimal values.
+ *  @param leftOperand The first value to compare.
+ *  @param rightOperand The second value to compare.
+ *  @return The smaller of the two arguments.
+ **/
+NSDecimal CPTDecimalMin(NSDecimal leftOperand, NSDecimal rightOperand)
+{
+    if ( NSDecimalCompare(&leftOperand, &rightOperand) == NSOrderedAscending ) {
+        return leftOperand;
+    }
+    else {
+        return rightOperand;
+    }
+}
+
+/**
+ *  @brief Determines the larger of two @ref NSDecimal values.
+ *  @param leftOperand The first value to compare.
+ *  @param rightOperand The second value to compare.
+ *  @return The larger of the two arguments.
+ **/
+NSDecimal CPTDecimalMax(NSDecimal leftOperand, NSDecimal rightOperand)
+{
+    if ( NSDecimalCompare(&leftOperand, &rightOperand) == NSOrderedDescending ) {
+        return leftOperand;
+    }
+    else {
+        return rightOperand;
+    }
+}
+
+/**
+ *  @brief Determines the absolute value of an @ref NSDecimal value.
+ *  @param value The input value for the calculation.
+ *  @return The absolute value of the argument.
+ **/
+NSDecimal CPTDecimalAbs(NSDecimal value)
+{
+    if ( CPTDecimalGreaterThanOrEqualTo( value, CPTDecimalFromInteger(0) ) ) {
+        return value;
+    }
+    else {
+        return CPTDecimalMultiply( value, CPTDecimalFromInteger(-1) );
+    }
 }
 
 #pragma mark -
 #pragma mark Ranges
 
 /**
- *	@brief Expands an NSRange by the given amount.
+ *  @brief Expands an NSRange by the given amount.
  *
- *	The <code>location</code> of the resulting NSRange will be non-negative.
+ *  The @par{location} of the resulting NSRange will be non-negative.
  *
- *	@param range The NSRange to expand.
- *	@param expandBy The amount the expand the range by.
- *	@return The expanded range.
+ *  @param range The NSRange to expand.
+ *  @param expandBy The amount the expand the range by.
+ *  @return The expanded range.
  **/
-NSRange CPTExpandedRange(NSRange range, NSInteger expandBy) 
+NSRange CPTExpandedRange(NSRange range, NSInteger expandBy)
 {
-    NSInteger loc = MAX(0, (int)range.location - expandBy);
-    NSInteger lowerExpansion = range.location - loc;
-    NSInteger length = range.length + lowerExpansion + expandBy;
-    return NSMakeRange(loc, length);
+    NSInteger loc            = MAX(0, (NSInteger)range.location - expandBy);
+    NSInteger lowerExpansion = (NSInteger)range.location - loc;
+    NSInteger length         = MAX(0, (NSInteger)range.length + lowerExpansion + expandBy);
+
+    return NSMakeRange( (NSUInteger)loc, (NSUInteger)length );
 }
 
 #pragma mark -
 #pragma mark Colors
 
 /**
- *	@brief Extracts the color information from a CGColorRef and returns it as a CPTRGBAColor.
+ *  @brief Extracts the color information from a @ref CGColorRef and returns it as a CPTRGBAColor.
  *
- *	Supports RGBA and grayscale colorspaces.
+ *  Supports RGBA and grayscale color spaces.
  *
- *	@param color The color.
- *	@return The RGBA components of the color.
+ *  @param color The color.
+ *  @return The RGBA components of the color.
  **/
-CPTRGBAColor CPTRGBAColorFromCGColor(CGColorRef color)
+CPTRGBAColor CPTRGBAColorFromCGColor(__nonnull CGColorRef color)
 {
-	CPTRGBAColor rgbColor;
-	
-	size_t numComponents = CGColorGetNumberOfComponents(color);
-	
-	if (numComponents == 2) {
-		const CGFloat *components = CGColorGetComponents(color);
-		CGFloat all = components[0];
-		rgbColor.red = all;
-		rgbColor.green = all;
-		rgbColor.blue = all;
-		rgbColor.alpha = components[1];
-	} else {
-		const CGFloat *components = CGColorGetComponents(color);
-		rgbColor.red = components[0];
-		rgbColor.green = components[1];
-		rgbColor.blue = components[2];
-		rgbColor.alpha = components[3];
-	}
+    CPTRGBAColor rgbColor;
 
-	return rgbColor;
+    size_t numComponents = CGColorGetNumberOfComponents(color);
+
+    if ( numComponents == 2 ) {
+        const CGFloat *components = CGColorGetComponents(color);
+        CGFloat all               = components[0];
+        rgbColor.red   = all;
+        rgbColor.green = all;
+        rgbColor.blue  = all;
+        rgbColor.alpha = components[1];
+    }
+    else {
+        const CGFloat *components = CGColorGetComponents(color);
+        rgbColor.red   = components[0];
+        rgbColor.green = components[1];
+        rgbColor.blue  = components[2];
+        rgbColor.alpha = components[3];
+    }
+
+    return rgbColor;
 }
 
 #pragma mark -
 #pragma mark Coordinates
 
 /**
- *	@brief Determines the CPTCoordinate that is orthogonal to the one provided.
+ *  @brief Determines the CPTCoordinate that is orthogonal to the one provided.
  *
- *	The current implementation is two-dimensional--X is orthogonal to Y and Y is orthogonal to X.
+ *  The current implementation is two-dimensional—X is orthogonal to Y and Y is orthogonal to X.
  *
- *	@param coord The CPTCoordinate.
- *	@return The orthogonal CPTCoordinate.
+ *  @param coord The CPTCoordinate.
+ *  @return The orthogonal CPTCoordinate.
  **/
 CPTCoordinate CPTOrthogonalCoordinate(CPTCoordinate coord)
 {
-	return ( coord == CPTCoordinateX ? CPTCoordinateY : CPTCoordinateX );
+    return coord == CPTCoordinateX ? CPTCoordinateY : CPTCoordinateX;
 }
 
 #pragma mark -
 #pragma mark Quartz pixel-alignment functions
 
 /**
- *	@brief Aligns a point in user space to integral coordinates in device space.
+ *  @brief Aligns a point in user space to integral coordinates in device space.
  *
- *	Ensures that the x and y coordinates are at a pixel corner in device space.
- *	Drawn from <i>Programming with Quartz</i> by D. Gelphman, B. Laden.
+ *  Ensures that the x and y coordinates are at a pixel corner in device space.
+ *  Drawn from <i>Programming with Quartz</i> by D. Gelphman, B. Laden.
  *
- *	@param context The graphics context.
- *	@param p The point in user space.
- *	@return The device aligned point in user space.
+ *  @param context The graphics context.
+ *  @param point The point in user space.
+ *  @return The device aligned point in user space.
  **/
-CGPoint CPTAlignPointToUserSpace(CGContextRef context, CGPoint p)
+CGPoint CPTAlignPointToUserSpace(__nonnull CGContextRef context, CGPoint point)
 {
     // Compute the coordinates of the point in device space.
-    p = CGContextConvertPointToDeviceSpace(context, p);
-    
+    point = CGContextConvertPointToDeviceSpace(context, point);
+
     // Ensure that coordinates are at exactly the corner
     // of a device pixel.
-    p.x = round(p.x) + (CGFloat)0.5;
-    p.y = round(p.y) + (CGFloat)0.5;
-    
+    point.x = round( point.x - CPTFloat(0.5) ) + CPTFloat(0.5);
+    point.y = ceil(point.y) - CPTFloat(0.5);
+
     // Convert the device aligned coordinate back to user space.
-    return CGContextConvertPointToUserSpace(context, p);
+    return CGContextConvertPointToUserSpace(context, point);
 }
 
 /**
- *	@brief Adjusts a size in user space to integral dimensions in device space.
+ *  @brief Adjusts a size in user space to integral dimensions in device space.
  *
- *	Ensures that the width and height are an integer number of device pixels.
- *	Drawn from <i>Programming with Quartz</i> by D. Gelphman, B. Laden.
+ *  Ensures that the width and height are an integer number of device pixels.
+ *  Drawn from <i>Programming with Quartz</i> by D. Gelphman, B. Laden.
  *
- *	@param context The graphics context.
- *	@param s The size in user space.
- *	@return The device aligned size in user space.
+ *  @param context The graphics context.
+ *  @param size The size in user space.
+ *  @return The device aligned size in user space.
  **/
-CGSize CPTAlignSizeToUserSpace(CGContextRef context, CGSize s)
+CGSize CPTAlignSizeToUserSpace(__nonnull CGContextRef context, CGSize size)
 {
     // Compute the size in device space.
-    s = CGContextConvertSizeToDeviceSpace(context, s);
-    
+    size = CGContextConvertSizeToDeviceSpace(context, size);
+
     // Ensure that size is an integer multiple of device pixels.
-    s.width = round(s.width);
-    s.height = round(s.height);
-    
+    size.width  = round(size.width);
+    size.height = round(size.height);
+
     // Convert back to user space.
-    return CGContextConvertSizeToUserSpace(context, s);
+    return CGContextConvertSizeToUserSpace(context, size);
 }
 
 /**
- *	@brief Aligns a rectangle in user space to integral coordinates in device space.
+ *  @brief Aligns a rectangle in user space to integral coordinates in device space.
  *
- *	Ensures that the x and y coordinates are at a pixel corner in device space
- *	and the width and height are an integer number of device pixels.
- *	Drawn from <i>Programming with Quartz</i> by D. Gelphman, B. Laden.
+ *  Ensures that the x and y coordinates are at a pixel corner in device space
+ *  and the width and height are an integer number of device pixels.
+ *  Drawn from <i>Programming with Quartz</i> by D. Gelphman, B. Laden.
  *
- *	@note This function produces a width and height
- *	that is less than or equal to the original width.
- *	@param context The graphics context.
- *	@param r The rectangle in user space.
- *	@return The device aligned rectangle in user space.
+ *  @param context The graphics context.
+ *  @param rect The rectangle in user space.
+ *  @return The device aligned rectangle in user space.
  **/
-CGRect CPTAlignRectToUserSpace(CGContextRef context, CGRect r)
+CGRect CPTAlignRectToUserSpace(__nonnull CGContextRef context, CGRect rect)
 {
-    // Compute the coordinates of the rectangle in device space.
-    r = CGContextConvertRectToDeviceSpace(context, r);
-    
-    // Ensure that the x and y coordinates are at a pixel corner.
-    r.origin.x = round(r.origin.x) + (CGFloat)0.5;
-    r.origin.y = round(r.origin.y) + (CGFloat)0.5;
-    
-    // Ensure that the width and height are an integer number of
-    // device pixels.
-    r.size.width = round(r.size.width);
-    r.size.height = round(r.size.height);
-    
-    // Convert back to user space.
-    return CGContextConvertRectToUserSpace(context, r);
+    rect = CGContextConvertRectToDeviceSpace(context, rect);
+
+    CGPoint oldOrigin = rect.origin;
+
+    rect.origin.x   = round( rect.origin.x - CPTFloat(0.5) );
+    rect.size.width = round( oldOrigin.x + rect.size.width - CPTFloat(0.5) ) - rect.origin.x;
+    rect.origin.x  += CPTFloat(0.5);
+
+    rect.origin.y    = ceil( CGRectGetMaxY(rect) ) - CPTFloat(0.5);
+    rect.size.height = ceil(oldOrigin.y - CPTFloat(0.5) - rect.origin.y);
+
+    return CGContextConvertRectToUserSpace(context, rect);
+}
+
+#pragma mark -
+#pragma mark Integral Geometry Conversions
+
+/**
+ *  @brief Aligns a point in user space between integral coordinates in device space.
+ *
+ *  Ensures that the x and y coordinates are between pixels in device space.
+ *
+ *  @param context The graphics context.
+ *  @param point The point in user space.
+ *  @return The device aligned point in user space.
+ **/
+CGPoint CPTAlignIntegralPointToUserSpace(__nonnull CGContextRef context, CGPoint point)
+{
+    point = CGContextConvertPointToDeviceSpace(context, point);
+
+    point.x = round(point.x);
+    point.y = ceil( point.y - CPTFloat(0.5) );
+
+    return CGContextConvertPointToUserSpace(context, point);
+}
+
+/**
+ *  @brief Aligns a rectangle in user space between integral coordinates in device space.
+ *
+ *  Ensures that the x and y coordinates are between pixels in device space
+ *  and the width and height are an integer number of device pixels.
+ *
+ *  @param context The graphics context.
+ *  @param rect The rectangle in user space.
+ *  @return The device aligned rectangle in user space.
+ **/
+CGRect CPTAlignIntegralRectToUserSpace(__nonnull CGContextRef context, CGRect rect)
+{
+    rect = CGContextConvertRectToDeviceSpace(context, rect);
+
+    CGPoint oldOrigin = rect.origin;
+
+    rect.origin.x   = round(rect.origin.x);
+    rect.size.width = round(oldOrigin.x + rect.size.width) - rect.origin.x;
+
+    rect.origin.y    = ceil( CGRectGetMaxY(rect) - CPTFloat(0.5) );
+    rect.size.height = ceil(oldOrigin.y - CPTFloat(0.5) - rect.origin.y);
+
+    return CGContextConvertRectToUserSpace(context, rect);
+}
+
+CGRect CPTAlignBorderedRectToUserSpace(__nonnull CGContextRef context, CGRect rect, CPTLineStyle *__nonnull borderLineStyle)
+{
+    CGRect borderRect;
+    CGFloat contextScale = CPTFloat(1.0);
+
+    if ( rect.size.height != CPTFloat(0.0) ) {
+        CGRect deviceRect = CGContextConvertRectToDeviceSpace(context, rect);
+        contextScale = deviceRect.size.height / rect.size.height;
+    }
+
+    if ( contextScale != CPTFloat(1.0) ) {
+        CGFloat borderWidth = borderLineStyle.lineWidth;
+        if ( ( borderWidth > CPTFloat(0.0) ) && ( borderWidth == round(borderWidth) ) ) {
+            borderRect = CPTAlignIntegralRectToUserSpace(context, rect);
+        }
+        else {
+            borderRect = CPTAlignRectToUserSpace(context, rect);
+        }
+    }
+    else {
+        borderRect = CPTAlignRectToUserSpace(context, rect);
+    }
+
+    return borderRect;
 }
 
 #pragma mark -
 #pragma mark String formatting for Core Graphics structs
 
-/**	@brief Creates a string representation of the given point.
- *	@param p The point.
- *	@return A string with the format <code>{x, y}</code>.
+/** @brief Creates a string representation of the given point.
+ *  @param point The point.
+ *  @return A string with the format <code> {x, y}</code>.
  **/
-NSString *CPTStringFromPoint(CGPoint p)
+NSString * __nonnull CPTStringFromPoint(CGPoint point)
 {
-	return [NSString stringWithFormat:@"{%g, %g}", p.x, p.y];
+    return [NSString stringWithFormat:@"{%g, %g}", (double)point.x, (double)point.y];
 }
 
-/**	@brief Creates a string representation of the given size.
- *	@param s The size.
- *	@return A string with the format <code>{width, height}</code>.
+/** @brief Creates a string representation of the given size.
+ *  @param size The size.
+ *  @return A string with the format <code> {width, height}</code>.
  **/
-NSString *CPTStringFromSize(CGSize s)
+NSString *__nonnull CPTStringFromSize(CGSize size)
 {
-	return [NSString stringWithFormat:@"{%g, %g}", s.width, s.height];
+    return [NSString stringWithFormat:@"{%g, %g}", (double)size.width, (double)size.height];
 }
 
-/**	@brief Creates a string representation of the given rectangle.
- *	@param r The rectangle.
- *	@return A string with the format <code>{{x, y}, {width, height}}</code>.
+/** @brief Creates a string representation of the given rectangle.
+ *  @param rect The rectangle.
+ *  @return A string with the format <code> {{x, y}, {width, height}}</code>.
  **/
-NSString *CPTStringFromRect(CGRect r)
+NSString *__nonnull CPTStringFromRect(CGRect rect)
 {
-	return [NSString stringWithFormat:@"{{%g, %g}, {%g, %g}}", r.origin.x, r.origin.y, r.size.width, r.size.height];
+    return [NSString stringWithFormat:@"{{%g, %g}, {%g, %g}}", (double)rect.origin.x, (double)rect.origin.y, (double)rect.size.width, (double)rect.size.height];
+}
+
+/** @brief Creates a string representation of the given vector.
+ *  @param vector The vector.
+ *  @return A string with the format <code> {dx, dy}</code>.
+ **/
+NSString *__nonnull CPTStringFromVector(CGVector vector)
+{
+    return [NSString stringWithFormat:@"{%g, %g}", (double)vector.dx, (double)vector.dy];
+}
+
+#pragma mark -
+#pragma mark CGPoint utilities
+
+/** @brief Computes the square of the distance between two points.
+ *  @param point1 The first point.
+ *  @param point2 The second point.
+ *  @return The square of the distance between the two points.
+ **/
+CGFloat squareOfDistanceBetweenPoints(CGPoint point1, CGPoint point2)
+{
+    CGFloat deltaX          = point1.x - point2.x;
+    CGFloat deltaY          = point1.y - point2.y;
+    CGFloat distanceSquared = deltaX * deltaX + deltaY * deltaY;
+
+    return distanceSquared;
+}
+
+#pragma mark -
+#pragma mark Edge Inset Utilities
+
+/** @brief Returns a CPTEdgeInsets struct with the given insets.
+ *  @param top The top inset.
+ *  @param left The left inset.
+ *  @param bottom The bottom inset.
+ *  @param right The right inset.
+ *  @return A CPTEdgeInsets struct with the given insets.
+ **/
+CPTEdgeInsets CPTEdgeInsetsMake(CGFloat top, CGFloat left, CGFloat bottom, CGFloat right)
+{
+    CPTEdgeInsets insets;
+
+    insets.top    = top;
+    insets.left   = left;
+    insets.bottom = bottom;
+    insets.right  = right;
+
+    return insets;
+}
+
+/** @brief Compares two CPTEdgeInsets structstructs.
+ *  @param insets1 The first inset.
+ *  @param insets2 The second inset.
+ *  @return @YES if the two CPTEdgeInsets structs are equal.
+ **/
+BOOL CPTEdgeInsetsEqualToEdgeInsets(CPTEdgeInsets insets1, CPTEdgeInsets insets2)
+{
+    return (insets1.top == insets2.top) &&
+           (insets1.left == insets2.left) &&
+           (insets1.bottom == insets2.bottom) &&
+           (insets1.right == insets2.right);
+}
+
+#pragma mark -
+#pragma mark Log Modulus
+
+/** @brief Computes the log modulus of the given value.
+ *  @param value The value.
+ *  @return The log modulus of the given value.
+ *  @see <a href="http://blogs.sas.com/content/iml/2014/07/14/log-transformation-of-pos-neg.html">A log transformation of positive and negative values</a> for more information about the log-modulus transformation.
+ **/
+double CPTLogModulus(double value)
+{
+    if ( value != 0.0 ) {
+        double sign = (signbit(value) ? -1.0 : +1.0);
+
+        return sign * log10(fabs(value) + 1.0);
+    }
+    else {
+        return 0.0;
+    }
+}
+
+/** @brief Computes the inverse log modulus of the given value.
+ *  @param value The value.
+ *  @return The inverse log modulus of the given value.
+ **/
+double CPTInverseLogModulus(double value)
+{
+    if ( value != 0.0 ) {
+        double sign = (signbit(value) ? -1.0 : +1.0);
+
+        return sign * (pow( 10.0, fabs(value) ) - 1.0);
+    }
+    else {
+        return 0.0;
+    }
 }

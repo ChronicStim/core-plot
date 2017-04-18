@@ -1,28 +1,20 @@
 #import "CPTTestCase.h"
+
 #import "CPTPlot.h"
 
-@class CPTPlotRange;
-@class CPTPlot;
+@class CPTMutablePlotRange;
 
-@interface CPTDataSourceTestCase : CPTTestCase <CPTPlotDataSource> {
-@private
-    NSArray *xData, *yData;
-    CPTPlotRange *xRange, *yRange;
-    
-    NSMutableArray *plots;
-    
-    NSUInteger nRecords;
-}
+@interface CPTDataSourceTestCase : CPTTestCase<CPTPlotDataSource>
 
-@property (copy,readwrite) NSArray *xData;
-@property (copy,readwrite) NSArray *yData;
-@property (assign,readwrite) NSUInteger nRecords;
-@property (retain,readonly) CPTPlotRange * xRange;
-@property (retain,readonly) CPTPlotRange * yRange;
-@property (retain,readwrite) NSMutableArray *plots;
+@property (nonatomic, readwrite, copy, nullable) CPTNumberArray *xData;
+@property (nonatomic, readwrite, copy, nullable) CPTNumberArray *yData;
+@property (nonatomic, readwrite, assign) NSUInteger nRecords;
+@property (nonatomic, readonly, strong, nonnull) CPTPlotRange *xRange;
+@property (nonatomic, readonly, strong, nonnull) CPTPlotRange *yRange;
+@property (nonatomic, readwrite, strong, nonnull) CPTMutablePlotArray *plots;
 
 -(void)buildData;
 
--(void)addPlot:(CPTPlot*)newPlot;
+-(void)addPlot:(nonnull CPTPlot *)newPlot;
 
 @end

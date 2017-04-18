@@ -1,80 +1,81 @@
-#import <Foundation/Foundation.h>
 #import "CPTDefinitions.h"
 
 /// @file
 
-/**	@brief Enumeration of possible results of a plot range comparison.
- **/
-typedef enum _CPTPlotRangeComparisonResult {
-    CPTPlotRangeComparisonResultNumberBelowRange,	///< Number is below the range.
-    CPTPlotRangeComparisonResultNumberInRange,		///< Number is in the range.
-    CPTPlotRangeComparisonResultNumberAboveRange		///< Number is above the range.
-} CPTPlotRangeComparisonResult;
+@class CPTPlotRange;
 
-@interface CPTPlotRange : NSObject <NSCoding, NSCopying> {
-	@private
-	NSDecimal location;
-	NSDecimal length;
-    double locationDouble;
-	double lengthDouble;
-}
+/**
+ *  @brief Enumeration of possible results of a plot range comparison.
+ **/
+typedef NS_ENUM (NSInteger, CPTPlotRangeComparisonResult) {
+    CPTPlotRangeComparisonResultNumberBelowRange, ///< Number is below the range.
+    CPTPlotRangeComparisonResultNumberInRange,    ///< Number is in the range.
+    CPTPlotRangeComparisonResultNumberAboveRange  ///< Number is above the range.
+};
+
+/**
+ *  @brief An array of plot ranges.
+ **/
+typedef NSArray<CPTPlotRange *> CPTPlotRangeArray;
+
+/**
+ *  @brief A mutable array of plot ranges.
+ **/
+typedef NSMutableArray<CPTPlotRange *> CPTMutablePlotRangeArray;
+
+@interface CPTPlotRange : NSObject<NSCopying, NSMutableCopying, NSCoding, NSSecureCoding>
 
 /// @name Range Limits
 /// @{
-@property (nonatomic, readwrite) NSDecimal location;
-@property (nonatomic, readwrite) NSDecimal length;
-@property (nonatomic, readonly) NSDecimal end;
+@property (nonatomic, readonly, strong, nonnull) NSNumber *location;
+@property (nonatomic, readonly, strong, nonnull) NSNumber *length;
+@property (nonatomic, readonly, strong, nonnull) NSNumber *end;
+@property (nonatomic, readonly) NSDecimal locationDecimal;
+@property (nonatomic, readonly) NSDecimal lengthDecimal;
+@property (nonatomic, readonly) NSDecimal endDecimal;
 @property (nonatomic, readonly) double locationDouble;
 @property (nonatomic, readonly) double lengthDouble;
 @property (nonatomic, readonly) double endDouble;
 
-@property (nonatomic, readonly) NSDecimal minLimit;
-@property (nonatomic, readonly) NSDecimal midPoint;
-@property (nonatomic, readonly) NSDecimal maxLimit;
+@property (nonatomic, readonly, strong, nonnull) NSNumber *minLimit;
+@property (nonatomic, readonly, strong, nonnull) NSNumber *midPoint;
+@property (nonatomic, readonly, strong, nonnull) NSNumber *maxLimit;
+@property (nonatomic, readonly) NSDecimal minLimitDecimal;
+@property (nonatomic, readonly) NSDecimal midPointDecimal;
+@property (nonatomic, readonly) NSDecimal maxLimitDecimal;
 @property (nonatomic, readonly) double minLimitDouble;
 @property (nonatomic, readonly) double midPointDouble;
 @property (nonatomic, readonly) double maxLimitDouble;
-///	@}
+/// @}
 
 /// @name Factory Methods
 /// @{
-+(CPTPlotRange *)plotRangeWithLocation:(NSDecimal)loc length:(NSDecimal)len;
-///	@}
++(nonnull instancetype)plotRangeWithLocation:(nonnull NSNumber *)loc length:(nonnull NSNumber *)len;
++(nonnull instancetype)plotRangeWithLocationDecimal:(NSDecimal)loc lengthDecimal:(NSDecimal)len;
+/// @}
 
 /// @name Initialization
 /// @{
--(id)initWithLocation:(NSDecimal)loc length:(NSDecimal)len;
-///	@}
+-(nonnull instancetype)initWithLocation:(nonnull NSNumber *)loc length:(nonnull NSNumber *)len;
+-(nonnull instancetype)initWithLocationDecimal:(NSDecimal)loc lengthDecimal:(NSDecimal)len NS_DESIGNATED_INITIALIZER;
+-(nullable instancetype)initWithCoder:(nonnull NSCoder *)decoder NS_DESIGNATED_INITIALIZER;
+/// @}
 
 /// @name Checking Ranges
 /// @{
 -(BOOL)contains:(NSDecimal)number;
 -(BOOL)containsDouble:(double)number;
--(BOOL)isEqualToRange:(CPTPlotRange *)otherRange;
-///	@}
-
-/// @name Combining Ranges
-/// @{
--(void)unionPlotRange:(CPTPlotRange *)otherRange;
--(void)intersectionPlotRange:(CPTPlotRange *)otherRange;
-///	@}
-
-/// @name Shifting Ranges
-/// @{
--(void)shiftLocationToFitInRange:(CPTPlotRange *)otherRange;
--(void)shiftEndToFitInRange:(CPTPlotRange *)otherRange;
-///	@}
-
-/// @name Expanding/Contracting Ranges
-/// @{
--(void)expandRangeByFactor:(NSDecimal)factor;
-///	@}
+-(BOOL)containsNumber:(nullable NSNumber *)number;
+-(BOOL)isEqualToRange:(nullable CPTPlotRange *)otherRange;
+-(BOOL)containsRange:(nullable CPTPlotRange *)otherRange;
+-(BOOL)intersectsRange:(nullable CPTPlotRange *)otherRange;
+/// @}
 
 /// @name Range Comparison
 /// @{
--(CPTPlotRangeComparisonResult)compareToNumber:(NSNumber *)number;
+-(CPTPlotRangeComparisonResult)compareToNumber:(nonnull NSNumber *)number;
 -(CPTPlotRangeComparisonResult)compareToDecimal:(NSDecimal)number;
 -(CPTPlotRangeComparisonResult)compareToDouble:(double)number;
-///	@}
+/// @}
 
 @end

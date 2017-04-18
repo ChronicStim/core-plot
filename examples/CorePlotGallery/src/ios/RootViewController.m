@@ -1,100 +1,119 @@
 //
-//  RootViewController.m
-//  CorePlotGallery
-//
-//  Created by Jeff Buck on 8/28/10.
-//  Copyright Jeff Buck 2010. All rights reserved.
+// RootViewController.m
+// CorePlotGallery
 //
 
 #import "RootViewController.h"
+
 #import "DetailViewController.h"
+#import "ThemeTableViewController.h"
 
 #import "PlotGallery.h"
 #import "PlotItem.h"
 
+@interface RootViewController()
+
+@property (nonatomic, copy, nonnull) NSString *currentThemeName;
+
+-(void)themeChanged:(nonnull NSNotification *)notification;
+
+@end
+
+#pragma mark -
+
 @implementation RootViewController
 
-@synthesize detailViewController;
+@synthesize currentThemeName;
 
-- (void)viewDidLoad
+-(void)viewDidLoad
 {
     [super viewDidLoad];
+
     self.clearsSelectionOnViewWillAppear = NO;
-    self.contentSizeForViewInPopover = CGSizeMake(320.0, 600.0);
+
+    self.currentThemeName = kThemeTableViewControllerDefaultTheme;
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(themeChanged:)
+                                                 name:PlotGalleryThemeDidChangeNotification
+                                               object:nil];
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+-(void)dealloc
 {
-    return YES;
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+#pragma mark -
+#pragma mark Segues
+
+-(void)prepareForSegue:(nonnull UIStoryboardSegue *)segue sender:(nullable id)sender
+{
+    if ( [segue.identifier isEqualToString:@"showDetail"] ) {
+        DetailViewController *controller = (DetailViewController *)( (UINavigationController *)segue.destinationViewController ).topViewController;
+
+        controller.navigationItem.leftBarButtonItem             = self.splitViewController.displayModeButtonItem;
+        controller.navigationItem.leftItemsSupplementBackButton = YES;
+
+        controller.currentThemeName = self.currentThemeName;
+
+        NSIndexPath *indexPath = self.tableView.indexPathForSelectedRow;
+
+        PlotItem *plotItem = [[PlotGallery sharedPlotGallery] objectInSection:[indexPath indexAtPosition:0]
+                                                                      atIndex:[indexPath indexAtPosition:1]];
+
+        controller.detailItem = plotItem;
+    }
+}
+
+#pragma mark -
+#pragma mark Theme Selection
+
+-(void)themeChanged:(nonnull NSNotification *)notification
+{
+    NSDictionary<NSString *, NSString *> *themeInfo = notification.userInfo;
+
+    NSString *themeName = themeInfo[PlotGalleryThemeNameKey];
+    if ( themeName ) {
+        self.currentThemeName = themeName;
+    }
 }
 
 #pragma mark -
 #pragma mark Table view data source
 
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tv
+-(NSInteger)numberOfSectionsInTableView:(nonnull UITableView *)tv
 {
-    return 1;
+    return (NSInteger)[PlotGallery sharedPlotGallery].numberOfSections;
 }
 
-- (NSInteger)tableView:(UITableView *)tv numberOfRowsInSection:(NSInteger)section
+-(NSInteger)tableView:(nonnull UITableView *)tv numberOfRowsInSection:(NSInteger)section
 {
-    return [[PlotGallery sharedPlotGallery] count];
+    return (NSInteger)[[PlotGallery sharedPlotGallery] numberOfRowsInSection:(NSUInteger)section];
 }
 
-- (UITableViewCell *)tableView:(UITableView *)tv cellForRowAtIndexPath:(NSIndexPath *)indexPath
+-(nonnull UITableViewCell *)tableView:(nonnull UITableView *)tv cellForRowAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
     static NSString *cellId = @"PlotCell";
 
     UITableViewCell *cell = [tv dequeueReusableCellWithIdentifier:cellId];
-    if (cell == nil) {
-        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellId] autorelease];
+
+    if ( cell == nil ) {
+        cell               = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellId];
         cell.accessoryType = UITableViewCellAccessoryNone;
     }
 
-    PlotItem *plotItem = [[PlotGallery sharedPlotGallery] objectAtIndex:indexPath.row];
+    PlotItem *plotItem = [[PlotGallery sharedPlotGallery] objectInSection:[indexPath indexAtPosition:0]
+                                                                  atIndex:[indexPath indexAtPosition:1]];
     cell.imageView.image = [plotItem image];
-    cell.textLabel.text = plotItem.title;
+    cell.textLabel.text  = plotItem.title;
 
     return cell;
 }
 
-#pragma mark -
-#pragma mark Table view delegate
-
-- (void)tableView:(UITableView *)tv didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+-(nullable NSString *)tableView:(nonnull UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
-    PlotItem *plotItem = [[PlotGallery sharedPlotGallery] objectAtIndex:indexPath.row];
-
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-        detailViewController.detailItem = plotItem;
-    }
-    else {
-        detailViewController = [[DetailViewController alloc] initWithNibName:@"DetailView" bundle:nil];
-        [self.navigationController pushViewController:detailViewController animated:YES];
-        detailViewController.detailItem = plotItem;
-        [detailViewController release];
-        detailViewController = nil;
-    }
-}
-
-#pragma mark -
-#pragma mark Memory management
-
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-}
-
-- (void)viewDidUnload
-{
-    detailViewController = nil;
-}
-
-- (void)dealloc
-{
-    [detailViewController release];
-    detailViewController = nil;
-    [super dealloc];
+    return [PlotGallery sharedPlotGallery].sectionTitles[(NSUInteger)section];
 }
 
 @end

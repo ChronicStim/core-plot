@@ -1,17 +1,12 @@
 //
-//  RealTimePlot.h
-//  CorePlotGallery
+// RealTimePlot.h
+// CorePlotGallery
 //
 
 #import "PlotItem.h"
 
-@interface RealTimePlot : PlotItem < CPTPlotDataSource >
-{
-    NSMutableArray* plotData;
-	NSUInteger currentIndex;
-	NSTimer *dataTimer;
-}
+@interface RealTimePlot : PlotItem<CPTPlotDataSource>
 
--(void)newData:(NSTimer *)theTimer;
+-(void)newData:(nonnull NSTimer *)theTimer;
 
 @end

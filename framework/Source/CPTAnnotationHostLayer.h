@@ -1,16 +1,15 @@
+#import "CPTAnnotation.h"
 #import "CPTLayer.h"
 
-@class CPTAnnotation;
+@interface CPTAnnotationHostLayer : CPTLayer
 
-@interface CPTAnnotationHostLayer : CPTLayer {
-	@private
-	NSMutableArray *mutableAnnotations;
-}
+@property (nonatomic, readonly, nonnull) CPTAnnotationArray *annotations;
 
-@property (nonatomic, readonly, retain) NSArray *annotations;
-
--(void)addAnnotation:(CPTAnnotation *)annotation;
--(void)removeAnnotation:(CPTAnnotation *)annotation;
+/// @name Annotations
+/// @{
+-(void)addAnnotation:(nullable CPTAnnotation *)annotation;
+-(void)removeAnnotation:(nullable CPTAnnotation *)annotation;
 -(void)removeAllAnnotations;
+/// @}
 
 @end

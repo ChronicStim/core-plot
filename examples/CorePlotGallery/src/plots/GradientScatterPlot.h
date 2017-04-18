@@ -1,20 +1,13 @@
 //
-//  GradientScatterPlot.h
-//  CorePlotGallery
-//
-//  Created by Jeff Buck on 8/2/10.
-//  Copyright 2010 Jeff Buck. All rights reserved.
+// GradientScatterPlot.h
+// CorePlotGallery
 //
 
 #import "PlotItem.h"
 
-@interface GradientScatterPlot : PlotItem <	CPTPlotSpaceDelegate,
-                                            CPTPlotDataSource,
-                                            CPTScatterPlotDelegate>
-{
-    CPTLayerAnnotation   *symbolTextAnnotation;
-
-    NSArray*            plotData;
-}
+@interface GradientScatterPlot : PlotItem<CPTPlotAreaDelegate,
+                                          CPTPlotSpaceDelegate,
+                                          CPTPlotDataSource,
+                                          CPTScatterPlotDelegate>
 
 @end

@@ -1,16 +1,12 @@
-#import <Foundation/Foundation.h>
+@interface CPTTimeFormatter : NSNumberFormatter
 
-///	@file
+@property (nonatomic, readwrite, strong, nullable) NSDateFormatter *dateFormatter;
+@property (nonatomic, readwrite, copy, nullable) NSDate *referenceDate;
 
-@interface CPTTimeFormatter : NSNumberFormatter {
-	@private
-	NSDateFormatter *dateFormatter;
-    NSDate *referenceDate;
-}
-
-@property (nonatomic, readwrite, retain) NSDateFormatter *dateFormatter;
-@property (nonatomic, readwrite, copy) NSDate *referenceDate;
-
--(id)initWithDateFormatter:(NSDateFormatter *)aDateFormatter;
+/// @name Initialization
+/// @{
+-(nonnull instancetype)initWithDateFormatter:(nullable NSDateFormatter *)aDateFormatter NS_DESIGNATED_INITIALIZER;
+-(nullable instancetype)initWithCoder:(nonnull NSCoder *)decoder NS_DESIGNATED_INITIALIZER;
+/// @}
 
 @end

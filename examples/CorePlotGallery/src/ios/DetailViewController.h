@@ -1,40 +1,18 @@
 //
-//  DetailViewController.h
-//  CorePlotGallery
-//
-//  Created by Jeff Buck on 8/28/10.
-//  Copyright Jeff Buck 2010. All rights reserved.
+// DetailViewController.h
+// CorePlotGallery
 //
 
-#import <UIKit/UIKit.h>
-#import "CorePlot-CocoaTouch.h"
-#import "ThemeTableViewController.h"
-#import "PlotItem.h"
+@class PlotItem;
 
-@interface DetailViewController : UIViewController <UIPopoverControllerDelegate, 
-                                                    UISplitViewControllerDelegate,
-                                                    ThemeTableViewControllerDelegate>
-{
-    UIPopoverController         *popoverController;
-    UIToolbar                   *toolbar;
+@interface DetailViewController : UIViewController
 
-    PlotItem                    *detailItem;
+@property (nonatomic, strong, nonnull) PlotItem *detailItem;
+@property (nonatomic, copy, nonnull) NSString *currentThemeName;
 
-    UIView                      *hostingView;
-    UIBarButtonItem             *themeBarButton;
-    UIPopoverController         *themePopoverController;
-    ThemeTableViewController    *themeTableViewController;
+@property (nonatomic, strong, nullable) IBOutlet UIView *hostingView;
+@property (nonatomic, strong, nullable) IBOutlet UIBarButtonItem *themeBarButton;
 
-    NSString                    *currentThemeName;
-}
-
-@property (nonatomic, retain) IBOutlet UIToolbar *toolbar;
-@property (nonatomic, retain) PlotItem *detailItem;
-@property (nonatomic, retain) IBOutlet UIView *hostingView;
-@property (nonatomic, retain) IBOutlet UIBarButtonItem *themeBarButton;
-@property (nonatomic, retain) IBOutlet ThemeTableViewController *themeTableViewController;
-@property (nonatomic, copy) NSString *currentThemeName;
-
-- (IBAction)showThemes:(id)sender;
+-(void)themeSelectedWithName:(nonnull NSString *)themeName;
 
 @end

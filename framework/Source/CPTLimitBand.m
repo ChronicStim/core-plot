@@ -1,17 +1,19 @@
 #import "CPTLimitBand.h"
+
 #import "CPTFill.h"
 #import "CPTPlotRange.h"
 
-/** @brief Defines a range and fill used to highlight a band of data.
+/**
+ *  @brief Defines a range and fill used to highlight a band of data.
  **/
 @implementation CPTLimitBand
 
-/** @property range
+/** @property nullable CPTPlotRange *range
  *  @brief The data range for the band.
  **/
 @synthesize range;
 
-/** @property fill
+/** @property nullable CPTFill *fill
  *  @brief The fill used to draw the band.
  **/
 @synthesize fill;
@@ -24,9 +26,9 @@
  *  @param newFill The fill used to draw the interior of the band.
  *  @return A new CPTLimitBand instance initialized with the provided range and fill.
  **/
-+(CPTLimitBand *)limitBandWithRange:(CPTPlotRange *)newRange fill:(CPTFill *)newFill
++(nonnull instancetype)limitBandWithRange:(nullable CPTPlotRange *)newRange fill:(nullable CPTFill *)newFill
 {
-	return [[[CPTLimitBand alloc] initWithRange:newRange fill:newFill] autorelease];
+    return [[CPTLimitBand alloc] initWithRange:newRange fill:newFill];
 }
 
 /** @brief Initializes a newly allocated CPTLimitBand object with the provided range and fill.
@@ -34,71 +36,92 @@
  *  @param newFill The fill used to draw the interior of the band.
  *  @return The initialized CPTLimitBand object.
  **/
--(id)initWithRange:(CPTPlotRange *)newRange fill:(CPTFill *)newFill
+-(nonnull instancetype)initWithRange:(nullable CPTPlotRange *)newRange fill:(nullable CPTFill *)newFill
 {
-	if ( (self = [super init]) ) {
-    	range = [newRange retain];
-        fill = [newFill retain];
-	}
-	return self;	
+    if ( (self = [super init]) ) {
+        range = newRange;
+        fill  = newFill;
+    }
+    return self;
 }
 
--(void)dealloc
+/// @cond
+
+-(nonnull instancetype)init
 {
-	[range release];
-	[fill release];
-	[super dealloc];
+    return [self initWithRange:nil fill:nil];
 }
+
+/// @endcond
 
 #pragma mark -
-#pragma mark NSCopying
+#pragma mark NSCopying Methods
 
--(id)copyWithZone:(NSZone *)zone 
+/// @cond
+
+-(nonnull id)copyWithZone:(nullable NSZone *)zone
 {
     CPTLimitBand *newBand = [[CPTLimitBand allocWithZone:zone] init];
-	if ( newBand ) {
-		newBand->range = [self->range copyWithZone:zone];
-		newBand->fill = [self->fill copyWithZone:zone];
-	}
+
+    if ( newBand ) {
+        newBand.range = self.range;
+        newBand.fill  = self.fill;
+    }
     return newBand;
 }
 
+/// @endcond
+
 #pragma mark -
-#pragma mark NSCoding
+#pragma mark NSCoding Methods
 
-- (void)encodeWithCoder:(NSCoder *)encoder 
+/// @cond
+
+-(void)encodeWithCoder:(nonnull NSCoder *)encoder
 {
-    if ( [encoder allowsKeyedCoding] ) {
-		[encoder encodeObject:range forKey:@"CPTLimitBand.range"];
-		[encoder encodeObject:fill forKey:@"CPTLimitBand.fill"];
-	} else {
-		[encoder encodeObject:range];
-		[encoder encodeObject:fill];
-	}
+    [encoder encodeObject:self.range forKey:@"CPTLimitBand.range"];
+    [encoder encodeObject:self.fill forKey:@"CPTLimitBand.fill"];
 }
 
-- (id)initWithCoder:(NSCoder *)decoder 
-{
-	CPTPlotRange *newRange;
-	CPTFill *newFill;
-	
-    if ( [decoder allowsKeyedCoding] ) {
-		newRange = [decoder decodeObjectForKey:@"CPTLimitBand.range"];
-		newFill = [decoder decodeObjectForKey:@"CPTLimitBand.fill"];
-	} else {
-		newRange = [decoder decodeObject];
-		newFill = [decoder decodeObject];
-	}
+/// @endcond
 
-    return [self initWithRange:newRange fill:newFill];
+/** @brief Returns an object initialized from data in a given unarchiver.
+ *  @param decoder An unarchiver object.
+ *  @return An object initialized from data in a given unarchiver.
+ */
+-(nullable instancetype)initWithCoder:(nonnull NSCoder *)decoder
+{
+    if ( (self = [super init]) ) {
+        range = [decoder decodeObjectOfClass:[CPTPlotRange class]
+                                      forKey:@"CPTLimitBand.range"];
+        fill = [decoder decodeObjectOfClass:[CPTFill class]
+                                     forKey:@"CPTLimitBand.fill"];
+    }
+    return self;
 }
+
+#pragma mark -
+#pragma mark NSSecureCoding Methods
+
+/// @cond
+
++(BOOL)supportsSecureCoding
+{
+    return YES;
+}
+
+/// @endcond
 
 #pragma mark -
 #pragma mark Description
 
--(NSString *)description
+/// @cond
+
+-(nullable NSString *)description
 {
-	return [NSString stringWithFormat:@"<%@ with range: %@ and fill: %@>", [super description], self.range, self.fill]; 
+    return [NSString stringWithFormat:@"<%@ with range: %@ and fill: %@>", super.description, self.range, self.fill];
 }
+
+/// @endcond
 
 @end

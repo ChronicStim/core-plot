@@ -1,11 +1,13 @@
 #import "CPTConstraints.h"
+
+#import "CPTDefinitions.h"
+#import "NSCoderExtensions.h"
 #import "_CPTConstraintsFixed.h"
 #import "_CPTConstraintsRelative.h"
-#import "NSCoderExtensions.h"
 
-/**	@brief Implements a one-dimensional constrained position within a given numeric range.
+/** @brief Implements a one-dimensional constrained position within a given numeric range.
  *
- *	Supports fixed distance from either end of the range and a proportional fraction of the range.
+ *  Supports fixed distance from either end of the range and a proportional fraction of the range.
  **/
 @implementation CPTConstraints
 
@@ -16,31 +18,31 @@
  *  @param newOffset The offset.
  *  @return A new CPTConstraints instance initialized with the given offset.
  **/
-+(CPTConstraints *)constraintWithLowerOffset:(CGFloat)newOffset
++(nonnull instancetype)constraintWithLowerOffset:(CGFloat)newOffset
 {
-	return [[(_CPTConstraintsFixed *)[_CPTConstraintsFixed alloc] initWithLowerOffset:newOffset] autorelease];
+    return [[_CPTConstraintsFixed alloc] initWithLowerOffset:newOffset];
 }
 
 /** @brief Creates and returns a new CPTConstraints instance initialized with a fixed offset from the upper bound.
  *  @param newOffset The offset.
  *  @return A new CPTConstraints instance initialized with the given offset.
  **/
-+(CPTConstraints *)constraintWithUpperOffset:(CGFloat)newOffset
++(nonnull instancetype)constraintWithUpperOffset:(CGFloat)newOffset
 {
-	return [[(_CPTConstraintsFixed *)[_CPTConstraintsFixed alloc] initWithUpperOffset:newOffset] autorelease];
+    return [[_CPTConstraintsFixed alloc] initWithUpperOffset:newOffset];
 }
 
 /** @brief Creates and returns a new CPTConstraints instance initialized with a proportional offset relative to the bounds.
  *
- *	For example, an offset of 0.0 will return a position equal to the lower bound, 1.0 will return the upper bound,
- *	and 0.5 will return a point midway between the two bounds.
+ *  For example, an offset of @num{0.0} will return a position equal to the lower bound, @num{1.0} will return the upper bound,
+ *  and @num{0.5} will return a point midway between the two bounds.
  *
  *  @param newOffset The offset.
  *  @return A new CPTConstraints instance initialized with the given offset.
  **/
-+(CPTConstraints *)constraintWithRelativeOffset:(CGFloat)newOffset
++(nonnull instancetype)constraintWithRelativeOffset:(CGFloat)newOffset
 {
-	return [[(_CPTConstraintsRelative *)[_CPTConstraintsRelative alloc] initWithRelativeOffset:newOffset] autorelease];
+    return [[_CPTConstraintsRelative alloc] initWithRelativeOffset:newOffset];
 }
 
 #pragma mark -
@@ -50,81 +52,95 @@
  *  @param newOffset The offset.
  *  @return The initialized CPTConstraints object.
  **/
--(id)initWithLowerOffset:(CGFloat)newOffset
+-(nonnull instancetype)initWithLowerOffset:(CGFloat)newOffset
 {
-	[self release];
-	
-	self = [(_CPTConstraintsFixed *)[_CPTConstraintsFixed alloc] initWithLowerOffset:newOffset];
-	
-	return self;
+    self = [[_CPTConstraintsFixed alloc] initWithLowerOffset:newOffset];
+
+    return self;
 }
 
 /** @brief Initializes a newly allocated CPTConstraints instance initialized with a fixed offset from the upper bound.
  *  @param newOffset The offset.
  *  @return The initialized CPTConstraints object.
  **/
--(id)initWithUpperOffset:(CGFloat)newOffset
+-(nonnull instancetype)initWithUpperOffset:(CGFloat)newOffset
 {
-	[self release];
-	
-	self = [(_CPTConstraintsFixed *)[_CPTConstraintsFixed alloc] initWithUpperOffset:newOffset];
-	
-	return self;
+    self = [[_CPTConstraintsFixed alloc] initWithUpperOffset:newOffset];
+
+    return self;
 }
 
 /** @brief Initializes a newly allocated CPTConstraints instance initialized with a proportional offset relative to the bounds.
  *
- *	For example, an offset of 0.0 will return a position equal to the lower bound, 1.0 will return the upper bound,
- *	and 0.5 will return a point midway between the two bounds.
+ *  For example, an offset of @num{0.0} will return a position equal to the lower bound, @num{1.0} will return the upper bound,
+ *  and @num{0.5} will return a point midway between the two bounds.
  *
  *  @param newOffset The offset.
  *  @return The initialized CPTConstraints object.
  **/
--(id)initWithRelativeOffset:(CGFloat)newOffset
+-(nonnull instancetype)initWithRelativeOffset:(CGFloat)newOffset
 {
-	[self release];
-	
-	self = [(_CPTConstraintsRelative *)[_CPTConstraintsRelative alloc] initWithRelativeOffset:newOffset];
-	
-	return self;
+    self = [[_CPTConstraintsRelative alloc] initWithRelativeOffset:newOffset];
+
+    return self;
 }
 
 #pragma mark -
-#pragma mark NSCopying methods
+#pragma mark NSCopying Methods
 
--(id)copyWithZone:(NSZone *)zone
+/// @cond
+
+-(nonnull id)copyWithZone:(nullable NSZone *)zone
 {
-	// do nothing--implemented in subclasses
-	return nil;
+    // do nothing--implemented in subclasses
+    return nil;
 }
+
+/// @endcond
 
 #pragma mark -
-#pragma mark NSCoding methods
+#pragma mark NSCoding Methods
 
--(void)encodeWithCoder:(NSCoder *)coder
+/// @cond
+
+-(void)encodeWithCoder:(nonnull NSCoder *)coder
 {
-	// do nothing--implemented in subclasses
+    // do nothing--implemented in subclasses
 }
 
--(id)initWithCoder:(NSCoder *)coder
+-(nullable instancetype)initWithCoder:(nonnull NSCoder *)coder
 {
-	if ( [coder containsValueForKey:@"_CPTConstraintsFixed.offset"] ) {
-		CGFloat offset = [coder decodeCGFloatForKey:@"_CPTConstraintsFixed.offset"];
-		BOOL isFixedToLower = [coder decodeBoolForKey:@"_CPTConstraintsFixed.isFixedToLower"];
-		if ( isFixedToLower ) {
-			return [self initWithLowerOffset:offset];
-		}
-		else {
-			return [self initWithUpperOffset:offset];
-		}
-	}
-	else if ( [coder containsValueForKey:@"_CPTConstraintsRelative.offset"] ) {
-		CGFloat offset = [coder decodeCGFloatForKey:@"_CPTConstraintsRelative.offset"];
-		return [self initWithRelativeOffset:offset];
-	}
-	
-	return self;
+    if ( [coder containsValueForKey:@"_CPTConstraintsFixed.offset"] ) {
+        CGFloat offset      = [coder decodeCGFloatForKey:@"_CPTConstraintsFixed.offset"];
+        BOOL isFixedToLower = [coder decodeBoolForKey:@"_CPTConstraintsFixed.isFixedToLower"];
+        if ( isFixedToLower ) {
+            return [self initWithLowerOffset:offset];
+        }
+        else {
+            return [self initWithUpperOffset:offset];
+        }
+    }
+    else if ( [coder containsValueForKey:@"_CPTConstraintsRelative.offset"] ) {
+        CGFloat offset = [coder decodeCGFloatForKey:@"_CPTConstraintsRelative.offset"];
+        return [self initWithRelativeOffset:offset];
+    }
+
+    return nil;
 }
+
+/// @endcond
+
+#pragma mark -
+#pragma mark NSSecureCoding Methods
+
+/// @cond
+
++(BOOL)supportsSecureCoding
+{
+    return YES;
+}
+
+/// @endcond
 
 @end
 
@@ -137,26 +153,26 @@
 
 /** @brief Determines whether a given constraint is equal to the receiver.
  *  @param otherConstraint The constraint to check.
- *  @return YES if the constraints are equal.
+ *  @return @YES if the constraints are equal.
  **/
--(BOOL)isEqualToConstraint:(CPTConstraints *)otherConstraint
+-(BOOL)isEqualToConstraint:(nullable CPTConstraints *)otherConstraint
 {
-	// subclasses override to do comparison here
-	return [super isEqual:otherConstraint];
+    // subclasses override to do comparison here
+    return [super isEqual:otherConstraint];
 }
 
 #pragma mark -
 #pragma mark Positioning
 
-/**	@brief Compute the position given a range of values.
- *	@param lowerBound The lower bound; must be less than or equal to the upperBound.
- *	@param upperBound The upper bound; must be greater than or equal to the lowerBound.
- *	@return The calculated position.
+/** @brief Compute the position given a range of values.
+ *  @param lowerBound The lower bound; must be less than or equal to the @par{upperBound}.
+ *  @param upperBound The upper bound; must be greater than or equal to the @par{lowerBound}.
+ *  @return The calculated position.
  **/
--(CGFloat)positionForLowerBound:(CGFloat)lowerBound upperBound:(CGFloat)upperBound;
+-(CGFloat)positionForLowerBound:(CGFloat)lowerBound upperBound:(CGFloat)upperBound
 {
-	// subclasses override to do position calculation here
-	return NAN;
+    // subclasses override to do position calculation here
+    return CPTNAN;
 }
 
 @end

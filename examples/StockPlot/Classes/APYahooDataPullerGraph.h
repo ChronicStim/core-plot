@@ -1,24 +1,18 @@
 //
-//  APYahooDataPullerGraph.h
-//  StockPlot
+// APYahooDataPullerGraph.h
+// StockPlot
 //
-//  Created by Jonathan Saggau on 6/19/09.
-//  Copyright 2009 __MyCompanyName__. All rights reserved.
+// Created by Jonathan Saggau on 6/19/09.
+// Copyright 2009 __MyCompanyName__. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
 #import "APYahooDataPuller.h"
 #import "CorePlot-CocoaTouch.h"
+#import <UIKit/UIKit.h>
 
-@interface APYahooDataPullerGraph : UIViewController <APYahooDataPullerDelegate, CPTPlotDataSource> {
-    CPTGraphHostingView *graphHost;
-    APYahooDataPuller *dataPuller;
+@interface APYahooDataPullerGraph : UIViewController<APYahooDataPullerDelegate, CPTPlotDataSource>
 
-@private
-    CPTXYGraph *graph;
-}
-
-@property (nonatomic, retain) IBOutlet CPTGraphHostingView *graphHost;
-@property (nonatomic, retain) APYahooDataPuller *dataPuller;
+@property (nonatomic, strong, nullable) IBOutlet CPTGraphHostingView *graphHost;
+@property (nonatomic, strong, nonnull) APYahooDataPuller *dataPuller;
 
 @end

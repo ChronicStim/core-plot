@@ -1,53 +1,66 @@
-#import <Foundation/Foundation.h>
-#import <QuartzCore/QuartzCore.h>
-
-///	@file
+#import "CPTDefinitions.h"
+#import "CPTTextStylePlatformSpecific.h"
 
 @class CPTColor;
+@class CPTTextStyle;
 
 /**
- *	@brief Enumeration of paragraph alignments.
+ *  @brief An array of text styles.
  **/
-typedef enum  _CPTTextAlignment {
-    CPTTextAlignmentLeft,		///< Left alignment
-    CPTTextAlignmentCenter,		///< Center alignment
-    CPTTextAlignmentRight		///< Right alignment
-} CPTTextAlignment;
+typedef NSArray<CPTTextStyle *> CPTTextStyleArray;
 
-@interface CPTTextStyle : NSObject <NSCoding, NSCopying, NSMutableCopying> {
-	@protected
-    NSString *fontName;
-	CGFloat fontSize;
-    CPTColor *color;
-	CPTTextAlignment textAlignment;
-}
+/**
+ *  @brief A mutable array of text styles.
+ **/
+typedef NSMutableArray<CPTTextStyle *> CPTMutableTextStyleArray;
 
-@property(readonly, copy, nonatomic) NSString *fontName;
-@property(readonly, assign, nonatomic) CGFloat fontSize;
-@property(readonly, copy, nonatomic) CPTColor *color;
-@property(readonly, assign, nonatomic) CPTTextAlignment textAlignment;
+@interface CPTTextStyle : NSObject<NSCopying, NSMutableCopying, NSCoding, NSSecureCoding>
+
+@property (readonly, copy, nonatomic, nullable) NSString *fontName;
+@property (readonly, nonatomic) CGFloat fontSize;
+@property (readonly, copy, nonatomic, nullable) CPTColor *color;
+@property (readonly, nonatomic) CPTTextAlignment textAlignment;
+@property (readonly, assign, nonatomic) NSLineBreakMode lineBreakMode;
 
 /// @name Factory Methods
 /// @{
-+(id)textStyle;
-///	@}
++(nonnull instancetype)textStyle;
++(nonnull instancetype)textStyleWithStyle:(nullable CPTTextStyle *)textStyle;
+/// @}
 
 @end
 
+#pragma mark -
 
-/**	@category NSString(CPTTextStyleExtensions)
- *	@brief NSString extensions for drawing styled text.
+/** @category CPTTextStyle(CPTPlatformSpecificTextStyleExtensions)
+ *  @brief Platform-specific extensions to CPTTextStyle.
+ **/
+@interface CPTTextStyle(CPTPlatformSpecificTextStyleExtensions)
+
+@property (readonly, nonatomic, nonnull) CPTDictionary *attributes;
+
+/// @name Factory Methods
+/// @{
++(nonnull instancetype)textStyleWithAttributes:(nullable CPTDictionary *)attributes;
+/// @}
+
+@end
+
+#pragma mark -
+
+/** @category NSString(CPTTextStyleExtensions)
+ *  @brief NSString extensions for drawing styled text.
  **/
 @interface NSString(CPTTextStyleExtensions)
 
 /// @name Measurement
 /// @{
--(CGSize)sizeWithTextStyle:(CPTTextStyle *)style;
-///	@}
+-(CGSize)sizeWithTextStyle:(nullable CPTTextStyle *)style;
+/// @}
 
 /// @name Drawing
 /// @{
--(void)drawInRect:(CGRect)rect withTextStyle:(CPTTextStyle *)style inContext:(CGContextRef)context;
-///	@}
+-(void)drawInRect:(CGRect)rect withTextStyle:(nullable CPTTextStyle *)style inContext:(nonnull CGContextRef)context;
+/// @}
 
 @end

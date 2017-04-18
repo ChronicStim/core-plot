@@ -1,35 +1,20 @@
 //
-//  CompositePlot.h
-//  CorePlotGallery
-//
-//  Created by Jeff Buck on 9/4/10.
-//  Copyright 2010 Jeff Buck. All rights reserved.
+// CompositePlot.h
+// CorePlotGallery
 //
 
 #import "PlotItem.h"
 
-@interface CompositePlot : PlotItem <CPTPlotSpaceDelegate,
-									 CPTPlotDataSource,
-									 CPTScatterPlotDelegate,
-									 CPTBarPlotDelegate>
-{
-    CPTGraphHostingView  *scatterPlotView;
-    CPTGraphHostingView  *barChartView;
-    CPTGraphHostingView  *pieChartView;
+@interface CompositePlot : PlotItem<CPTPlotSpaceDelegate,
+                                    CPTScatterPlotDataSource,
+                                    CPTScatterPlotDelegate,
+                                    CPTBarPlotDelegate>
 
-    CPTXYGraph           *scatterPlot;
-    CPTXYGraph           *barChart;
-    CPTXYGraph           *pieChart;
+@property (readwrite, strong, nonatomic, nonnull) CPTMutableNumberArray *dataForChart;
+@property (readwrite, strong, nonatomic, nonnull) NSMutableArray<NSDictionary *> *dataForPlot;
 
-    NSMutableArray      *dataForChart;
-    NSMutableArray      *dataForPlot;
-}
-
-@property(readwrite, retain, nonatomic) NSMutableArray *dataForChart;
-@property(readwrite, retain, nonatomic) NSMutableArray *dataForPlot;
-
-- (void)renderScatterPlotInLayer:(CPTGraphHostingView *)layerHostingView withTheme:(CPTTheme *)theme;
-- (void)renderBarPlotInLayer:(CPTGraphHostingView *)layerHostingView withTheme:(CPTTheme *)theme;
-- (void)renderPieChartInLayer:(CPTGraphHostingView *)layerHostingView withTheme:(CPTTheme *)theme;
+-(void)renderScatterPlotInHostingView:(nonnull CPTGraphHostingView *)hostingView withTheme:(nullable CPTTheme *)theme;
+-(void)renderBarPlotInHostingView:(nonnull CPTGraphHostingView *)hostingView withTheme:(nullable CPTTheme *)theme;
+-(void)renderPieChartInHostingView:(nonnull CPTGraphHostingView *)hostingView withTheme:(nullable CPTTheme *)theme;
 
 @end

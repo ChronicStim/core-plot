@@ -14,6 +14,9 @@ syntax: glob
 # Temporary files used by TestMate
 ._*
 
+# Backup files left behind by various editors
+*.bak
+
 # build directories
 **/build/*
 build/*
@@ -23,8 +26,11 @@ build/*
 **.mode?v?
 **.perspectivev?
 **.xcuserstate
+**.xccheckout
 **/xcuserdata/*
 
+# AppCode settings
+**/.idea/*
 
 # documentation
 **.docset/*

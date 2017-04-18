@@ -1,31 +1,35 @@
 #import "CPTMutableTextStyle.h"
-#import "CPTColor.h"
 
 /** @brief Mutable wrapper for text style properties.
- *  
+ *
  *  Use this whenever you need to customize the properties of a text style.
  **/
 
 @implementation CPTMutableTextStyle
 
-/** @property fontSize
- *  @brief The font size.
+/** @property CGFloat fontSize
+ *  @brief The font size. Default is @num{12.0}.
  **/
 @dynamic fontSize;
 
-/** @property fontName
- *  @brief The font name.
+/** @property nullable NSString *fontName
+ *  @brief The font name. Default is Helvetica.
  **/
 @dynamic fontName;
 
-/** @property color
- *  @brief The current text color.
+/** @property nullable CPTColor *color
+ *  @brief The current text color. Default is solid black.
  **/
 @dynamic color;
 
-/** @property textAlignment
- *  @brief The paragraph alignment for multi-line text.
+/** @property CPTTextAlignment textAlignment
+ *  @brief The paragraph alignment for multi-line text. Default is #CPTTextAlignmentLeft.
  **/
 @dynamic textAlignment;
+
+/** @property NSLineBreakMode lineBreakMode
+ *  @brief The line break mode used when laying out the text. Default is @link NSParagraphStyle::NSLineBreakByWordWrapping NSLineBreakByWordWrapping @endlink.
+ **/
+@dynamic lineBreakMode;
 
 @end

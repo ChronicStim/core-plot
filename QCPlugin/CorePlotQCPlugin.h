@@ -1,68 +1,54 @@
-#import <Quartz/Quartz.h>
 #import <CorePlot/CorePlot.h>
+#import <Quartz/Quartz.h>
 
-@interface CorePlotQCPlugIn : QCPlugIn <CPTPlotDataSource>
-{	
-	NSUInteger numberOfPlots;
-	BOOL configurationCheck;
-	
-	void *imageData;
-	CGContextRef bitmapContext;
-	id<QCPlugInOutputImageProvider> imageProvider;
-	CPTGraph *graph;
-}
+@interface CorePlotQCPlugIn : QCPlugIn<CPTPlotDataSource>
 
-/*
-Declare here the Obj-C 2.0 properties to be used as input and output ports for the plug-in e.g.
-@property double inputFoo;
-@property(assign) NSString* outputBar;
-You can access their values in the appropriate plug-in methods using self.inputFoo or self.inputBar
-*/
+@property (readwrite, strong, nullable) CPTGraph *graph;
 
-@property(assign) id<QCPlugInOutputImageProvider> outputImage;
+@property (readwrite, assign, nonnull) id<QCPlugInOutputImageProvider> outputImage;
 
-@property(assign) NSUInteger numberOfPlots;
+@property (readwrite, assign) NSUInteger numberOfPlots;
 
-@property(assign) NSUInteger inputPixelsWide;
-@property(assign) NSUInteger inputPixelsHigh;
+@property (readwrite, assign) NSUInteger inputPixelsWide;
+@property (readwrite, assign) NSUInteger inputPixelsHigh;
 
-@property(assign) CGColorRef inputPlotAreaColor;
+@property (readwrite, assign, nonnull) CGColorRef inputPlotAreaColor;
 
-@property(assign) CGColorRef inputAxisColor;
-@property(assign) double inputAxisLineWidth;
-@property(assign) double inputAxisMajorTickWidth;
-@property(assign) double inputAxisMinorTickWidth;
-@property(assign) double inputAxisMajorTickLength;
-@property(assign) double inputAxisMinorTickLength;
-@property(assign) double inputMajorGridLineWidth;
-@property(assign) double inputMinorGridLineWidth;
+@property (readwrite, assign, nonnull) CGColorRef inputAxisColor;
+@property (readwrite, assign) double inputAxisLineWidth;
+@property (readwrite, assign) double inputAxisMajorTickWidth;
+@property (readwrite, assign) double inputAxisMinorTickWidth;
+@property (readwrite, assign) double inputAxisMajorTickLength;
+@property (readwrite, assign) double inputAxisMinorTickLength;
+@property (readwrite, assign) double inputMajorGridLineWidth;
+@property (readwrite, assign) double inputMinorGridLineWidth;
 
-@property(assign) NSUInteger inputXMajorIntervals;
-@property(assign) NSUInteger inputYMajorIntervals;
-@property(assign) NSUInteger inputXMinorIntervals;
-@property(assign) NSUInteger inputYMinorIntervals;
+@property (readwrite, assign) NSUInteger inputXMajorIntervals;
+@property (readwrite, assign) NSUInteger inputYMajorIntervals;
+@property (readwrite, assign) NSUInteger inputXMinorIntervals;
+@property (readwrite, assign) NSUInteger inputYMinorIntervals;
 
-@property(assign) double inputXMin;
-@property(assign) double inputXMax;
-@property(assign) double inputYMin;
-@property(assign) double inputYMax;
+@property (readwrite, assign) double inputXMin;
+@property (readwrite, assign) double inputXMax;
+@property (readwrite, assign) double inputYMin;
+@property (readwrite, assign) double inputYMax;
 
-- (void) createGraph;
-- (void) addPlots:(NSUInteger)count;
-- (void) addPlotWithIndex:(NSUInteger)index;
-- (void) removePlots:(NSUInteger)count;
-- (BOOL) configureGraph;
-- (BOOL) configurePlots;
-- (BOOL) configureAxis;
+-(void)createGraph;
+-(void)addPlots:(NSUInteger)count;
+-(void)addPlotWithIndex:(NSUInteger)index;
+-(void)removePlots:(NSUInteger)count;
+-(BOOL)configureGraph;
+-(BOOL)configurePlots;
+-(BOOL)configureAxis;
 
-- (NSUInteger)numberOfRecordsForPlot:(CPTPlot *)plot;
-- (CGColorRef) newDefaultColorForPlot:(NSUInteger)index alpha:(CGFloat)alpha;
+-(NSUInteger)numberOfRecordsForPlot:(nonnull CPTPlot *)plot;
+-(nonnull CGColorRef)newDefaultColorForPlot:(NSUInteger)index alpha:(CGFloat)alpha;
 
-- (void) freeResources;
+-(void)freeResources;
 
-- (id) dataLineColor:(NSUInteger)index;
-- (CGFloat) dataLineWidth:(NSUInteger)index;
-- (id) areaFillColor:(NSUInteger)index;
-- (CGImageRef) newAreaFillImage:(NSUInteger)index;
+-(nonnull CGColorRef)dataLineColor:(NSUInteger)index;
+-(CGFloat)dataLineWidth:(NSUInteger)index;
+-(nullable CGColorRef)areaFillColor:(NSUInteger)index;
+-(nullable CGImageRef)newAreaFillImage:(NSUInteger)index;
 
 @end

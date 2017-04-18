@@ -1,51 +1,58 @@
 #import "_CPTXYTheme.h"
 
 #import "CPTPlotRange.h"
+#import "CPTUtilities.h"
 #import "CPTXYGraph.h"
 #import "CPTXYPlotSpace.h"
-#import "CPTUtilities.h"
 
-/** @brief Creates a CPTXYGraph instance formatted with padding of 60 on each side and X and Y plot ranges of +/- 1.
+/**
+ *  @brief Creates a CPTXYGraph instance formatted with padding of 60 on each side and X and Y plot ranges of +/- 1.
  **/
 @implementation _CPTXYTheme
 
--(id)init
+/// @name Initialization
+/// @{
+
+-(nonnull instancetype)init
 {
-	if ( (self = [super init]) ) {
-		self.graphClass = [CPTXYGraph class];
-	}
-	return self;
+    if ( (self = [super init]) ) {
+        self.graphClass = [CPTXYGraph class];
+    }
+    return self;
 }
 
--(id)newGraph 
+/// @}
+
+-(nullable id)newGraph
 {
     CPTXYGraph *graph;
-	if (self.graphClass) {
-		graph = [(CPTXYGraph *)[self.graphClass alloc] initWithFrame:CGRectMake(0.0, 0.0, 200.0, 200.0)];
-	}
-	else {
-		graph = [(CPTXYGraph *)[CPTXYGraph alloc] initWithFrame:CGRectMake(0.0, 0.0, 200.0, 200.0)];
-	}	
-	graph.paddingLeft = 60.0;
-	graph.paddingTop = 60.0;
-	graph.paddingRight = 60.0;
-	graph.paddingBottom = 60.0;
-    
+
+    if ( self.graphClass ) {
+        graph = [[self.graphClass alloc] initWithFrame:CPTRectMake(0.0, 0.0, 200.0, 200.0)];
+    }
+    else {
+        graph = [[CPTXYGraph alloc] initWithFrame:CPTRectMake(0.0, 0.0, 200.0, 200.0)];
+    }
+    graph.paddingLeft   = CPTFloat(60.0);
+    graph.paddingTop    = CPTFloat(60.0);
+    graph.paddingRight  = CPTFloat(60.0);
+    graph.paddingBottom = CPTFloat(60.0);
+
     CPTXYPlotSpace *plotSpace = (CPTXYPlotSpace *)graph.defaultPlotSpace;
-    plotSpace.xRange = [CPTPlotRange plotRangeWithLocation:CPTDecimalFromDouble(-1.0) length:CPTDecimalFromDouble(1.0)];
-    plotSpace.yRange = [CPTPlotRange plotRangeWithLocation:CPTDecimalFromDouble(-1.0) length:CPTDecimalFromDouble(1.0)];
-    
+    plotSpace.xRange = [CPTPlotRange plotRangeWithLocation:@(-1.0) length:@1.0];
+    plotSpace.yRange = [CPTPlotRange plotRangeWithLocation:@(-1.0) length:@1.0];
+
     [self applyThemeToGraph:graph];
-    
-	return graph;
+
+    return graph;
 }
 
 #pragma mark -
-#pragma mark NSCoding methods
+#pragma mark NSCoding Methods
 
--(Class)classForCoder
+-(nonnull Class)classForCoder
 {
-	return [CPTTheme class];
+    return [CPTTheme class];
 }
 
 @end

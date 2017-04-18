@@ -1,197 +1,221 @@
 //
-//  OHLCPlot.m
-//  CorePlotGallery
+// OHLCPlot.m
+// CorePlotGallery
 //
 
 #import "OHLCPlot.h"
 
 static const NSTimeInterval oneDay = 24 * 60 * 60;
 
+@interface OHLCPlot()
+
+@property (nonatomic, readwrite, strong, nullable) CPTGraph *graph;
+@property (nonatomic, readwrite, strong, nonnull) NSArray<NSDictionary *> *plotData;
+
+@end
+
 @implementation OHLCPlot
 
-+ (void)load
+@synthesize graph;
+@synthesize plotData;
+
++(void)load
 {
     [super registerPlotItem:self];
 }
 
-- (id)init
+-(nonnull instancetype)init
 {
-	if ( (self = [super init]) ) {
-		graph = nil;
-		plotData = nil;
-        title = @"OHLC Plot";
-	}
-	
+    if ( (self = [super init]) ) {
+        graph    = nil;
+        plotData = @[];
+
+        self.title   = @"OHLC Plot";
+        self.section = kFinancialPlots;
+    }
+
     return self;
 }
 
-- (void)generateData
+-(void)generateData
 {
-    if ( !plotData ) {
-		NSMutableArray *newData = [NSMutableArray array];
-		for ( NSUInteger i = 0; i < 8; i++ ) {
-			NSTimeInterval x = oneDay * i;
-			double rOpen = 3.0 * rand()/(double)RAND_MAX + 1.0;
-			double rClose = (rand()/(double)RAND_MAX - 0.5) * 0.125 + rOpen;
-			double rHigh = MAX(rOpen, MAX(rClose, (rand()/(double)RAND_MAX - 0.5) * 0.5 + rOpen));
-			double rLow = MIN(rOpen, MIN(rClose, (rand()/(double)RAND_MAX - 0.5) * 0.5 + rOpen));
-			
-			[newData addObject:
-			 [NSDictionary dictionaryWithObjectsAndKeys:
-			  [NSDecimalNumber numberWithDouble:x], [NSNumber numberWithInt:CPTTradingRangePlotFieldX], 
-			  [NSDecimalNumber numberWithDouble:rOpen], [NSNumber numberWithInt:CPTTradingRangePlotFieldOpen], 
-			  [NSDecimalNumber numberWithDouble:rHigh], [NSNumber numberWithInt:CPTTradingRangePlotFieldHigh], 
-			  [NSDecimalNumber numberWithDouble:rLow], [NSNumber numberWithInt:CPTTradingRangePlotFieldLow], 
-			  [NSDecimalNumber numberWithDouble:rClose], [NSNumber numberWithInt:CPTTradingRangePlotFieldClose], 
-			  nil]];
-		}
-		
-		plotData = [newData retain];
+    if ( self.plotData.count == 0 ) {
+        NSMutableArray<NSDictionary *> *newData = [NSMutableArray array];
+        for ( NSUInteger i = 0; i < 8; i++ ) {
+            NSTimeInterval x = oneDay * i;
+
+            double rOpen  = 3.0 * arc4random() / (double)UINT32_MAX + 1.0;
+            double rClose = (arc4random() / (double)UINT32_MAX - 0.5) * 0.125 + rOpen;
+            double rHigh  = MAX( rOpen, MAX(rClose, (arc4random() / (double)UINT32_MAX - 0.5) * 0.5 + rOpen) );
+            double rLow   = MIN( rOpen, MIN(rClose, (arc4random() / (double)UINT32_MAX - 0.5) * 0.5 + rOpen) );
+
+            [newData addObject:
+             @{ @(CPTTradingRangePlotFieldX): @(x),
+                @(CPTTradingRangePlotFieldOpen): @(rOpen),
+                @(CPTTradingRangePlotFieldHigh): @(rHigh),
+                @(CPTTradingRangePlotFieldLow): @(rLow),
+                @(CPTTradingRangePlotFieldClose): @(rClose) }
+            ];
+        }
+
+        self.plotData = newData;
     }
 }
 
-- (void)renderInLayer:(CPTGraphHostingView *)layerHostingView withTheme:(CPTTheme *)theme
+-(void)renderInGraphHostingView:(nonnull CPTGraphHostingView *)hostingView withTheme:(nullable CPTTheme *)theme animated:(BOOL)animated
 {
-	// If you make sure your dates are calculated at noon, you shouldn't have to 
+    // If you make sure your dates are calculated at noon, you shouldn't have to
     // worry about daylight savings. If you use midnight, you will have to adjust
     // for daylight savings time.
     NSDate *refDate = [NSDate dateWithTimeIntervalSinceReferenceDate:oneDay / 2.0];
-	
-#if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
-    CGRect bounds = layerHostingView.bounds;
+
+#if TARGET_OS_SIMULATOR || TARGET_OS_IPHONE
+    CGRect bounds = hostingView.bounds;
 #else
-    CGRect bounds = NSRectToCGRect(layerHostingView.bounds);
+    CGRect bounds = NSRectToCGRect(hostingView.bounds);
 #endif
-    
-	[graph release];
-    graph = [(CPTXYGraph *)[CPTXYGraph alloc] initWithFrame:bounds];
-    [self addGraph:graph toHostingView:layerHostingView];
-    [self applyTheme:theme toGraph:graph withDefault:[CPTTheme themeNamed:kCPTStocksTheme]];
-	
-    [self setTitleDefaultsForGraph:graph withBounds:bounds];
-    [self setPaddingDefaultsForGraph:graph withBounds:bounds];
-	
-	CPTMutableLineStyle *borderLineStyle = [CPTMutableLineStyle lineStyle];
-    borderLineStyle.lineColor = [CPTColor whiteColor];
-    borderLineStyle.lineWidth = 2.0f;
-    graph.plotAreaFrame.borderLineStyle = borderLineStyle;
-	graph.plotAreaFrame.paddingTop = 10.0;
-	graph.plotAreaFrame.paddingRight = 10.0;
-	graph.plotAreaFrame.paddingBottom = 30.0;
-	graph.plotAreaFrame.paddingLeft = 35.0;
-	
+
+    CPTXYGraph *newGraph = [[CPTXYGraph alloc] initWithFrame:bounds];
+    [self addGraph:newGraph toHostingView:hostingView];
+    [self applyTheme:theme toGraph:newGraph withDefault:[CPTTheme themeNamed:kCPTStocksTheme]];
+
+    CPTMutableLineStyle *borderLineStyle = [CPTMutableLineStyle lineStyle];
+    borderLineStyle.lineColor              = [CPTColor whiteColor];
+    borderLineStyle.lineWidth              = 2.0;
+    newGraph.plotAreaFrame.borderLineStyle = borderLineStyle;
+    newGraph.plotAreaFrame.paddingTop      = self.titleSize * CPTFloat(0.5);
+    newGraph.plotAreaFrame.paddingRight    = self.titleSize * CPTFloat(0.5);
+    newGraph.plotAreaFrame.paddingBottom   = self.titleSize * CPTFloat(1.25);
+    newGraph.plotAreaFrame.paddingLeft     = self.titleSize * CPTFloat(1.5);
+    newGraph.plotAreaFrame.masksToBorder   = NO;
+
+    self.graph = newGraph;
+
     // Axes
-    CPTXYAxisSet *xyAxisSet = (id)graph.axisSet;
-    CPTXYAxis *xAxis = xyAxisSet.xAxis;
-    xAxis.majorIntervalLength = CPTDecimalFromDouble(oneDay);
+    CPTXYAxisSet *xyAxisSet = (CPTXYAxisSet *)newGraph.axisSet;
+    CPTXYAxis *xAxis        = xyAxisSet.xAxis;
+    xAxis.majorIntervalLength   = @(oneDay);
     xAxis.minorTicksPerInterval = 0;
-    NSDateFormatter *dateFormatter = [[[NSDateFormatter alloc] init] autorelease];
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
     dateFormatter.dateStyle = kCFDateFormatterShortStyle;
-    CPTTimeFormatter *timeFormatter = [[[CPTTimeFormatter alloc] initWithDateFormatter:dateFormatter] autorelease];
+    CPTTimeFormatter *timeFormatter = [[CPTTimeFormatter alloc] initWithDateFormatter:dateFormatter];
     timeFormatter.referenceDate = refDate;
-    xAxis.labelFormatter = timeFormatter;
-	
-	CPTLineCap *lineCap = [[CPTLineCap alloc] init];
-	lineCap.lineStyle = xAxis.axisLineStyle;
-	lineCap.lineCapType = CPTLineCapTypeOpenArrow;
-	lineCap.size = CGSizeMake(12.0, 12.0);
-	xAxis.axisLineCapMax = lineCap;
-	[lineCap release];
-	
-	CPTXYAxis *yAxis = xyAxisSet.yAxis;
-	yAxis.orthogonalCoordinateDecimal = CPTDecimalFromDouble(-0.5 * oneDay);
-	
+    xAxis.labelFormatter        = timeFormatter;
+
+    CPTLineCap *lineCap = [[CPTLineCap alloc] init];
+    lineCap.lineStyle    = xAxis.axisLineStyle;
+    lineCap.lineCapType  = CPTLineCapTypeOpenArrow;
+    lineCap.size         = CGSizeMake( self.titleSize * CPTFloat(0.5), self.titleSize * CPTFloat(0.5) );
+    xAxis.axisLineCapMax = lineCap;
+
+    CPTXYAxis *yAxis = xyAxisSet.yAxis;
+    yAxis.orthogonalPosition = @(-0.5 * oneDay);
+
     // Line plot with gradient fill
-	CPTScatterPlot *dataSourceLinePlot = [[(CPTScatterPlot *)[CPTScatterPlot alloc] initWithFrame:graph.bounds] autorelease];
-    dataSourceLinePlot.identifier = @"Data Source Plot";
-	dataSourceLinePlot.title = @"Close Values";
-	dataSourceLinePlot.dataLineStyle = nil;
-    dataSourceLinePlot.dataSource = self;
-	[graph addPlot:dataSourceLinePlot];
-	
-	CPTColor *areaColor = [CPTColor colorWithComponentRed:1.0 green:1.0 blue:1.0 alpha:0.6];
+    CPTScatterPlot *dataSourceLinePlot = [[CPTScatterPlot alloc] initWithFrame:newGraph.bounds];
+    dataSourceLinePlot.identifier    = @"Data Source Plot";
+    dataSourceLinePlot.title         = @"Close Values";
+    dataSourceLinePlot.dataLineStyle = nil;
+    dataSourceLinePlot.dataSource    = self;
+    [newGraph addPlot:dataSourceLinePlot];
+
+    CPTColor *areaColor       = [CPTColor colorWithComponentRed:CPTFloat(1.0) green:CPTFloat(1.0) blue:CPTFloat(1.0) alpha:CPTFloat(0.6)];
     CPTGradient *areaGradient = [CPTGradient gradientWithBeginningColor:areaColor endingColor:[CPTColor clearColor]];
-    areaGradient.angle = -90.0f;
-	CPTFill *areaGradientFill = [CPTFill fillWithGradient:areaGradient];
-    dataSourceLinePlot.areaFill = areaGradientFill;
-    dataSourceLinePlot.areaBaseValue = CPTDecimalFromDouble(0.0);
-    
-	areaColor = [CPTColor colorWithComponentRed:0.0 green:1.0 blue:0.0 alpha:0.6];
-    areaGradient = [CPTGradient gradientWithBeginningColor:[CPTColor clearColor] endingColor:areaColor];
-    areaGradient.angle = -90.0f;
-	areaGradientFill = [CPTFill fillWithGradient:areaGradient];
-    dataSourceLinePlot.areaFill2 = areaGradientFill;
-    dataSourceLinePlot.areaBaseValue2 = CPTDecimalFromDouble(5.0);
-    
+    areaGradient.angle = -90.0;
+    CPTFill *areaGradientFill = [CPTFill fillWithGradient:areaGradient];
+    dataSourceLinePlot.areaFill      = areaGradientFill;
+    dataSourceLinePlot.areaBaseValue = @0.0;
+
+    areaColor                         = [CPTColor colorWithComponentRed:CPTFloat(0.0) green:CPTFloat(1.0) blue:CPTFloat(0.0) alpha:CPTFloat(0.6)];
+    areaGradient                      = [CPTGradient gradientWithBeginningColor:[CPTColor clearColor] endingColor:areaColor];
+    areaGradient.angle                = -90.0;
+    areaGradientFill                  = [CPTFill fillWithGradient:areaGradient];
+    dataSourceLinePlot.areaFill2      = areaGradientFill;
+    dataSourceLinePlot.areaBaseValue2 = @5.0;
+
     // OHLC plot
     CPTMutableLineStyle *whiteLineStyle = [CPTMutableLineStyle lineStyle];
     whiteLineStyle.lineColor = [CPTColor whiteColor];
     whiteLineStyle.lineWidth = 2.0;
-    CPTTradingRangePlot *ohlcPlot = [[(CPTTradingRangePlot *)[CPTTradingRangePlot alloc] initWithFrame:graph.bounds] autorelease];
-    ohlcPlot.identifier = @"OHLC";
-    ohlcPlot.lineStyle = whiteLineStyle;
-	CPTMutableTextStyle *whiteTextStyle = [CPTMutableTextStyle textStyle];
+
+    CPTMutableLineStyle *redLineStyle = [whiteLineStyle mutableCopy];
+    redLineStyle.lineColor = [CPTColor redColor];
+
+    CPTMutableLineStyle *greenLineStyle = [whiteLineStyle mutableCopy];
+    greenLineStyle.lineColor = [CPTColor greenColor];
+
+    CPTMutableTextStyle *whiteTextStyle = [CPTMutableTextStyle textStyle];
     whiteTextStyle.color = [CPTColor whiteColor];
-	whiteTextStyle.fontSize = 12.0;
-	ohlcPlot.labelTextStyle = whiteTextStyle;
-	ohlcPlot.labelOffset = 5.0;
-    ohlcPlot.stickLength = 10.0;
-    ohlcPlot.dataSource = self;
-    ohlcPlot.plotStyle = CPTTradingRangePlotStyleOHLC;
-    [graph addPlot:ohlcPlot];
-    
-	// Add legend
-	graph.legend = [CPTLegend legendWithGraph:graph];
-	graph.legend.textStyle = xAxis.titleTextStyle;
-	graph.legend.fill = graph.plotAreaFrame.fill;
-	graph.legend.borderLineStyle = graph.plotAreaFrame.borderLineStyle;
-	graph.legend.cornerRadius = 5.0;
-	graph.legend.swatchSize = CGSizeMake(25.0, 25.0);
-	graph.legend.swatchCornerRadius = 5.0;
-	graph.legendAnchor = CPTRectAnchorBottom;
-	graph.legendDisplacement = CGPointMake(0.0, 12.0);
 
-	// Set plot ranges
-	CPTXYPlotSpace *plotSpace = (CPTXYPlotSpace *)graph.defaultPlotSpace;
-	plotSpace.xRange = [CPTPlotRange plotRangeWithLocation:CPTDecimalFromDouble(-0.5 * oneDay) length:CPTDecimalFromDouble(oneDay * plotData.count)];
-	plotSpace.yRange = [CPTPlotRange plotRangeWithLocation:CPTDecimalFromInteger(0) length:CPTDecimalFromInteger(4)];
-}
+    CPTTradingRangePlot *ohlcPlot = [[CPTTradingRangePlot alloc] initWithFrame:newGraph.bounds];
+    ohlcPlot.identifier = @"OHLC";
 
-- (void)dealloc
-{
-	[graph release];
-    [plotData release];
-    [super dealloc];
+    ohlcPlot.lineStyle         = whiteLineStyle;
+    ohlcPlot.increaseLineStyle = greenLineStyle;
+    ohlcPlot.decreaseLineStyle = redLineStyle;
+
+    ohlcPlot.labelTextStyle = whiteTextStyle;
+    ohlcPlot.labelOffset    = 5.0;
+    ohlcPlot.stickLength    = 10.0;
+    ohlcPlot.dataSource     = self;
+    ohlcPlot.delegate       = self;
+    ohlcPlot.plotStyle      = CPTTradingRangePlotStyleOHLC;
+    [newGraph addPlot:ohlcPlot];
+
+    // Add legend
+    newGraph.legend                    = [CPTLegend legendWithGraph:newGraph];
+    newGraph.legend.textStyle          = xAxis.titleTextStyle;
+    newGraph.legend.fill               = newGraph.plotAreaFrame.fill;
+    newGraph.legend.borderLineStyle    = newGraph.plotAreaFrame.borderLineStyle;
+    newGraph.legend.cornerRadius       = 5.0;
+    newGraph.legend.swatchCornerRadius = 5.0;
+    newGraph.legendAnchor              = CPTRectAnchorBottom;
+    newGraph.legendDisplacement        = CGPointMake( 0.0, self.titleSize * CPTFloat(3.0) );
+
+    // Set plot ranges
+    CPTXYPlotSpace *plotSpace = (CPTXYPlotSpace *)newGraph.defaultPlotSpace;
+    plotSpace.xRange = [CPTPlotRange plotRangeWithLocation:@(-0.5 * oneDay) length:@(oneDay * self.plotData.count)];
+    plotSpace.yRange = [CPTPlotRange plotRangeWithLocation:@0.0 length:@4.0];
 }
 
 #pragma mark -
 #pragma mark Plot Data Source Methods
 
--(NSUInteger)numberOfRecordsForPlot:(CPTPlot *)plot
+-(NSUInteger)numberOfRecordsForPlot:(nonnull CPTPlot *)plot
 {
-    return plotData.count;
+    return self.plotData.count;
 }
 
--(NSNumber *)numberForPlot:(CPTPlot *)plot field:(NSUInteger)fieldEnum recordIndex:(NSUInteger)index {
+-(nullable id)numberForPlot:(nonnull CPTPlot *)plot field:(NSUInteger)fieldEnum recordIndex:(NSUInteger)index
+{
     NSDecimalNumber *num = [NSDecimalNumber zero];
+
     if ( [plot.identifier isEqual:@"Data Source Plot"] ) {
-		switch ( fieldEnum ) {
-			case CPTScatterPlotFieldX:
-				num = [[plotData objectAtIndex:index] objectForKey:[NSNumber numberWithUnsignedInt:CPTTradingRangePlotFieldX]];
-				break;
-				
-			case CPTScatterPlotFieldY:
-				num = [[plotData objectAtIndex:index] objectForKey:[NSNumber numberWithUnsignedInt:CPTTradingRangePlotFieldClose]];
-				break;
-				
-			default:
-				break;
-		}
+        switch ( fieldEnum ) {
+            case CPTScatterPlotFieldX:
+                num = self.plotData[index][@(CPTTradingRangePlotFieldX)];
+                break;
+
+            case CPTScatterPlotFieldY:
+                num = self.plotData[index][@(CPTTradingRangePlotFieldClose)];
+                break;
+
+            default:
+                break;
+        }
     }
     else {
-		num = [[plotData objectAtIndex:index] objectForKey:[NSNumber numberWithUnsignedInteger:fieldEnum]];
+        num = self.plotData[index][@(fieldEnum)];
     }
     return num;
+}
+
+#pragma mark -
+#pragma mark Plot Delegate Methods
+
+-(void)tradingRangePlot:(nonnull CPTTradingRangePlot *)plot barWasSelectedAtRecordIndex:(NSUInteger)index
+{
+    NSLog(@"Bar for '%@' was selected at index %d.", plot.identifier, (int)index);
 }
 
 @end

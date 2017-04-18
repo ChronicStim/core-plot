@@ -1,18 +1,19 @@
 #import "CPTGradientTests.h"
+
 #import "CPTGradient.h"
 
 @implementation CPTGradientTests
 
 #pragma mark -
-#pragma mark NSCoding
+#pragma mark NSCoding Methods
 
 -(void)testKeyedArchivingRoundTrip
 {
-	CPTGradient *gradient = [CPTGradient rainbowGradient];
-	
-	CPTGradient *newGradient = [NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:gradient]];
+    CPTGradient *gradient = [CPTGradient rainbowGradient];
 
-	STAssertEqualObjects(gradient, newGradient, @"Gradients not equal");
+    CPTGradient *newGradient = [self archiveRoundTrip:gradient];
+
+    XCTAssertEqualObjects(gradient, newGradient, @"Gradients not equal");
 }
 
 @end

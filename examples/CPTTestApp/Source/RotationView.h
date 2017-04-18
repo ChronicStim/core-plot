@@ -1,6 +1,6 @@
 //
-//  RotationView.h
-//  CPTTestApp
+// RotationView.h
+// CPTTestApp
 //
 
 #import <Cocoa/Cocoa.h>
@@ -8,19 +8,13 @@
 
 @protocol CPTRotationDelegate;
 
-@interface RotationView : NSView {
-	id<CPTRotationDelegate> rotationDelegate;
-	
-	CATransform3D rotationTransform;
-	
-	NSPoint previousLocation;
-}
+@interface RotationView : NSView
 
-@property(readwrite, nonatomic) CATransform3D rotationTransform;
-@property(readwrite, assign, nonatomic) id<CPTRotationDelegate> rotationDelegate;
+@property (nonatomic, readwrite) CATransform3D rotationTransform;
+@property (nonatomic, readwrite, weak, nullable) id<CPTRotationDelegate> rotationDelegate;
 
 @end
 
-@protocol CPTRotationDelegate <NSObject>
-- (void)rotateObjectUsingTransform:(CATransform3D)rotationTransform;
+@protocol CPTRotationDelegate<NSObject>
+-(void)rotateObjectUsingTransform:(CATransform3D)rotationTransform;
 @end

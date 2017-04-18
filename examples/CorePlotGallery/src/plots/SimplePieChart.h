@@ -1,17 +1,13 @@
 //
-//  SimplePieChart.h
-//  CorePlotGallery
-//
-//  Created by Jeff Buck on 8/2/10.
-//  Copyright 2010 Jeff Buck. All rights reserved.
+// SimplePieChart.h
+// CorePlotGallery
 //
 
 #import "PlotItem.h"
 
-@interface SimplePieChart : PlotItem <CPTPlotSpaceDelegate,
-									  CPTPlotDataSource>
-{
-    NSArray *plotData;
-}
+@interface SimplePieChart : PlotItem<CPTPlotSpaceDelegate,
+                                     CPTPieChartDelegate,
+                                     CPTLegendDelegate,
+                                     CPTPlotDataSource>
 
 @end

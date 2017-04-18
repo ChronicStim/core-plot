@@ -1,7 +1,5 @@
 #import "_CPTXYTheme.h"
 
-@interface _CPTSlateTheme : _CPTXYTheme {
-
-}
+@interface _CPTSlateTheme : _CPTXYTheme
 
 @end

@@ -1,102 +1,134 @@
 #import "CPTPlotDocument.h"
 #import "NSString+ParseCSV.h"
 
+@interface CPTPlotDocument()
+
+@property (nonatomic, readwrite, strong, nullable) IBOutlet CPTGraphHostingView *graphView;
+@property (nonatomic, readwrite, strong, nonnull) CPTXYGraph *graph;
+
+@property (nonatomic, readwrite, assign) double minimumValueForXAxis;
+@property (nonatomic, readwrite, assign) double maximumValueForXAxis;
+@property (nonatomic, readwrite, assign) double minimumValueForYAxis;
+@property (nonatomic, readwrite, assign) double maximumValueForYAxis;
+@property (nonatomic, readwrite, assign) double majorIntervalLengthForX;
+@property (nonatomic, readwrite, assign) double majorIntervalLengthForY;
+@property (nonatomic, readwrite, strong) NSArray<NSDictionary *> *dataPoints;
+
+@property (nonatomic, readwrite, strong, nullable) CPTPlotSpaceAnnotation *zoomAnnotation;
+@property (nonatomic, readwrite, assign) CGPoint dragStart;
+@property (nonatomic, readwrite, assign) CGPoint dragEnd;
+
+@end
+
+#pragma mark -
+
 @implementation CPTPlotDocument
 
-//#define USE_NSDECIMAL
+@synthesize graphView;
+@synthesize graph;
 
-+(void)initialize {
-	CPTDecimalNumberValueTransformer *valueTransformer = [[CPTDecimalNumberValueTransformer alloc] init];
-    [NSValueTransformer setValueTransformer:valueTransformer forName:@"CPTDecimalNumberValueTransformer"];
-	[valueTransformer release];
-}
+@synthesize minimumValueForXAxis;
+@synthesize maximumValueForXAxis;
+@synthesize minimumValueForYAxis;
+@synthesize maximumValueForYAxis;
 
-- (id)init
+@synthesize majorIntervalLengthForX;
+@synthesize majorIntervalLengthForY;
+@synthesize dataPoints;
+
+@synthesize zoomAnnotation;
+@synthesize dragStart;
+@synthesize dragEnd;
+
+// #define USE_NSDECIMAL
+
+-(nonnull instancetype)init
 {
     self = [super init];
-    if (self) {
-    	dataPoints = [[NSMutableArray alloc] init];
-
+    if ( self ) {
+        dataPoints     = [[NSMutableArray alloc] init];
+        zoomAnnotation = nil;
+        dragStart      = CGPointZero;
+        dragEnd        = CGPointZero;
     }
     return self;
 }
 
--(void)dealloc
-{
-	[graph release];
-	[dataPoints release];
-	[super dealloc];
-}
-
-- (NSString *)windowNibName
+-(nullable NSString *)windowNibName
 {
     return @"CPTPlotDocument";
 }
 
-- (void)windowControllerDidLoadNib:(NSWindowController *)windowController
+-(void)windowControllerDidLoadNib:(nonnull NSWindowController *)windowController
 {
     // Create graph from theme
-    graph = [(CPTXYGraph *)[CPTXYGraph alloc] initWithFrame:CGRectZero];
-	CPTTheme *theme = [CPTTheme themeNamed:kCPTPlainWhiteTheme];
-	[graph applyTheme:theme]; 
-	graphView.hostedGraph = graph;
-	
-	graph.paddingTop = 40.0;
-	graph.paddingRight = 40.0;
-	graph.paddingBottom = 40.0;
+    CPTXYGraph *newGraph = [[CPTXYGraph alloc] initWithFrame:CGRectZero];
+    CPTTheme *theme      = [CPTTheme themeNamed:kCPTDarkGradientTheme];
+
+    [newGraph applyTheme:theme];
+    self.graph = newGraph;
+
+    self.graphView.hostedGraph = newGraph;
+
+    newGraph.paddingLeft   = 0.0;
+    newGraph.paddingTop    = 0.0;
+    newGraph.paddingRight  = 0.0;
+    newGraph.paddingBottom = 0.0;
+
+    newGraph.plotAreaFrame.paddingLeft   = 55.0;
+    newGraph.plotAreaFrame.paddingTop    = 40.0;
+    newGraph.plotAreaFrame.paddingRight  = 40.0;
+    newGraph.plotAreaFrame.paddingBottom = 35.0;
+
+    newGraph.plotAreaFrame.plotArea.fill = newGraph.plotAreaFrame.fill;
+    newGraph.plotAreaFrame.fill          = nil;
+
+    newGraph.plotAreaFrame.borderLineStyle = nil;
+    newGraph.plotAreaFrame.cornerRadius    = 0.0;
+    newGraph.plotAreaFrame.masksToBorder   = NO;
 
     // Setup plot space
-    CPTXYPlotSpace *plotSpace = (CPTXYPlotSpace *)graph.defaultPlotSpace;
-    plotSpace.xRange = [CPTPlotRange plotRangeWithLocation:CPTDecimalFromFloat(minimumValueForXAxis) length:CPTDecimalFromFloat(maximumValueForXAxis - minimumValueForXAxis)];
-    plotSpace.yRange = [CPTPlotRange plotRangeWithLocation:CPTDecimalFromFloat(minimumValueForYAxis) length:CPTDecimalFromFloat(maximumValueForYAxis - minimumValueForYAxis)];
+    CPTXYPlotSpace *plotSpace = (CPTXYPlotSpace *)newGraph.defaultPlotSpace;
+    plotSpace.xRange = [CPTPlotRange plotRangeWithLocation:@(self.minimumValueForXAxis)
+                                                    length:@(ceil( (self.maximumValueForXAxis - self.minimumValueForXAxis) / self.majorIntervalLengthForX ) * self.majorIntervalLengthForX)];
+    plotSpace.yRange = [CPTPlotRange plotRangeWithLocation:@(self.minimumValueForYAxis)
+                                                    length:@(ceil( (self.maximumValueForYAxis - self.minimumValueForYAxis) / self.majorIntervalLengthForY ) * self.majorIntervalLengthForY)];
 
-	CPTXYAxisSet *axisSet = (CPTXYAxisSet *)graph.axisSet;
-	CPTXYAxis *x = axisSet.xAxis;
-	x.majorIntervalLength = CPTDecimalFromDouble(majorIntervalLengthForX);
-	x.orthogonalCoordinateDecimal = CPTDecimalFromDouble(minimumValueForYAxis);
-	x.minorTicksPerInterval = 5;
-	
-	CPTXYAxis *y = axisSet.yAxis;
-	y.majorIntervalLength = CPTDecimalFromDouble(majorIntervalLengthForY);
-	y.minorTicksPerInterval = 5;
-	y.orthogonalCoordinateDecimal = CPTDecimalFromDouble(minimumValueForXAxis);
-	
-    CPTMutableLineStyle *borderLineStyle = [CPTMutableLineStyle lineStyle];
-    borderLineStyle.lineColor = [CPTColor colorWithGenericGray:0.2];
-    borderLineStyle.lineWidth = 0.0f;
-	
-//	CPTBorderedLayer *borderedLayer = (CPTBorderedLayer *)axisSet.overlayLayer;
-//	borderedLayer.borderLineStyle = borderLineStyle;
-//	borderedLayer.cornerRadius = 0.0f;
+    // this allows the plot to respond to mouse events
+    plotSpace.delegate = self;
+    [plotSpace setAllowsUserInteraction:YES];
+
+    CPTXYAxisSet *axisSet = (CPTXYAxisSet *)newGraph.axisSet;
+
+    CPTXYAxis *x = axisSet.xAxis;
+    x.minorTicksPerInterval = 9;
+    x.majorIntervalLength   = @(self.majorIntervalLengthForX);
+    x.labelOffset           = 5.0;
+    x.axisConstraints       = [CPTConstraints constraintWithLowerOffset:0.0];
+
+    CPTXYAxis *y = axisSet.yAxis;
+    y.minorTicksPerInterval = 9;
+    y.majorIntervalLength   = @(self.majorIntervalLengthForY);
+    y.labelOffset           = 5.0;
+    y.axisConstraints       = [CPTConstraints constraintWithLowerOffset:0.0];
 
     // Create the main plot for the delimited data
-	CPTScatterPlot *dataSourceLinePlot = [[(CPTScatterPlot *)[CPTScatterPlot alloc] initWithFrame:graph.bounds] autorelease];
+    CPTScatterPlot *dataSourceLinePlot = [[CPTScatterPlot alloc] initWithFrame:newGraph.bounds];
     dataSourceLinePlot.identifier = @"Data Source Plot";
-    
-    CPTMutableLineStyle *lineStyle = [[dataSourceLinePlot.dataLineStyle mutableCopy] autorelease];
-	lineStyle.lineWidth = 1.f;
-    lineStyle.lineColor = [CPTColor blackColor];
+
+    CPTMutableLineStyle *lineStyle = [dataSourceLinePlot.dataLineStyle mutableCopy];
+    lineStyle.lineWidth              = 1.0;
+    lineStyle.lineColor              = [CPTColor whiteColor];
     dataSourceLinePlot.dataLineStyle = lineStyle;
-    
+
     dataSourceLinePlot.dataSource = self;
-    [graph addPlot:dataSourceLinePlot];
-
-	// Add plot symbols
-//	CPTLineStyle *symbolLineStyle = [CPTLineStyle lineStyle];
-//	symbolLineStyle.lineColor = [CPTColor whiteColor];
-//	CPTPlotSymbol *plotSymbol = [CPTPlotSymbol ellipsePlotSymbol];
-//	plotSymbol.fill = [CPTFill fillWithColor:[CPTColor blueColor]];
-//	plotSymbol.lineStyle = symbolLineStyle;
-//    plotSymbol.size = CGSizeMake(10.0, 10.0);
-//    dataSourceLinePlot.plotSymbol = plotSymbol;
-
-	[graph reloadData];
+    [newGraph addPlot:dataSourceLinePlot];
 }
 
 #pragma mark -
 #pragma mark Data loading methods
 
-- (NSData *)dataOfType:(NSString *)typeName error:(NSError **)outError
+-(nullable NSData *)dataOfType:(nonnull NSString *)typeName error:(NSError *__autoreleasing __nullable *)outError
 {
     // Insert code here to write your document to data of the specified type. If the given outError != NULL, ensure that you set *outError when returning nil.
 
@@ -105,115 +137,343 @@
     // For applications targeted for Panther or earlier systems, you should use the deprecated API -dataRepresentationOfType:. In this case you can also choose to override -fileWrapperRepresentationOfType: or -writeToFile:ofType: instead.
 
     if ( outError != NULL ) {
-		*outError = [NSError errorWithDomain:NSOSStatusErrorDomain code:unimpErr userInfo:NULL];
-	}
-	return nil;
+        *outError = [NSError errorWithDomain:NSOSStatusErrorDomain code:unimpErr userInfo:NULL];
+    }
+    return nil;
 }
 
-- (BOOL)readFromData:(NSData *)data ofType:(NSString *)typeName error:(NSError **)outError
+-(BOOL)readFromData:(nonnull NSData *)data ofType:(NSString *)typeName error:(NSError *__autoreleasing __nullable *)outError
 {
-	if ([typeName isEqualToString:@"CSVDocument"]) {
-		
-		minimumValueForXAxis = MAXFLOAT;
-		maximumValueForXAxis = -MAXFLOAT;
-		
-		minimumValueForYAxis = MAXFLOAT;
-		maximumValueForYAxis = -MAXFLOAT;
+    if ( [typeName isEqualToString:@"CSVDocument"] ) {
+        double minX = (double)INFINITY;
+        double maxX = -(double)INFINITY;
 
-		NSString *fileContents = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
-		// Parse CSV
-		NSUInteger length = [fileContents length];
-		NSUInteger lineStart = 0, lineEnd = 0, contentsEnd = 0;
-		NSRange currentRange;
-		
-		// Read headers from the first line of the file
-		[fileContents getParagraphStart:&lineStart end:&lineEnd contentsEnd:&contentsEnd forRange:NSMakeRange(lineEnd, 0)];
-//		currentRange = NSMakeRange(lineStart, contentsEnd - lineStart);
-//		NSArray *columnHeaders = [[fileContents substringWithRange:currentRange] arrayByParsingCSVLine];
-//		NSLog([columnHeaders objectAtIndex:0]);
-		
-		while (lineEnd < length) {
-			[fileContents getParagraphStart:&lineStart end:&lineEnd contentsEnd:&contentsEnd forRange:NSMakeRange(lineEnd, 0)];
-			currentRange = NSMakeRange(lineStart, contentsEnd - lineStart);
-			NSArray *columnValues = [[fileContents substringWithRange:currentRange] arrayByParsingCSVLine];
-			
-			double xValue = [[columnValues objectAtIndex:0] doubleValue];
-			double yValue = [[columnValues objectAtIndex:1] doubleValue];
-			if (xValue < minimumValueForXAxis)
-				minimumValueForXAxis = xValue;
-			if (xValue > maximumValueForXAxis)
-				maximumValueForXAxis = xValue;
-			if (yValue < minimumValueForYAxis)
-				minimumValueForYAxis = yValue;
-			if (yValue > maximumValueForYAxis)
-				maximumValueForYAxis = yValue;
-			
-#ifdef USE_NSDECIMAL			
-			[dataPoints addObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[NSDecimalNumber decimalNumberWithString:[columnValues objectAtIndex:0]], @"x", [NSDecimalNumber decimalNumberWithString:[columnValues objectAtIndex:1]], @"y", nil]];
+        double minY = (double)INFINITY;
+        double maxY = -(double)INFINITY;
+
+        NSMutableArray<NSDictionary *> *newData = [[NSMutableArray alloc] init];
+
+        NSString *fileContents = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
+
+        // Parse CSV
+        NSUInteger length = fileContents.length;
+        NSUInteger lineStart = 0, lineEnd = 0, contentsEnd = 0;
+        NSRange currentRange;
+
+        // Read headers from the first line of the file
+        [fileContents getParagraphStart:&lineStart end:&lineEnd contentsEnd:&contentsEnd forRange:NSMakeRange(lineEnd, 0)];
+        // currentRange = NSMakeRange(lineStart, contentsEnd - lineStart);
+        // CPTStringArray * columnHeaders = [[fileContents substringWithRange:currentRange] arrayByParsingCSVLine];
+        // NSLog([columnHeaders objectAtIndex:0]);
+
+        while ( lineEnd < length ) {
+            [fileContents getParagraphStart:&lineStart end:&lineEnd contentsEnd:&contentsEnd forRange:NSMakeRange(lineEnd, 0)];
+            currentRange = NSMakeRange(lineStart, contentsEnd - lineStart);
+            CPTStringArray *columnValues = [[fileContents substringWithRange:currentRange] arrayByParsingCSVLine];
+
+            double xValue = columnValues[0].doubleValue;
+            double yValue = columnValues[1].doubleValue;
+            if ( xValue < minX ) {
+                minX = xValue;
+            }
+            if ( xValue > maxX ) {
+                maxX = xValue;
+            }
+            if ( yValue < minY ) {
+                minY = yValue;
+            }
+            if ( yValue > maxY ) {
+                maxY = yValue;
+            }
+
+#ifdef USE_NSDECIMAL
+            [newData addObject:@{ @"x": [NSDecimalNumber decimalNumberWithString:columnValues[0]],
+                                  @"y": [NSDecimalNumber decimalNumberWithString:columnValues[1]] }
+            ];
 #else
-			[dataPoints addObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithDouble:xValue], @"x", [NSNumber numberWithDouble:yValue], @"y", nil]];
+            [newData addObject:@{ @"x": @(xValue),
+                                  @"y": @(yValue) }
+            ];
 #endif
-			// Create a dictionary of the items, keyed to the header titles
-//			NSDictionary *keyedImportedItems = [[NSDictionary alloc] initWithObjects:columnValues forKeys:columnHeaders];
-			// Process this
-		}
-		
-		majorIntervalLengthForX = (maximumValueForXAxis - minimumValueForXAxis) / 10.0;
-		majorIntervalLengthForY = (maximumValueForYAxis - minimumValueForYAxis) / 10.0;
-		
-		[fileContents release];
-	}
+        }
+
+        self.dataPoints = newData;
+
+        double intervalX = (maxX - minX) / 5.0;
+        if ( intervalX > 0.0 ) {
+            intervalX = pow( 10.0, ceil( log10(intervalX) ) );
+        }
+        self.majorIntervalLengthForX = intervalX;
+
+        double intervalY = (maxY - minY) / 10.0;
+        if ( intervalY > 0.0 ) {
+            intervalY = pow( 10.0, ceil( log10(intervalY) ) );
+        }
+        self.majorIntervalLengthForY = intervalY;
+
+        minX = floor(minX / intervalX) * intervalX;
+        minY = floor(minY / intervalY) * intervalY;
+
+        self.minimumValueForXAxis = minX;
+        self.maximumValueForXAxis = maxX;
+        self.minimumValueForYAxis = minY;
+        self.maximumValueForYAxis = maxY;
+    }
 
     if ( outError != NULL ) {
-		*outError = [NSError errorWithDomain:NSOSStatusErrorDomain code:unimpErr userInfo:NULL];
-	}
+        *outError = [NSError errorWithDomain:NSOSStatusErrorDomain code:unimpErr userInfo:NULL];
+    }
     return YES;
+}
+
+#pragma mark -
+#pragma mark Zoom Methods
+
+-(IBAction)zoomIn
+{
+    CPTXYPlotSpace *plotSpace = (CPTXYPlotSpace *)self.graph.defaultPlotSpace;
+    CPTPlotArea *plotArea     = self.graph.plotAreaFrame.plotArea;
+
+    // convert the dragStart and dragEnd values to plot coordinates
+    CGPoint dragStartInPlotArea = [self.graph convertPoint:self.dragStart toLayer:plotArea];
+    CGPoint dragEndInPlotArea   = [self.graph convertPoint:self.dragEnd toLayer:plotArea];
+
+    double start[2], end[2];
+
+    // obtain the datapoints for the drag start and end
+    [plotSpace doublePrecisionPlotPoint:start numberOfCoordinates:2 forPlotAreaViewPoint:dragStartInPlotArea];
+    [plotSpace doublePrecisionPlotPoint:end numberOfCoordinates:2 forPlotAreaViewPoint:dragEndInPlotArea];
+
+    // recalculate the min and max values
+    self.minimumValueForXAxis = MIN(start[CPTCoordinateX], end[CPTCoordinateX]);
+    self.maximumValueForXAxis = MAX(start[CPTCoordinateX], end[CPTCoordinateX]);
+    self.minimumValueForYAxis = MIN(start[CPTCoordinateY], end[CPTCoordinateY]);
+    self.maximumValueForYAxis = MAX(start[CPTCoordinateY], end[CPTCoordinateY]);
+
+    // now adjust the plot range and axes
+    plotSpace.xRange = [CPTPlotRange plotRangeWithLocation:@(self.minimumValueForXAxis)
+                                                    length:@(self.maximumValueForXAxis - self.minimumValueForXAxis)];
+    plotSpace.yRange = [CPTPlotRange plotRangeWithLocation:@(self.minimumValueForYAxis)
+                                                    length:@(self.maximumValueForYAxis - self.minimumValueForYAxis)];
+
+    CPTXYAxisSet *axisSet = (CPTXYAxisSet *)self.graph.axisSet;
+    axisSet.xAxis.labelingPolicy = CPTAxisLabelingPolicyAutomatic;
+    axisSet.yAxis.labelingPolicy = CPTAxisLabelingPolicyAutomatic;
+}
+
+-(IBAction)zoomOut
+{
+    double minX = (double)INFINITY;
+    double maxX = -(double)INFINITY;
+
+    double minY = (double)INFINITY;
+    double maxY = -(double)INFINITY;
+
+    // get the ful range min and max values
+    for ( NSDictionary<NSString *, NSNumber *> *xyValues in self.dataPoints ) {
+        double xVal = xyValues[@"x"].doubleValue;
+
+        minX = fmin(xVal, minX);
+        maxX = fmax(xVal, maxX);
+
+        double yVal = xyValues[@"y"].doubleValue;
+
+        minY = fmin(yVal, minY);
+        maxY = fmax(yVal, maxY);
+    }
+
+    double intervalX = self.majorIntervalLengthForX;
+    double intervalY = self.majorIntervalLengthForY;
+
+    minX = floor(minX / intervalX) * intervalX;
+    minY = floor(minY / intervalY) * intervalY;
+
+    self.minimumValueForXAxis = minX;
+    self.maximumValueForXAxis = maxX;
+    self.minimumValueForYAxis = minY;
+    self.maximumValueForYAxis = maxY;
+
+    // now adjust the plot range and axes
+    CPTXYPlotSpace *plotSpace = (CPTXYPlotSpace *)self.graph.defaultPlotSpace;
+
+    plotSpace.xRange = [CPTPlotRange plotRangeWithLocation:@(minX)
+                                                    length:@(ceil( (maxX - minX) / intervalX ) * intervalX)];
+    plotSpace.yRange = [CPTPlotRange plotRangeWithLocation:@(minY)
+                                                    length:@(ceil( (maxY - minY) / intervalY ) * intervalY)];
+    CPTXYAxisSet *axisSet = (CPTXYAxisSet *)self.graph.axisSet;
+    axisSet.xAxis.labelingPolicy = CPTAxisLabelingPolicyFixedInterval;
+    axisSet.yAxis.labelingPolicy = CPTAxisLabelingPolicyFixedInterval;
 }
 
 #pragma mark -
 #pragma mark PDF / image export
 
--(IBAction)exportToPDF:(id)sender;
+-(IBAction)exportToPDF:(nullable id)sender
 {
-	NSSavePanel *pdfSavingDialog = [NSSavePanel savePanel];
-	[pdfSavingDialog setAllowedFileTypes:[NSArray arrayWithObject:@"pdf"]];
-	
-	if ( [pdfSavingDialog runModal] == NSOKButton )
-	{
-		NSData *dataForPDF = [graph dataForPDFRepresentationOfLayer];
-		[dataForPDF writeToURL:[pdfSavingDialog URL] atomically:NO];
-	}		
+    NSSavePanel *pdfSavingDialog = [NSSavePanel savePanel];
+
+    pdfSavingDialog.allowedFileTypes = @[@"pdf"];
+
+    if ( [pdfSavingDialog runModal] == NSOKButton ) {
+        NSData *dataForPDF = [self.graph dataForPDFRepresentationOfLayer];
+
+        NSURL *url = pdfSavingDialog.URL;
+        if ( url ) {
+            [dataForPDF writeToURL:url atomically:NO];
+        }
+    }
 }
 
--(IBAction)exportToPNG:(id)sender;
+-(IBAction)exportToPNG:(nullable id)sender
 {
-	NSSavePanel *pngSavingDialog = [NSSavePanel savePanel];
-	[pngSavingDialog setAllowedFileTypes:[NSArray arrayWithObject:@"png"]];
-	
-	if ( [pngSavingDialog runModal] == NSOKButton )
-	{
-		NSImage *image = [graph imageOfLayer];
-        NSData *tiffData = [image TIFFRepresentation];
+    NSSavePanel *pngSavingDialog = [NSSavePanel savePanel];
+
+    pngSavingDialog.allowedFileTypes = @[@"png"];
+
+    if ( [pngSavingDialog runModal] == NSOKButton ) {
+        NSImage *image            = [self.graph imageOfLayer];
+        NSData *tiffData          = image.TIFFRepresentation;
         NSBitmapImageRep *tiffRep = [NSBitmapImageRep imageRepWithData:tiffData];
-        NSData *pngData = [tiffRep representationUsingType:NSPNGFileType properties:nil];
-		[pngData writeToURL:[pngSavingDialog URL] atomically:NO];
-	}		
+        NSData *pngData           = [tiffRep representationUsingType:NSPNGFileType properties:@{}];
+
+        NSURL *url = pngSavingDialog.URL;
+        if ( url ) {
+            [pngData writeToURL:url atomically:NO];
+        }
+    }
 }
 
 #pragma mark -
 #pragma mark Plot Data Source Methods
 
--(NSUInteger)numberOfRecordsForPlot:(CPTPlot *)plot {
-    return [dataPoints count];
+-(NSUInteger)numberOfRecordsForPlot:(nonnull CPTPlot *)plot
+{
+    return self.dataPoints.count;
 }
 
--(NSNumber *)numberForPlot:(CPTPlot *)plot field:(NSUInteger)fieldEnum recordIndex:(NSUInteger)index {
-#ifdef USE_NSDECIMAL
-    NSDecimalNumber *num = [[dataPoints objectAtIndex:index] valueForKey:(fieldEnum == CPTScatterPlotFieldX ? @"x" : @"y")];
-#else
-    NSNumber *num = [[dataPoints objectAtIndex:index] valueForKey:(fieldEnum == CPTScatterPlotFieldX ? @"x" : @"y")];
-#endif
-    return num;
+-(nullable id)numberForPlot:(nonnull CPTPlot *)plot field:(NSUInteger)fieldEnum recordIndex:(NSUInteger)index
+{
+    NSString *key = (fieldEnum == CPTScatterPlotFieldX ? @"x" : @"y");
+
+    return self.dataPoints[index][key];
+}
+
+#pragma mark -
+#pragma mark Plot Space Delegate Methods
+
+-(BOOL)plotSpace:(nonnull CPTPlotSpace *)space shouldHandlePointingDeviceDraggedEvent:(nonnull CPTNativeEvent *)event atPoint:(CGPoint)interactionPoint
+{
+    CPTPlotSpaceAnnotation *annotation = self.zoomAnnotation;
+
+    if ( annotation ) {
+        CPTPlotArea *plotArea = self.graph.plotAreaFrame.plotArea;
+        CGRect plotBounds     = plotArea.bounds;
+
+        // convert the dragStart and dragEnd values to plot coordinates
+        CGPoint dragStartInPlotArea = [self.graph convertPoint:self.dragStart toLayer:plotArea];
+        CGPoint dragEndInPlotArea   = [self.graph convertPoint:interactionPoint toLayer:plotArea];
+
+        // create the dragrect from dragStart to the current location
+        CGFloat endX      = MAX( MIN( dragEndInPlotArea.x, CGRectGetMaxX(plotBounds) ), CGRectGetMinX(plotBounds) );
+        CGFloat endY      = MAX( MIN( dragEndInPlotArea.y, CGRectGetMaxY(plotBounds) ), CGRectGetMinY(plotBounds) );
+        CGRect borderRect = CGRectMake( dragStartInPlotArea.x, dragStartInPlotArea.y,
+                                        (endX - dragStartInPlotArea.x),
+                                        (endY - dragStartInPlotArea.y) );
+
+        annotation.contentAnchorPoint = CGPointMake(dragEndInPlotArea.x >= dragStartInPlotArea.x ? 0.0 : 1.0,
+                                                    dragEndInPlotArea.y >= dragStartInPlotArea.y ? 0.0 : 1.0);
+        annotation.contentLayer.frame = borderRect;
+    }
+
+    return NO;
+}
+
+-(BOOL)plotSpace:(nonnull CPTPlotSpace *)space shouldHandlePointingDeviceDownEvent:(nonnull CPTNativeEvent *)event atPoint:(CGPoint)interactionPoint
+{
+    if ( !self.zoomAnnotation ) {
+        self.dragStart = interactionPoint;
+
+        CPTPlotArea *plotArea       = self.graph.plotAreaFrame.plotArea;
+        CGPoint dragStartInPlotArea = [self.graph convertPoint:self.dragStart toLayer:plotArea];
+
+        if ( CGRectContainsPoint(plotArea.bounds, dragStartInPlotArea) ) {
+            // create the zoom rectangle
+            // first a bordered layer to draw the zoomrect
+            CPTBorderedLayer *zoomRectangleLayer = [[CPTBorderedLayer alloc] initWithFrame:CGRectNull];
+
+            CPTMutableLineStyle *lineStyle = [CPTMutableLineStyle lineStyle];
+            lineStyle.lineColor                = [CPTColor darkGrayColor];
+            lineStyle.lineWidth                = 1.0;
+            zoomRectangleLayer.borderLineStyle = lineStyle;
+
+            CPTColor *transparentFillColor = [[CPTColor blueColor] colorWithAlphaComponent:0.2];
+            zoomRectangleLayer.fill = [CPTFill fillWithColor:transparentFillColor];
+
+            double start[2];
+            [self.graph.defaultPlotSpace doublePrecisionPlotPoint:start numberOfCoordinates:2 forPlotAreaViewPoint:dragStartInPlotArea];
+            CPTNumberArray *anchorPoint = @[@(start[CPTCoordinateX]),
+                                            @(start[CPTCoordinateY])];
+
+            // now create the annotation
+            CPTPlotSpace *defaultSpace = self.graph.defaultPlotSpace;
+            if ( defaultSpace ) {
+                CPTPlotSpaceAnnotation *annotation = [[CPTPlotSpaceAnnotation alloc] initWithPlotSpace:defaultSpace anchorPlotPoint:anchorPoint];
+                annotation.contentLayer = zoomRectangleLayer;
+                self.zoomAnnotation     = annotation;
+
+                [self.graph.plotAreaFrame.plotArea addAnnotation:annotation];
+            }
+        }
+    }
+
+    return NO;
+}
+
+-(BOOL)plotSpace:(nonnull CPTPlotSpace *)space shouldHandlePointingDeviceUpEvent:(nonnull CPTNativeEvent *)event atPoint:(CGPoint)interactionPoint
+{
+    CPTPlotSpaceAnnotation *annotation = self.zoomAnnotation;
+
+    if ( annotation ) {
+        self.dragEnd = interactionPoint;
+
+        // double-click to completely zoom out
+        if ( event.clickCount == 2 ) {
+            CPTPlotArea *plotArea     = self.graph.plotAreaFrame.plotArea;
+            CGPoint dragEndInPlotArea = [self.graph convertPoint:interactionPoint toLayer:plotArea];
+
+            if ( CGRectContainsPoint(plotArea.bounds, dragEndInPlotArea) ) {
+                [self zoomOut];
+            }
+        }
+        else if ( !CGPointEqualToPoint(self.dragStart, self.dragEnd) ) {
+            // no accidental drag, so zoom in
+            [self zoomIn];
+        }
+
+        // and we're done with the drag
+        [self.graph.plotAreaFrame.plotArea removeAnnotation:annotation];
+        self.zoomAnnotation = nil;
+
+        self.dragStart = CGPointZero;
+        self.dragEnd   = CGPointZero;
+    }
+
+    return NO;
+}
+
+-(BOOL)plotSpace:(nonnull CPTPlotSpace *)space shouldHandlePointingDeviceCancelledEvent:(nonnull CPTNativeEvent *)event atPoint:(CGPoint)interactionPoint
+{
+    CPTPlotSpaceAnnotation *annotation = self.zoomAnnotation;
+
+    if ( annotation ) {
+        [self.graph.plotAreaFrame.plotArea removeAnnotation:annotation];
+        self.zoomAnnotation = nil;
+
+        self.dragStart = CGPointZero;
+        self.dragEnd   = CGPointZero;
+    }
+
+    return NO;
 }
 
 @end

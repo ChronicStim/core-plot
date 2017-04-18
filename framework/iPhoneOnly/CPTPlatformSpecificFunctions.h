@@ -1,21 +1,23 @@
-#import <Foundation/Foundation.h>
-#import <QuartzCore/QuartzCore.h>
+#import "CPTDefinitions.h"
+#import "CPTPlatformSpecificDefines.h"
 
-///	@file
+/// @file
 
 #if __cplusplus
 extern "C" {
 #endif
-	
+
 /// @name Graphics Context Save Stack
 /// @{
-void CPTPushCGContext(CGContextRef context);
+void CPTPushCGContext(__nonnull CGContextRef context);
 void CPTPopCGContext(void);
-///	@}
 
-/// @name Graphics Context
+/// @}
+
+/// @name Debugging
 /// @{
-CGContextRef CPTGetCurrentContext(void);
+CPTNativeImage *__nonnull CPTQuickLookImage(CGRect rect, __nonnull CPTQuickLookImageBlock renderBlock);
+
 /// @}
 
 #if __cplusplus

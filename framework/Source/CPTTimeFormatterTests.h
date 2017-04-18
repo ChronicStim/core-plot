@@ -1,7 +1,5 @@
 #import "CPTTestCase.h"
 
-@interface CPTTimeFormatterTests : CPTTestCase {
-
-}
+@interface CPTTimeFormatterTests : CPTTestCase
 
 @end

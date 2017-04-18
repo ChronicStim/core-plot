@@ -1,37 +1,22 @@
-#import <Foundation/Foundation.h>
-#import "CPTNumericDataType.h"
 #import "CPTNumericData.h"
+#import "CPTNumericDataType.h"
 
-@interface CPTMutableNumericData : CPTNumericData {
-	
-}
+@interface CPTMutableNumericData : CPTNumericData
 
 /// @name Data Buffer
 /// @{
-@property (readonly) void *mutableBytes;
-///	@}
+@property (nonatomic, readonly, nonnull) void *mutableBytes;
+/// @}
 
 /// @name Dimensions
 /// @{
-@property (copy, readwrite) NSArray *shape;
-///	@}
+@property (nonatomic, readwrite, copy, nonnull) CPTNumberArray *shape;
+/// @}
 
-/// @name Factory Methods
+/// @name Samples
 /// @{
-+(CPTMutableNumericData *)numericDataWithData:(NSData *)newData
-									dataType:(CPTNumericDataType)newDataType
-									   shape:(NSArray *)shapeArray;
-
-+(CPTMutableNumericData *)numericDataWithData:(NSData *)newData
-							  dataTypeString:(NSString *)newDataTypeString
-									   shape:(NSArray *)shapeArray;
-///	@}
-
-/// @name Initialization
-/// @{
--(id)initWithData:(NSData *)newData
-		 dataType:(CPTNumericDataType)newDataType
-            shape:(NSArray *)shapeArray;
-///	@}
+-(nullable void *)mutableSamplePointer:(NSUInteger)sample NS_RETURNS_INNER_POINTER;
+-(nullable void *)mutableSamplePointerAtIndex:(NSUInteger)idx, ...NS_RETURNS_INNER_POINTER;
+/// @}
 
 @end
