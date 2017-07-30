@@ -16,13 +16,12 @@
 #import "CPTTextLayer.h"
 #import "CPTUtilities.h"
 #import "NSCoderExtensions.h"
-#import <Accelerate/Accelerate.h>
 #import <tgmath.h>
 
 /** @defgroup plotAnimation Plots
  *  @brief Plot properties that can be animated using Core Animation.
  *  @if MacOnly
- *  @since Custom layer property animation is supported on MacOS 10.6 and later.
+ *  @since Custom layer property animation is supported on macOS 10.6 and later.
  *  @endif
  *  @ingroup animation
  **/
@@ -79,7 +78,7 @@ CPTPlotBinding const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data la
  *  Each data series on the graph is represented by a plot. Data is provided by
  *  a datasource that conforms to the CPTPlotDataSource protocol.
  *  @if MacOnly
- *  Plots also support data binding on MacOS.
+ *  Plots also support data binding on macOS.
  *  @endif
  *
  *  A Core Plot plot will request its data from the datasource when it is first displayed.
@@ -1467,31 +1466,21 @@ CPTPlotBinding const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data la
     NSUInteger numberOfSamples = numbers.numberOfSamples;
     if ( numberOfSamples > 0 ) {
         if ( self.doublePrecisionCache ) {
-            const double *doubles = (const double *)numbers.bytes;
-
             double min = (double)INFINITY;
             double max = -(double)INFINITY;
 
-            vDSP_minvD(doubles, 1, &min, (vDSP_Length)numberOfSamples);
-            vDSP_maxvD(doubles, 1, &max, (vDSP_Length)numberOfSamples);
+            const double *doubles    = (const double *)numbers.bytes;
+            const double *lastSample = doubles + numberOfSamples;
 
-            if ( isnan(min) || isnan(max) ) {
-                // vDSP functions may return NAN if any data in the array is NAN
-                min = (double)INFINITY;
-                max = -(double)INFINITY;
+            while ( doubles < lastSample ) {
+                double value = *doubles++;
 
-                const double *lastSample = doubles + numberOfSamples;
-
-                while ( doubles < lastSample ) {
-                    double value = *doubles++;
-
-                    if ( !isnan(value) ) {
-                        if ( value < min ) {
-                            min = value;
-                        }
-                        if ( value > max ) {
-                            max = value;
-                        }
+                if ( !isnan(value) ) {
+                    if ( value < min ) {
+                        min = value;
+                    }
+                    if ( value > max ) {
+                        max = value;
                     }
                 }
             }
@@ -1506,6 +1495,7 @@ CPTPlotBinding const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data la
 
             const NSDecimal *decimals   = (const NSDecimal *)numbers.bytes;
             const NSDecimal *lastSample = decimals + numberOfSamples;
+
             while ( decimals < lastSample ) {
                 NSDecimal value = *decimals++;
 

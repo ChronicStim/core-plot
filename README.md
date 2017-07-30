@@ -1,12 +1,12 @@
 # Core Plot
 
-*Cocoa plotting framework for Mac OS X and iOS.*
+*Cocoa plotting framework for macOS, iOS, and tvOS.*
 
 [![Build Status](https://secure.travis-ci.org/core-plot/core-plot.svg)](http://travis-ci.org/core-plot/core-plot) [![Version Status](https://img.shields.io/cocoapods/v/CorePlot.svg)](https://cocoapods.org/pods/CorePlot) [![license MIT](https://img.shields.io/cocoapods/l/CorePlot.svg)](http://opensource.org/licenses/BSD-3-Clause)  [![Platform](https://img.shields.io/cocoapods/p/CorePlot.svg)](http://core-plot.github.io)
 
 # Introduction
 
-Core Plot is a 2D plotting framework for Mac OS X, iOS, and tvOS. It is highly customizable and capable of drawing many types of plots. See the  [Example Graphs](https://github.com/core-plot/core-plot/wiki/Example-Graphs) wiki page and the [example applications](https://github.com/core-plot/core-plot/tree/master/examples) for examples of some of its capabilities.
+Core Plot is a 2D plotting framework for macOS, iOS, and tvOS. It is highly customizable and capable of drawing many types of plots. See the  [Example Graphs](https://github.com/core-plot/core-plot/wiki/Example-Graphs) wiki page and the [example applications](https://github.com/core-plot/core-plot/tree/master/examples) for examples of some of its capabilities.
 
 # Getting Started
 
@@ -33,7 +33,6 @@ Documentation of the Core Plot API and high-level architecture can be found in t
 ## Social Networks
 
   * [Twitter](https://twitter.com/CorePlot)
-  * [App.net](https://alpha.app.net/coreplot); Subscribe to the [Announcements](https://app.net/c/2rw2) broadcast.
 
 # Contributing to Core Plot
 

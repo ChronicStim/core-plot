@@ -18,7 +18,7 @@ Pod::Spec.new do |s|
                   'of data, and is tightly integrated with Apple technologies like Core Animation, ' \
                   'Core Data, and Cocoa Bindings.'
 
-  s.ios.deployment_target = '6.0'
+  s.ios.deployment_target = '8.0'
   s.osx.deployment_target = '10.8'
   s.tvos.deployment_target = '9.0'
   
@@ -34,12 +34,11 @@ Pod::Spec.new do |s|
   s.private_header_files = '**/_*.h', '**/CorePlotProbes.h'
 
   s.requires_arc  = true
-  s.xcconfig      = { 'ALWAYS_SEARCH_USER_PATHS' => 'YES' }
   s.ios.xcconfig  = { 'HEADER_SEARCH_PATHS' => '"${PODS_ROOT}/Headers/Private/CorePlot/ios"' }
   s.osx.xcconfig  = { 'HEADER_SEARCH_PATHS' => '"${PODS_ROOT}/Headers/Private/CorePlot/osx"' }
   s.tvos.xcconfig = { 'HEADER_SEARCH_PATHS' => '"${PODS_ROOT}/Headers/Private/CorePlot/tvos"' }
   
-  s.frameworks     = 'QuartzCore', 'Accelerate'
+  s.frameworks     = 'QuartzCore'
   s.ios.frameworks = 'UIKit', 'Foundation'
   s.tvos.frameworks = 'UIKit', 'Foundation'
   s.osx.frameworks = 'Cocoa'
