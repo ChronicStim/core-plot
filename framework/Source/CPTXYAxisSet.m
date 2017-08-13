@@ -23,6 +23,8 @@
 #pragma mark -
 #pragma mark Init/Dealloc
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation-html"
 /// @name Initialization
 /// @{
 
@@ -40,6 +42,8 @@
  *  @param newFrame The frame rectangle.
  *  @return The initialized CPTXYAxisSet object.
  **/
+#pragma clang diagnostic pop
+
 -(nonnull instancetype)initWithFrame:(CGRect)newFrame
 {
     if ( (self = [super initWithFrame:newFrame]) ) {
