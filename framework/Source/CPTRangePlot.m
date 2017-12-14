@@ -1026,7 +1026,10 @@ typedef struct CGPointError CGPointError;
     }
 
     NSNumber *yValue;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnullable-to-nonnull-conversion"
     CPTNumberArray *yValues       = @[[self cachedNumberForField:CPTRangePlotFieldY recordIndex:idx]];
+#pragma clang diagnostic pop
     CPTNumberArray *yValuesSorted = [yValues sortedArrayUsingSelector:@selector(compare:)];
     if ( positiveDirection ) {
         yValue = yValuesSorted.lastObject;

@@ -1223,11 +1223,14 @@ static const CPTCoordinate dependentCoord   = CPTCoordinateY;
 
     NSNumber *xValue = [self cachedNumberForField:CPTTradingRangePlotFieldX recordIndex:idx];
     NSNumber *yValue;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnullable-to-nonnull-conversion"
     CPTNumberArray *yValues = @[[self cachedNumberForField:CPTTradingRangePlotFieldOpen recordIndex:idx],
                                 [self cachedNumberForField:CPTTradingRangePlotFieldClose recordIndex:idx],
                                 [self cachedNumberForField:CPTTradingRangePlotFieldHigh recordIndex:idx],
                                 [self cachedNumberForField:CPTTradingRangePlotFieldLow recordIndex:idx]];
     CPTNumberArray *yValuesSorted = [yValues sortedArrayUsingSelector:@selector(compare:)];
+#pragma clang diagnostic pop
     if ( positiveDirection ) {
         yValue = yValuesSorted.lastObject;
     }

@@ -347,7 +347,7 @@ typedef NSMutableArray<__kindof CPTPlot *> CPTMutablePlotArray;
 
 /// @name Data Cache
 /// @{
--(nullable CPTMutableNumericData *)cachedNumbersForField:(NSUInteger)fieldEnum;
+-(nonnull CPTMutableNumericData *)cachedNumbersForField:(NSUInteger)fieldEnum;
 -(nullable NSNumber *)cachedNumberForField:(NSUInteger)fieldEnum recordIndex:(NSUInteger)idx;
 -(double)cachedDoubleForField:(NSUInteger)fieldEnum recordIndex:(NSUInteger)idx;
 -(NSDecimal)cachedDecimalForField:(NSUInteger)fieldEnum recordIndex:(NSUInteger)idx;

@@ -1243,9 +1243,12 @@ CPTPlotBinding const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data la
  *  @param fieldEnum The field enumerator identifying the field.
  *  @return The array of cached numbers.
  **/
--(nullable CPTMutableNumericData *)cachedNumbersForField:(NSUInteger)fieldEnum
+-(nonnull CPTMutableNumericData *)cachedNumbersForField:(NSUInteger)fieldEnum
 {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnullable-to-nonnull-conversion"
     return (self.cachedData)[@(fieldEnum)];
+#pragma clang diagnostic pop
 }
 
 /** @brief Retrieves a single number from the cache.
