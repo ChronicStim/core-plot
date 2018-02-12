@@ -483,6 +483,9 @@ CPTGraphPlotSpaceKey const CPTGraphPlotSpaceNotificationKey       = @"CPTGraphPl
 {
     if ( plot ) {
         [self.plots addObject:plot];
+        if (nil == space) {
+            space = self.defaultPlotSpace;
+        }
         plot.plotSpace = space;
         plot.graph     = self;
         [self.plotAreaFrame.plotGroup addPlot:plot];

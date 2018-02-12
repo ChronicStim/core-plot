@@ -531,7 +531,9 @@ CPTPlotBinding const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data la
 
 -(void)layoutSublayers
 {
-    [self relabel];
+    if (nil != self.plotSpace) {
+        [self relabel];
+    }
     [super layoutSublayers];
 }
 
