@@ -47,7 +47,7 @@
     // Color
     NSColor *styleColor = attributes[NSForegroundColorAttributeName];
     if ( styleColor ) {
-        // CGColor property is available in Mac OS 10.8 and later
+        // CGColor property is available in macOS 10.8 and later
         if ( [styleColor respondsToSelector:@selector(CGColor)] ) {
             newStyle.color = [CPTColor colorWithCGColor:styleColor.CGColor];
         }
@@ -153,7 +153,7 @@
     // Color
     NSColor *styleColor = attributes[NSForegroundColorAttributeName];
     if ( styleColor ) {
-        // CGColor property is available in Mac OS 10.8 and later
+        // CGColor property is available in macOS 10.8 and later
         if ( [styleColor respondsToSelector:@selector(CGColor)] ) {
             newStyle.color = [CPTColor colorWithCGColor:styleColor.CGColor];
         }
@@ -198,25 +198,24 @@
  **/
 -(CGSize)sizeWithTextStyle:(nullable CPTTextStyle *)style
 {
-    NSFont *theFont    = nil;
-    NSString *fontName = style.fontName;
+    CGRect rect = CGRectZero;
 
-    if ( fontName ) {
-        theFont = [NSFont fontWithName:fontName size:style.fontSize];
-    }
-
-    CGSize textSize;
-
-    if ( theFont ) {
-        CPTDictionary *attributes = @{
-            NSFontAttributeName: theFont
-        };
-
-        textSize = NSSizeToCGSize([self sizeWithAttributes:attributes]);
+    if ( [self respondsToSelector:@selector(boundingRectWithSize:options:attributes:context:)] ) {
+        rect = [self boundingRectWithSize:CPTSizeMake(10000.0, 10000.0)
+                                  options:CPTStringDrawingOptions
+                               attributes:style.attributes
+                                  context:nil];
     }
     else {
-        textSize = CGSizeZero;
+        rect = [self boundingRectWithSize:CPTSizeMake(10000.0, 10000.0)
+                                  options:CPTStringDrawingOptions
+                               attributes:style.attributes];
     }
+
+    CGSize textSize = rect.size;
+
+    textSize.width  = ceil(textSize.width);
+    textSize.height = ceil(textSize.height);
 
     return textSize;
 }
@@ -261,7 +260,7 @@
             NSParagraphStyleAttributeName: paragraphStyle
         };
         [self drawWithRect:NSRectFromCGRect(rect)
-                   options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading | NSStringDrawingTruncatesLastVisibleLine
+                   options:CPTStringDrawingOptions
                 attributes:attributes];
     }
     CPTPopCGContext();

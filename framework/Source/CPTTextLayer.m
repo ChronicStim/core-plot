@@ -316,12 +316,8 @@ const CGFloat kCPTTextLayerMarginWidth = CPTFloat(2.0);
 
     if ( myText.length > 0 ) {
         NSAttributedString *styledText = self.attributedText;
-        if ( (styledText.length > 0) && [styledText respondsToSelector:@selector(size)] ) {
-#if TARGET_OS_SIMULATOR || TARGET_OS_IPHONE
-            textSize = styledText.size;
-#else
-            textSize = NSSizeToCGSize(styledText.size);
-#endif
+        if ( styledText.length > 0 ) {
+            textSize = [styledText sizeAsDrawn];
         }
         else {
             textSize = [myText sizeWithTextStyle:self.textStyle];
@@ -385,7 +381,7 @@ const CGFloat kCPTTextLayerMarginWidth = CPTFloat(2.0);
 #if TARGET_OS_SIMULATOR || TARGET_OS_IPHONE
         CGContextSaveGState(context);
         CGContextTranslateCTM(context, CPTFloat(0.0), self.bounds.size.height);
-        CGContextScaleCTM( context, CPTFloat(1.0), CPTFloat(-1.0) );
+        CGContextScaleCTM(context, CPTFloat(1.0), CPTFloat(-1.0) );
 #endif
 
         CGRect newBounds = CGRectInset(self.bounds, kCPTTextLayerMarginWidth, kCPTTextLayerMarginWidth);

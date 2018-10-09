@@ -1,6 +1,7 @@
 #import "CPTPlatformSpecificCategories.h"
 
 #import "CPTPlatformSpecificFunctions.h"
+#import "tgmath.h"
 
 #pragma mark CPTColor
 
@@ -29,14 +30,14 @@
 {
     CGSize boundsSize = self.bounds.size;
 
-    UIGraphicsBeginImageContextWithOptions( boundsSize, self.opaque, CPTFloat(0.0) );
+    UIGraphicsBeginImageContextWithOptions(boundsSize, self.opaque, CPTFloat(0.0) );
 
     CGContextRef context = UIGraphicsGetCurrentContext();
     CGContextSaveGState(context);
     CGContextSetAllowsAntialiasing(context, true);
 
     CGContextTranslateCTM(context, CPTFloat(0.0), boundsSize.height);
-    CGContextScaleCTM( context, CPTFloat(1.0), CPTFloat(-1.0) );
+    CGContextScaleCTM(context, CPTFloat(1.0), CPTFloat(-1.0) );
 
     [self layoutAndRenderInContext:context];
     CPTNativeImage *layerImage = UIGraphicsGetImageFromCurrentImageContext();
@@ -107,11 +108,28 @@
         CPTPushCGContext(context);
 
         [self drawWithRect:rect
-                   options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading | NSStringDrawingTruncatesLastVisibleLine
+                   options:CPTStringDrawingOptions
                    context:nil];
 
         CPTPopCGContext();
     }
+}
+
+/**
+ *  @brief Computes the size of the styled text when drawn rounded up to the nearest whole number in each dimension.
+ **/
+-(CGSize)sizeAsDrawn
+{
+    CGRect rect = [self boundingRectWithSize:CPTSizeMake(10000.0, 10000.0)
+                                     options:CPTStringDrawingOptions
+                                     context:nil];
+
+    CGSize textSize = rect.size;
+
+    textSize.width  = ceil(textSize.width);
+    textSize.height = ceil(textSize.height);
+
+    return textSize;
 }
 
 @end

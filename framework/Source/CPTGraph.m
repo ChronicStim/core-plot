@@ -17,7 +17,7 @@
 /** @defgroup graphAnimation Graphs
  *  @brief Graph properties that can be animated using Core Animation.
  *  @if MacOnly
- *  @since Custom layer property animation is supported on MacOS 10.6 and later.
+ *  @since Custom layer property animation is supported on macOS 10.6 and later.
  *  @endif
  *  @ingroup animation
  **/
@@ -324,13 +324,14 @@ CPTGraphPlotSpaceKey const CPTGraphPlotSpaceNotificationKey       = @"CPTGraphPl
             plots = [[NSMutableArray alloc] init];
         }
 
+        plotSpaces = [[NSMutableArray alloc] init];
+
         CPTPlotSpaceArray *plotSpaceArray = [coder decodeObjectOfClasses:[NSSet setWithArray:@[[NSArray class], [CPTPlotSpace class]]]
                                                                   forKey:@"CPTGraph.plotSpaces"];
         if ( plotSpaceArray ) {
-            plotSpaces = [plotSpaceArray mutableCopy];
-        }
-        else {
-            plotSpaces = [[NSMutableArray alloc] init];
+            for ( CPTPlotSpace *space in plotSpaceArray ) {
+                [self addPlotSpace:space];
+            }
         }
 
         title = [[coder decodeObjectOfClass:[NSString class]
@@ -378,7 +379,25 @@ CPTGraphPlotSpaceKey const CPTGraphPlotSpaceNotificationKey       = @"CPTGraphPl
 {
     [self reloadDataIfNeeded];
     [self.axisSet.axes makeObjectsPerformSelector:@selector(relabel)];
+
+#if TARGET_OS_OSX
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundeclared-selector"
+    // Workaround since @available macro is not there
+    if ( [NSView instancesRespondToSelector:@selector(effectiveAppearance)] ) {
+        NSAppearance *oldAppearance = NSAppearance.currentAppearance;
+        NSView *view                = (NSView *)self.hostingView;
+        NSAppearance.currentAppearance = view.effectiveAppearance;
+        [super layoutAndRenderInContext:context];
+        NSAppearance.currentAppearance = oldAppearance;
+    }
+    else {
+        [super layoutAndRenderInContext:context];
+    }
+#pragma clang diagnostic pop
+#else
     [super layoutAndRenderInContext:context];
+#endif
 }
 
 /// @endcond
@@ -1325,6 +1344,7 @@ CPTGraphPlotSpaceKey const CPTGraphPlotSpaceNotificationKey       = @"CPTGraphPl
         return [super scrollWheelEvent:event fromPoint:fromPoint toPoint:toPoint];
     }
 }
+
 #endif
 
 /// @}

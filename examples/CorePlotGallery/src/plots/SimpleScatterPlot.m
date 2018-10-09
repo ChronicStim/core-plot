@@ -53,7 +53,7 @@
 
 -(void)generateData
 {
-    if ( self.plotData == nil ) {
+    if ( self.plotData.count == 0 ) {
         NSMutableArray<NSDictionary *> *contentArray = [NSMutableArray array];
         for ( NSUInteger i = 0; i < 10; i++ ) {
             NSNumber *x = @(1.0 + i * 0.05);
@@ -293,8 +293,8 @@
         else {
             CPTScatterPlotInterpolation interpolation = CPTScatterPlotInterpolationHistogram;
 
-            // Decrease the histogram display option, and if < 0 display linear graph
-            if ( --self.histogramOption < 0 ) {
+            // Decrease the histogram display option, and if < CPTScatterPlotHistogramNormal display linear graph
+            if ( --self.histogramOption < CPTScatterPlotHistogramNormal ) {
                 interpolation = CPTScatterPlotInterpolationLinear;
 
                 // Set the histogram option to the count, as that is guaranteed to be the last available option + 1

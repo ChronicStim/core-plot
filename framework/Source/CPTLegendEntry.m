@@ -153,8 +153,8 @@
 #if TARGET_OS_SIMULATOR || TARGET_OS_IPHONE
     CGContextSaveGState(context);
     CGContextTranslateCTM(context, CPTFloat(0.0), rect.origin.y);
-    CGContextScaleCTM( context, CPTFloat(1.0), CPTFloat(-1.0) );
-    CGContextTranslateCTM( context, CPTFloat(0.0), -CGRectGetMaxY(rect) );
+    CGContextScaleCTM(context, CPTFloat(1.0), CPTFloat(-1.0) );
+    CGContextTranslateCTM(context, CPTFloat(0.0), -CGRectGetMaxY(rect) );
 #endif
     // center the title vertically
     CGRect textRect     = rect;
@@ -219,12 +219,8 @@
 
     NSAttributedString *styledTitle = self.attributedTitle;
 
-    if ( (styledTitle.length > 0) && [styledTitle respondsToSelector:@selector(size)] ) {
-#if TARGET_OS_SIMULATOR || TARGET_OS_IPHONE
-        theTitleSize = styledTitle.size;
-#else
-        theTitleSize = NSSizeToCGSize(styledTitle.size);
-#endif
+    if ( styledTitle.length > 0 ) {
+        theTitleSize = [styledTitle sizeAsDrawn];
     }
     else {
         NSString *theTitle = styledTitle.string;

@@ -59,7 +59,7 @@ static NSString *const kSecond = @"Second Derivative";
 
 -(void)generateData
 {
-    if ( self.plotData == nil ) {
+    if ( self.plotData.count == 0 ) {
         NSMutableArray<NSDictionary<NSString *, NSNumber *> *> *contentArray = [NSMutableArray array];
 
         for ( NSUInteger i = 0; i < 11; i++ ) {
@@ -169,7 +169,7 @@ static NSString *const kSecond = @"Second Derivative";
     redLineStyle.lineColor = [[CPTColor redColor] colorWithAlphaComponent:0.5];
 
     CPTLineCap *lineCap = [CPTLineCap sweptArrowPlotLineCap];
-    lineCap.size = CGSizeMake( self.titleSize * CPTFloat(0.625), self.titleSize * CPTFloat(0.625) );
+    lineCap.size = CGSizeMake(self.titleSize * CPTFloat(0.625), self.titleSize * CPTFloat(0.625) );
 
     // Axes
     // Label x axis with a fixed interval policy
@@ -291,7 +291,7 @@ static NSString *const kSecond = @"Second Derivative";
     graph.legend.borderLineStyle = x.axisLineStyle;
     graph.legend.cornerRadius    = 5.0;
     graph.legendAnchor           = CPTRectAnchorBottom;
-    graph.legendDisplacement     = CGPointMake( 0.0, self.titleSize * CPTFloat(2.0) );
+    graph.legendDisplacement     = CGPointMake(0.0, self.titleSize * CPTFloat(2.0) );
 }
 
 #pragma mark -
@@ -412,6 +412,8 @@ static NSString *const kSecond = @"Second Derivative";
         annotation.contentAnchorPoint = CGPointMake(0.5, 0.0);
         annotation.displacement       = CGPointMake(0.0, 10.0);
         [graph.plotAreaFrame.plotArea addAnnotation:annotation];
+
+        self.symbolTextAnnotation = annotation;
     }
 }
 

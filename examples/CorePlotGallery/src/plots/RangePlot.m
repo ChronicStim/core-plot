@@ -43,7 +43,7 @@ static const NSTimeInterval oneDay = 24 * 60 * 60;
 
 -(void)generateData
 {
-    if ( self.plotData == nil ) {
+    if ( self.plotData.count == 0 ) {
         NSMutableArray<NSDictionary *> *newData = [NSMutableArray array];
         for ( NSUInteger i = 0; i < 5; i++ ) {
             NSTimeInterval x = oneDay * (i + 1.0);
@@ -171,7 +171,7 @@ static const NSTimeInterval oneDay = 24 * 60 * 60;
     newGraph.legend.cornerRadius       = 5.0;
     newGraph.legend.swatchCornerRadius = 3.0;
     newGraph.legendAnchor              = CPTRectAnchorTop;
-    newGraph.legendDisplacement        = CGPointMake( 0.0, self.titleSize * CPTFloat(-2.0) - CPTFloat(12.0) );
+    newGraph.legendDisplacement        = CGPointMake(0.0, self.titleSize * CPTFloat(-2.0) - CPTFloat(12.0) );
 }
 
 #pragma mark -

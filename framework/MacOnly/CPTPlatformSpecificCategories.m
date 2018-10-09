@@ -52,7 +52,7 @@
     NSGraphicsContext *bitmapContext = [NSGraphicsContext graphicsContextWithBitmapImageRep:layerImage];
     CGContextRef context             = (CGContextRef)bitmapContext.graphicsPort;
 
-    CGContextClearRect( context, CPTRectMake(0.0, 0.0, boundsSize.width, boundsSize.height) );
+    CGContextClearRect(context, CPTRectMake(0.0, 0.0, boundsSize.width, boundsSize.height) );
     CGContextSetAllowsAntialiasing(context, true);
     CGContextSetShouldSmoothFonts(context, false);
     [self layoutAndRenderInContext:context];
@@ -62,22 +62,6 @@
     [image addRepresentation:layerImage];
 
     return image;
-}
-
-@end
-
-#pragma mark - CPTColor
-
-@implementation CPTColor(CPTPlatformSpecificColorExtensions)
-
-/** @property nsColor
- *  @brief Gets the color value as an NSColor.
- **/
-@dynamic nsColor;
-
--(nonnull NSColor *)nsColor
-{
-    return [NSColor colorWithCIColor:[CIColor colorWithCGColor:self.cgColor]];
 }
 
 @end
@@ -95,9 +79,34 @@
     CPTPushCGContext(context);
 
     [self drawWithRect:NSRectFromCGRect(rect)
-               options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading | NSStringDrawingTruncatesLastVisibleLine];
+               options:CPTStringDrawingOptions];
 
     CPTPopCGContext();
+}
+
+/**
+ *  @brief Computes the size of the styled text when drawn rounded up to the nearest whole number in each dimension.
+ **/
+-(CGSize)sizeAsDrawn
+{
+    CGRect rect = CGRectZero;
+
+    if ( [self respondsToSelector:@selector(boundingRectWithSize:options:context:)] ) {
+        rect = [self boundingRectWithSize:CPTSizeMake(10000.0, 10000.0)
+                                  options:CPTStringDrawingOptions
+                                  context:nil];
+    }
+    else {
+        rect = [self boundingRectWithSize:CPTSizeMake(10000.0, 10000.0)
+                                  options:CPTStringDrawingOptions];
+    }
+
+    CGSize textSize = rect.size;
+
+    textSize.width  = ceil(textSize.width);
+    textSize.height = ceil(textSize.height);
+
+    return textSize;
 }
 
 @end
